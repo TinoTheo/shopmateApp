@@ -1,0 +1,3 @@
+<resources>
+    <style name="Theme.Shopmate" parent="Theme.AppCompat.DayNight.NoActionBar" />
+</resources>

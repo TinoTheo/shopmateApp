@@ -1,0 +1,342 @@
+<resources>
+    <string name="app_name">ShopMate</string>
+
+    <!-- Screen titles -->
+    <string name="screen_pos">POS</string>
+    <string name="screen_products">Products</string>
+    <string name="screen_stock">Stock</string>
+    <string name="screen_reports">Reports</string>
+    <string name="screen_sync">Sync</string>
+    <string name="screen_settings">Settings</string>
+    <string name="screen_categories">Categories</string>
+    <string name="screen_add_product">New product</string>
+    <string name="screen_edit_product">Edit product</string>
+
+    <!-- Settings screen -->
+    <string name="settings_section_store">Store</string>
+    <string name="settings_section_cloud">Cloud Sync</string>
+    <string name="settings_section_data">Data Management</string>
+    <string name="settings_section_about">About</string>
+    <string name="settings_store_name">Store name</string>
+    <string name="settings_store_name_hint">My Shop</string>
+    <string name="settings_currency">Currency symbol</string>
+    <string name="settings_base_url">Dashboard API address</string>
+    <string name="settings_base_url_helper">Your ShopMate dashboard API address</string>
+    <string name="settings_base_url_invalid">Must start with http:// or https://</string>
+    <string name="settings_token">API token</string>
+    <string name="settings_token_helper">From your dashboard Settings → API Keys</string>
+    <string name="settings_token_show">Show token</string>
+    <string name="settings_token_hide">Hide token</string>
+    <string name="settings_test_connection">Test connection</string>
+    <string name="settings_testing">Testing…</string>
+    <string name="settings_test_connected">Connected</string>
+    <string name="settings_test_failed">Couldn\'t reach the cloud — we\'ll try again</string>
+    <string name="settings_test_no_token">Enter an API token first</string>
+    <string name="settings_test_no_url">Enter an API address first</string>
+    <string name="settings_connected_to">Connected to %1$s</string>
+    <string name="settings_not_connected">Not connected</string>
+    <string name="settings_export">Export sales data</string>
+    <string name="settings_coming_soon">Coming soon</string>
+    <string name="settings_retry_failed">Retry failed syncs</string>
+    <string name="settings_retry_failed_desc">Re-queue events that failed to upload</string>
+    <string name="settings_reset">Reset all data</string>
+    <string name="settings_reset_warning">This will delete all products, sales, and settings. This cannot be undone.</string>
+    <string name="settings_reset_confirm_type">Type DELETE to confirm</string>
+    <string name="settings_reset_done">All data cleared</string>
+    <string name="settings_app_name">ShopMate for Android</string>
+    <string name="settings_version">Version %1$s</string>
+    <string name="settings_made_in">Made in Zimbabwe 🇿🇼</string>
+    <string name="settings_clear_token">Clear token</string>
+    <string name="settings_clear_token_confirm">Remove the saved API token? Sync will pause until you enter a new one.</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_confirm">Confirm</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_save">Save</string>
+
+    <!-- Sync screen -->
+    <string name="sync_all_synced">Everything\'s up to date</string>
+    <string name="sync_pending">%1$d waiting</string>
+    <string name="sync_one_pending">1 sale waiting to sync</string>
+    <string name="sync_items_pending">%1$d sales waiting to sync</string>
+    <string name="sync_waiting_connection">Waiting for a connection</string>
+    <string name="sync_failed">Couldn\'t reach the cloud — we\'ll try again</string>
+    <string name="sync_last_synced">Last synced %1$s</string>
+    <string name="sync_never">Nothing synced yet</string>
+    <string name="sync_now">Sync now</string>
+    <string name="sync_syncing">Syncing…</string>
+    <string name="sync_connect_title">Sync paused</string>
+    <string name="sync_connect_subtitle">Your session has expired. Sign out and sign back in to resume syncing — nothing is lost, sales stay saved on this device.</string>
+    <string name="sync_open_settings">Open Settings</string>
+    <string name="sync_history">Sync history</string>
+    <string name="sync_empty_title">Nothing\'s synced yet</string>
+    <string name="sync_empty_subtitle">Sales and stock updates will show up here.</string>
+    <string name="sync_type_sale">Sale sync</string>
+    <string name="sync_type_snapshot">Store snapshot</string>
+    <string name="sync_connected_to">Connected to: %1$s</string>
+
+    <!-- Common actions -->
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="back">Back</string>
+    <string name="none">None</string>
+
+    <!-- Validation -->
+    <string name="field_required">This field is required</string>
+    <string name="price_must_be_positive">Must be greater than 0</string>
+    <string name="stock_must_be_non_negative">Must be 0 or more</string>
+
+    <!-- Categories -->
+    <string name="add_category">Add category</string>
+    <string name="edit_category">Edit category</string>
+    <string name="category_name">Category name</string>
+    <string name="colour">Colour</string>
+    <string name="no_categories">No categories yet</string>
+    <string name="add_first_category">Group your products to find them faster.</string>
+    <string name="delete_category_title">Delete category?</string>
+    <string name="delete_category_message">"%s" will be deleted. Products in this category will be uncategorised.</string>
+
+    <!-- Products -->
+    <string name="add_product">Add product</string>
+    <string name="no_products">Nothing on the shelves yet</string>
+    <string name="add_first_product">Add your first product and you\'re ready to sell.</string>
+    <string name="products_section_cost_up">Cost went up</string>
+    <string name="products_section_at_a_loss">Selling at a loss</string>
+    <string name="products_section_holding_target">Holding target</string>
+    <string name="products_section_below_target">Below target</string>
+    <string name="products_at_a_loss">At a loss</string>
+    <string name="products_margin_was">was %1$d%%</string>
+    <string name="products_cost_moved">Cost %1$s → %2$s on %3$s</string>
+    <string name="products_meta_cost">Cost %1$s</string>
+    <string name="products_meta_below_cost">Selling below cost %1$s</string>
+    <string name="products_unknown_codes_title">%1$d codes scanned but not named</string>
+    <string name="products_unknown_codes_body">They sold anyway. Name them when you have a minute.</string>
+    <string name="barcode_inbox_title">Unknown codes</string>
+    <string name="barcode_inbox_meta">%1$d hits · first seen %2$s</string>
+    <string name="barcode_inbox_meta_till">%1$d hits · first seen %2$s · %3$s</string>
+    <string name="barcode_inbox_name_it">Name it</string>
+    <string name="barcode_inbox_empty">No unknown codes. Everything scanned at the till has a name.</string>
+    <string name="no_products_matching">Nothing matches "%s".</string>
+    <string name="out_of_stock">Sold out</string>
+    <string name="search_products">Find a product…</string>
+
+    <!-- Product form fields -->
+    <string name="product_name">Product name</string>
+    <string name="sku">SKU</string>
+    <string name="barcode">Barcode</string>
+    <string name="category">Category</string>
+    <string name="selling_price">Selling price</string>
+    <string name="cost_price">Cost price</string>
+    <string name="initial_stock">Initial stock quantity</string>
+    <string name="stock_quantity">Stock quantity</string>
+    <string name="stock_adjust_hint">Adjust stock from the Stock screen</string>
+    <string name="low_stock_threshold">Low stock threshold</string>
+    <string name="unit">Unit</string>
+
+    <!-- POS -->
+    <string name="pos_search_products">Find a product…</string>
+    <string name="pos_clear_search">Clear search</string>
+    <string name="pos_no_products_found">Nothing matches that.</string>
+    <string name="pos_no_products_title">Nothing on the shelves yet</string>
+    <string name="pos_no_products_message">Add a product and you\'re ready to sell.</string>
+    <string name="pos_go_to_products">Add a product</string>
+    <string name="pos_category_dot">Category colour</string>
+    <string name="pos_cart">Cart</string>
+    <string name="pos_clear_cart">Clear cart</string>
+    <string name="pos_cart_empty">Nothing in this sale yet — tap a product to add it.</string>
+    <string name="pos_each">%1$s each</string>
+    <string name="pos_increase_qty">Increase quantity</string>
+    <string name="pos_decrease_qty">Decrease quantity</string>
+    <string name="pos_total">Total</string>
+    <string name="pos_charge">Charge %1$s</string>
+    <string name="pos_checkout_title">Checkout</string>
+    <string name="pos_items_count">%1$d item(s)</string>
+    <string name="pos_payment_method">Payment method</string>
+    <string name="pos_complete_sale">Complete Sale</string>
+    <string name="pos_sale_complete">Done — that\'s %1$s in.</string>
+    <string name="pos_receipt">Receipt: %1$s</string>
+    <string name="pos_current_sale">Current sale</string>
+    <string name="pos_items_n">%1$d items</string>
+    <string name="pos_times">×</string>
+    <string name="pos_cash_received">Cash received</string>
+    <string name="pos_change_due">Change due</string>
+    <string name="pos_cash_in">Cash in</string>
+    <string name="pos_change_out">Change out</string>
+    <string name="pos_still_owing">Still owing</string>
+    <string name="pos_quantity_hint">Tap a line, then type a quantity</string>
+    <string name="pos_set_quantity">Set quantity</string>
+    <string name="pos_next_sale">Next sale</string>
+    <string name="pos_cash_short">%1$s short</string>
+    <string name="pos_scan_barcode">Scan barcode</string>
+    <string name="pos_backspace">Backspace</string>
+
+    <!-- Checkout (the till) -->
+    <string name="checkout_close">Close checkout</string>
+    <string name="checkout_one_item">1 item</string>
+    <string name="checkout_items">%1$d items</string>
+    <string name="checkout_total">Total</string>
+    <string name="checkout_cash_received">Cash received</string>
+    <string name="checkout_change">Change</string>
+    <string name="checkout_short_tag">Short</string>
+    <string name="checkout_short_by">Short %1$s</string>
+    <string name="checkout_paid_by">Paid by %1$s</string>
+    <string name="checkout_exact">Exact</string>
+    <string name="checkout_confirm_give_change">Take %1$s, give %2$s</string>
+    <string name="checkout_confirm_exact">Confirm — %1$s</string>
+    <string name="checkout_confirm_need_cash">Enter enough cash</string>
+    <string name="checkout_confirm_method">Confirm — %1$s paid by %2$s</string>
+
+    <!-- Sales history -->
+    <string name="screen_sales">Sales</string>
+    <string name="sales_empty_title">No sales yet</string>
+    <string name="sales_empty_subtitle">Receipts will show up here as you sell.</string>
+    <string name="sales_synced">Up to date</string>
+    <string name="sales_pending_sync">Waiting to sync</string>
+    <string name="receipt_cashier">Cashier: %1$s</string>
+    <string name="receipt_paid_via">Paid via %1$s</string>
+    <string name="receipt_qty_at_price">%1$s × %2$s</string>
+
+    <!-- Payment methods -->
+    <string name="payment_cash">Cash</string>
+    <string name="payment_ecocash">EcoCash</string>
+    <string name="payment_mobile_money">Mobile Money</string>
+    <string name="payment_card">Card</string>
+    <string name="payment_bank_transfer">Bank Transfer</string>
+
+    <!-- Stock -->
+    <string name="stock_tab_levels">Stock Levels</string>
+    <string name="stock_tab_activity">Recent Activity</string>
+    <string name="stock_search">Search products…</string>
+    <string name="stock_filter_all">All</string>
+    <string name="stock_filter_low">Low Stock (%1$d)</string>
+    <string name="stock_filter_out">Out of Stock (%1$d)</string>
+    <string name="stock_out_badge">OUT</string>
+    <string name="stock_trend_none">No change (7d)</string>
+    <string name="stock_trend_7d">%1$s (7d)</string>
+    <string name="stock_empty_title">Nothing on the shelves yet</string>
+    <string name="stock_empty_action">Add a product</string>
+    <string name="stock_section_runs_out">Runs out this week</string>
+    <string name="stock_section_stopped">Stopped</string>
+    <string name="stock_section_healthy">Healthy</string>
+    <string name="stock_section_not_moving">Not moving</string>
+    <string name="stock_stopped_out">Out</string>
+    <string name="stock_meta_out">Out of stock</string>
+    <string name="stock_meta_thin_history">Not enough history yet</string>
+    <string name="stock_meta_dormant">Not sold in %1$d days</string>
+    <string name="stock_meta_days_left">%1$d days left</string>
+    <string name="stock_count_stock">Count stock</string>
+    <string name="stock_why_it_says">Why it says %1$d</string>
+    <string name="stock_add_to_order">Add to order list</string>
+    <string name="stock_adjust">Adjust</string>
+    <string name="count_summary_counted">Counted</string>
+    <string name="count_summary_mismatch">Don&#8217;t match</string>
+    <string name="count_summary_short">Short</string>
+    <string name="count_section_lines">Count sheet</string>
+    <string name="count_line_meta">Expected %1$d · %2$s</string>
+    <string name="count_commit">Commit count</string>
+    <string name="stock_no_match">Nothing matches that.</string>
+    <string name="stock_no_movements">No stock changes yet.</string>
+    <string name="stock_recent_history">Recent History</string>
+    <string name="stock_current">Current: %1$s</string>
+    <string name="stock_alert_below">Alert below: %1$d</string>
+    <string name="stock_restock">Restock</string>
+    <string name="stock_correction">Correction</string>
+    <string name="stock_toggle_sign">Toggle add or remove</string>
+    <string name="stock_new_will_be">New stock will be: %1$d</string>
+    <string name="stock_cannot_negative">Stock can\'t go below zero.</string>
+    <string name="stock_note_placeholder">Reason (optional)</string>
+    <string name="stock_note_helper">Supplier delivery, damaged, counted</string>
+    <string name="stock_update_button">Update stock</string>
+    <string name="stock_updated">Stock sorted.</string>
+
+    <!-- Activity date groups -->
+    <string name="activity_today">Today</string>
+    <string name="activity_yesterday">Yesterday</string>
+
+    <!-- Reports -->
+    <string name="report_period_today">Today</string>
+    <string name="report_period_this_week">This Week</string>
+    <string name="report_period_this_month">This Month</string>
+    <string name="report_period_last_month">Last Month</string>
+    <string name="report_period_custom">Custom</string>
+    <string name="report_apply">Apply</string>
+    <string name="report_best_sellers">Selling best</string>
+    <string name="report_payments">How they paid</string>
+    <string name="report_no_sales">No sales yet in this stretch.</string>
+    <string name="report_no_chart_data">Nothing to chart yet.</string>
+
+    <!-- Reports greeting (time-aware) -->
+    <string name="greeting_morning">Good morning</string>
+    <string name="greeting_afternoon">Good afternoon</string>
+    <string name="greeting_evening">Good evening</string>
+    <string name="greeting_named">%1$s, %2$s.</string>
+    <string name="greeting_plain">%1$s.</string>
+    <string name="greeting_subtitle">Here\'s how the shop\'s doing.</string>
+    <string name="report_earned_today">Earned today</string>
+    <string name="report_earned_period">Earned this stretch</string>
+    <string name="report_trend_up">Up %1$s — better than yesterday</string>
+    <string name="report_trend_down">Down %1$s on yesterday</string>
+    <string name="report_trend_flat">About the same as yesterday</string>
+    <string name="report_top_seller_title">%1$s is flying</string>
+    <string name="report_top_seller_subtitle">%1$d sold in this stretch</string>
+
+    <!-- Stock movement reasons -->
+    <string name="reason_sale">Sale</string>
+    <string name="reason_restock">Restock</string>
+    <string name="reason_adjustment">Adjustment</string>
+    <string name="reason_correction">Correction</string>
+    <string name="reason_purchase">Purchase</string>
+    <string name="reason_count">Count</string>
+
+    <!-- Auth -->
+    <string name="auth_welcome">Welcome to ShopMate</string>
+    <string name="auth_subtitle_sign_in">Welcome back.</string>
+    <string name="auth_subtitle_sign_up">Let\'s get your shop set up.</string>
+    <string name="auth_email">Email</string>
+    <string name="auth_password">Password</string>
+    <string name="auth_full_name">Full name</string>
+    <string name="auth_phone_optional">Phone (optional)</string>
+    <string name="auth_sign_in">Sign in</string>
+    <string name="auth_sign_up">Sign up</string>
+    <string name="auth_toggle_to_sign_up">New here? Create an account</string>
+    <string name="auth_toggle_to_sign_in">Already have an account? Sign in</string>
+    <string name="auth_error_email_required">Enter your email</string>
+    <string name="auth_error_email_invalid">Enter a valid email</string>
+    <string name="auth_error_password_short">Password must be at least 6 characters</string>
+    <string name="auth_error_name_required">Enter your name</string>
+    <string name="auth_check_email">Check your email to confirm your account, then sign in.</string>
+    <!-- Phone OTP (built, gated behind AuthConfig.ACTIVE_MODE) -->
+    <string name="auth_phone">Phone number</string>
+    <string name="auth_phone_hint">+263…</string>
+    <string name="auth_send_code">Send code</string>
+    <string name="auth_enter_code">Enter the 6-digit code</string>
+    <string name="auth_code">Verification code</string>
+    <string name="auth_verify">Verify</string>
+    <string name="auth_resend_code">Resend code</string>
+    <string name="auth_code_sent_to">Code sent to %1$s</string>
+    <string name="auth_error_phone_required">Enter your phone number</string>
+    <string name="auth_error_code_required">Enter the 6-digit code</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_title">Set up your business</string>
+    <string name="onboarding_subtitle">This creates your shop in the cloud. You can add staff later.</string>
+    <string name="onboarding_org_name">Business name</string>
+    <string name="onboarding_store_name">Store name</string>
+    <string name="onboarding_currency">Currency</string>
+    <string name="onboarding_create">Create shop</string>
+    <string name="onboarding_error_org_required">Enter a business name</string>
+    <string name="onboarding_error_store_required">Enter a store name</string>
+    <string name="onboarding_error_generic">Could not create your shop. Check your connection and try again.</string>
+
+    <!-- Cloud account (Settings) -->
+    <string name="settings_signed_in_as">Signed in as %1$s</string>
+    <string name="settings_sign_out">Sign out</string>
+    <string name="settings_sign_out_confirm">Sign out of ShopMate? Your local data stays on this device; sync pauses until you sign back in.</string>
+    <string name="settings_section_account">Account</string>
+    <string name="settings_active_store">Active store</string>
+    <string name="settings_switch_store">Switch store</string>
+    <string name="settings_no_store">No active store</string>
+    <string name="settings_section_staff">Staff</string>
+    <string name="settings_staff_coming">Add staff — coming with phone sign-in</string>
+</resources>

@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; font-family:Inter, system-ui, sans-serif; background:#E9E4DC; -webkit-font-smoothing:antialiased; }
+  a { color:#005B52; text-decoration:none; }
+  a:hover { color:#01423B; }
+  .tnum { font-variant-numeric: tabular-nums; }
+  ::-webkit-scrollbar { width:0; height:0; }
+</style>
+</helmet>
+
+<section style="padding:56px 64px 0;display:flex;gap:48px;align-items:flex-start">
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;align-items:baseline;gap:14px">
+      <div style="font-size:11px;font-weight:500;letter-spacing:0.11em;text-transform:uppercase;color:#8A8175">ShopMate · tablet · expanded</div>
+      <div style="display:flex;gap:4px">
+        <sc-for list="{{ tabletTabs }}" as="t" hint-placeholder-count="2">
+          <div onClick="{{ t.onClick }}" style="height:26px;padding:0 11px;border-radius:8px;display:flex;align-items:center;font-size:12.5px;font-weight:500;cursor:pointer;background:{{ t.bg }};color:{{ t.fg }}">{{ t.name }}</div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="width:1204px;height:844px;background:#1A1A1A;border-radius:26px;padding:12px;box-sizing:border-box">
+      <div style="width:1180px;height:820px;border-radius:16px;overflow:hidden;background:#005B52;display:flex;position:relative">
+
+        <div style="width:84px;flex:none;display:flex;flex-direction:column;align-items:center;padding:14px 0">
+          <div style="width:42px;height:42px;border-radius:14px;background:#99FFAA;display:flex;align-items:center;justify-content:center;flex:none">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3.5 8.5 5 3.5h14l1.5 5M3.5 8.5h17M3.5 8.5A2.5 2.5 0 0 0 8 10a2.5 2.5 0 0 0 4 0 2.5 2.5 0 0 0 4 0 2.5 2.5 0 0 0 4.5-1.5M5 11v9.5h14V11" stroke="#1A1A1A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div style="height:22px"></div>
+          <div style="flex:1;width:100%;display:flex;flex-direction:column;align-items:center;gap:4px">
+            <div onClick="{{ tGoPos }}" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0;cursor:pointer;user-select:none">
+              <div style="width:48px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center;transition:background 180ms;background:{{ tPillPos }}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3.5 8.5 5 3.5h14l1.5 5M3.5 8.5h17M3.5 8.5A2.5 2.5 0 0 0 8 10a2.5 2.5 0 0 0 4 0 2.5 2.5 0 0 0 4 0 2.5 2.5 0 0 0 4.5-1.5M5 11v9.5h14V11" stroke="{{ tInkPos }}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div style="font-size:10.5px;font-weight:500;color:{{ tLabelPos }}">Sale</div>
+            </div>
+            <div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0;user-select:none;opacity:.55">
+              <div style="width:48px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12.6 3H5a2 2 0 0 0-2 2v7.6a2 2 0 0 0 .6 1.4l6.4 6.4a2 2 0 0 0 2.8 0l7.6-7.6a2 2 0 0 0 0-2.8L14 3.6a2 2 0 0 0-1.4-.6Z" stroke="rgba(255,255,255,0.72)" stroke-width="1.7" stroke-linejoin="round"/><circle cx="8" cy="8" r="1.5" fill="rgba(255,255,255,0.72)"/></svg>
+              </div>
+              <div style="font-size:10.5px;font-weight:500;color:rgba(255,255,255,0.72)">Products</div>
+            </div>
+            <div onClick="{{ tGoStock }}" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0;cursor:pointer;user-select:none">
+              <div style="width:48px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center;transition:background 180ms;background:{{ tPillStock }}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5v-9Z" stroke="{{ tInkStock }}" stroke-width="1.7" stroke-linejoin="round"/><path d="M3.5 7.5 12 12m0 0 8.5-4.5M12 12v9" stroke="{{ tInkStock }}" stroke-width="1.7" stroke-linejoin="round"/></svg>
+              </div>
+              <div style="font-size:10.5px;font-weight:500;color:{{ tLabelStock }}">Stock</div>
+            </div>
+            <div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0;user-select:none;opacity:.55">
+              <div style="width:48px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 20V10m5 10V4m5 16v-7m5 7V8" stroke="rgba(255,255,255,0.72)" stroke-width="1.9" stroke-linecap="round"/></svg>
+              </div>
+              <div style="font-size:10.5px;font-weight:500;color:rgba(255,255,255,0.72)">Reports</div>
+            </div>
+            <div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0;user-select:none;opacity:.55">
+              <div style="width:48px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6.5 18.5A4.5 4.5 0 0 1 6 9.6a6 6 0 0 1 11.6-1.2A4 4 0 0 1 17.5 18.5h-11Z" stroke="rgba(255,255,255,0.72)" stroke-width="1.7" stroke-linejoin="round"/></svg>
+              </div>
+              <div style="font-size:10.5px;font-weight:500;color:rgba(255,255,255,0.72)">Sync</div>
+            </div>
+          </div>
+          <div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0;user-select:none;opacity:.55">
+            <div style="width:48px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="rgba(255,255,255,0.72)" stroke-width="1.7"/><path d="M12 2.8v2.4M12 18.8v2.4M21.2 12h-2.4M5.2 12H2.8m15-6.4-1.7 1.7M7.9 16.1l-1.7 1.7m0-12.2 1.7 1.7m8.2 8.2 1.7 1.7" stroke="rgba(255,255,255,0.72)" stroke-width="1.7" stroke-linecap="round"/></svg>
+            </div>
+            <div style="font-size:10.5px;font-weight:500;color:rgba(255,255,255,0.72)">Settings</div>
+          </div>
+        </div>
+
+        <div style="flex:1;min-width:0;background:#FDFCFA;border-top-left-radius:24px;display:flex;flex-direction:column;overflow:hidden">
+
+          <div style="height:60px;flex:none;display:flex;align-items:center;padding:0 20px;border-bottom:1px solid #ECE7E0;gap:16px">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:16px;font-weight:600;color:#1A1A1A;letter-spacing:-0.01em">{{ tTitle }}</div>
+              <div style="display:flex;align-items:center;gap:5px;margin-top:1px">
+                <div style="width:6px;height:6px;border-radius:3px;background:{{ syncDot }}"></div>
+                <div class="tnum" style="font-size:11.5px;color:#6B6459">{{ syncText }}</div>
+              </div>
+            </div>
+            <div class="tnum" style="font-size:15px;font-weight:500;color:#1A1A1A;letter-spacing:-0.01em">08:42</div>
+            <div style="flex:1;display:flex;justify-content:flex-end">
+              <div onClick="{{ goSales }}" style="width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:#F0EDE7">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M6 3v18l2-1.4 2 1.4 2-1.4 2 1.4 2-1.4 2 1.4V3H6Z" stroke="#1A1A1A" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.5 8h5M9.5 12h5" stroke="#1A1A1A" stroke-width="1.6" stroke-linecap="round"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <sc-if value="{{ tIsPos }}" hint-placeholder-val="{{ true }}">
+            <div style="flex:1;min-height:0;display:flex">
+
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;padding-top:8px">
+                <sc-if value="{{ tDone }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin:0 16px 4px;display:flex;align-items:center;border-radius:12px;background:#E8FFF0;overflow:hidden;max-width:480px;min-height:56px">
+                    <div style="width:4px;align-self:stretch;background:#99FFAA;flex:none"></div>
+                    <div style="padding-left:16px;display:flex;align-items:center;flex:none">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#005B52" stroke-width="1.8"/><path d="M8 12.2l2.6 2.6L16 9.4" stroke="#005B52" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <div style="padding:12px 16px;flex:1;min-width:0">
+                      <div class="tnum" style="font-size:15px;font-weight:600;color:#1A1A1A">{{ tDoneTitle }}</div>
+                      <div class="tnum" style="font-size:12.5px;color:#6B6459;margin-top:1px">{{ tDoneMeta }}</div>
+                    </div>
+                  </div>
+                </sc-if>
+                <div style="padding:8px 16px">
+                  <div style="height:44px;border-radius:12px;background:#F0EDE7;display:flex;align-items:center;gap:9px;padding:0 12px">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="#8A8175" stroke-width="1.8"/><path d="m16 16 4.5 4.5" stroke="#8A8175" stroke-width="1.8" stroke-linecap="round"/></svg>
+                    <div style="flex:1;font-size:14px;color:#A89F94">Search products</div>
+                    <div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 8V5a2 2 0 0 1 2-2h3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3M3 12h18" stroke="#005B52" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto">
+                  <sc-for list="{{ categories }}" as="cat" hint-placeholder-count="5">
+                    <div onClick="{{ cat.onClick }}" style="flex:none;height:32px;padding:0 14px;border-radius:16px;display:flex;align-items:center;font-size:13.5px;font-weight:500;cursor:pointer;border:1px solid {{ cat.border }};background:{{ cat.bg }};color:{{ cat.fg }}">{{ cat.name }}</div>
+                  </sc-for>
+                </div>
+
+                <div style="flex:1;min-height:0;overflow-y:auto;padding:0 16px 16px">
+                  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px">
+                    <sc-for list="{{ gridProducts }}" as="p" hint-placeholder-count="8">
+                      <div onClick="{{ p.add }}" style="border:1px solid #ECE7E0;border-radius:12px;padding:12px;background:#FDFCFA;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;height:116px;box-sizing:border-box;position:relative;min-width:0" style-hover="border-color:#DDD6CC">
+                        <div style="position:absolute;top:12px;right:12px;width:10px;height:10px;border-radius:5px;background:{{ p.dot }}"></div>
+                        <div style="font-size:14px;font-weight:600;color:#1A1A1A;line-height:1.25;padding-right:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.name }}</div>
+                        <div>
+                          <div class="tnum" style="font-size:15px;font-weight:500;color:#1A1A1A">{{ p.price }}</div>
+                          <sc-if value="{{ p.stopped }}" hint-placeholder-val="{{ false }}">
+                            <div style="display:inline-flex;height:20px;align-items:center;padding:0 8px;border-radius:10px;background:#1A1A1A;color:#FDFCFA;font-size:11px;font-weight:500;margin-top:4px">Out</div>
+                          </sc-if>
+                          <sc-if value="{{ p.inStock }}" hint-placeholder-val="{{ true }}">
+                            <div class="tnum" style="font-size:11.5px;font-weight:500;color:{{ p.stockFg }};margin-top:3px">{{ p.stockLabel }}</div>
+                          </sc-if>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+
+              <div style="width:1px;background:#ECE7E0;flex:none"></div>
+
+              <div style="width:240px;flex:none;background:#FBF9F6;display:flex;flex-direction:column">
+                <div style="display:flex;align-items:center;padding:14px">
+                  <div style="flex:1;font-size:14px;font-weight:500;color:#1A1A1A">Current sale</div>
+                  <div class="tnum" style="font-size:12px;color:#A89F94">{{ tItemCount }}</div>
+                </div>
+
+                <div style="flex:1;min-height:0;overflow-y:auto;padding:0 8px;display:flex;flex-direction:column;gap:3px">
+                  <sc-for list="{{ tLines }}" as="l" hint-placeholder-count="3">
+                    <div onClick="{{ l.onClick }}" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;cursor:pointer;transition:background 160ms;background:{{ l.bg }}">
+                      <div style="flex:1;min-width:0">
+                        <div style="font-size:13px;font-weight:500;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.name }}</div>
+                        <div class="tnum" style="font-size:11px;color:#A89F94;margin-top:1px">
+                          <span style="font-weight:{{ l.qtyWeight }};color:{{ l.qtyFg }}">{{ l.qty }}</span> × {{ l.unit }}
+                        </div>
+                      </div>
+                      <div class="tnum" style="font-size:14px;font-weight:500;color:#1A1A1A">{{ l.total }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <sc-if value="{{ tShowApply }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:6px 12px;display:flex;align-items:center;gap:8px">
+                    <div class="tnum" style="flex:1;font-size:11.5px;color:#6B6459">{{ tPadHint }}</div>
+                    <div onClick="{{ tApplyQty }}" style="height:28px;padding:0 11px;border-radius:8px;border:1px solid #005B52;display:flex;align-items:center;cursor:pointer;flex:none">
+                      <span style="font-size:12.5px;font-weight:500;color:#005B52">Set quantity</span>
+                    </div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ tShowHint }}" hint-placeholder-val="{{ true }}">
+                  <div class="tnum" style="padding:6px 14px;font-size:11.5px;color:#8A8175;min-height:18px">{{ tPadHint }}</div>
+                </sc-if>
+                <sc-if value="{{ tTender }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:2px 12px 8px">
+                    <div style="display:flex;gap:6px">
+                      <div onClick="{{ tPayCash }}" style="flex:1;height:62px;border-radius:12px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;background:{{ payCashBg }};box-shadow:inset 0 0 0 {{ payCashRing }}">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="2.5" y="6" width="19" height="12" rx="2.5" stroke="#005B52" stroke-width="1.7"/><circle cx="12" cy="12" r="2.6" stroke="#005B52" stroke-width="1.7"/></svg>
+                        <div style="font-size:11.5px;font-weight:600;color:#1A1A1A">Cash</div>
+                        <sc-if value="{{ payCashOn }}" hint-placeholder-val="{{ true }}">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="position:absolute;top:6px;right:6px"><circle cx="12" cy="12" r="9" stroke="#005B52" stroke-width="2"/><path d="M8 12.2l2.6 2.6L16 9.4" stroke="#005B52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </sc-if>
+                      </div>
+                      <div onClick="{{ tPayEco }}" style="flex:1;height:62px;border-radius:12px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;background:{{ payEcoBg }};box-shadow:inset 0 0 0 {{ payEcoRing }}">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5" stroke="#005B52" stroke-width="1.7"/><path d="M10.5 18.5h3" stroke="#005B52" stroke-width="1.7" stroke-linecap="round"/></svg>
+                        <div style="font-size:11.5px;font-weight:600;color:#1A1A1A">EcoCash</div>
+                        <sc-if value="{{ payEcoOn }}" hint-placeholder-val="{{ false }}">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="position:absolute;top:6px;right:6px"><circle cx="12" cy="12" r="9" stroke="#005B52" stroke-width="2"/><path d="M8 12.2l2.6 2.6L16 9.4" stroke="#005B52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </sc-if>
+                      </div>
+                      <div onClick="{{ tPayCard }}" style="flex:1;height:62px;border-radius:12px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;background:{{ payCardBg }};box-shadow:inset 0 0 0 {{ payCardRing }}">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="2.5" y="5" width="19" height="14" rx="2.5" stroke="#005B52" stroke-width="1.7"/><path d="M2.5 9.5h19" stroke="#005B52" stroke-width="1.7"/></svg>
+                        <div style="font-size:11.5px;font-weight:600;color:#1A1A1A">Card</div>
+                        <sc-if value="{{ payCardOn }}" hint-placeholder-val="{{ false }}">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="position:absolute;top:6px;right:6px"><circle cx="12" cy="12" r="9" stroke="#005B52" stroke-width="2"/><path d="M8 12.2l2.6 2.6L16 9.4" stroke="#005B52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </sc-if>
+                      </div>
+                    </div>
+
+                    <sc-if value="{{ tIsCash }}" hint-placeholder-val="{{ true }}">
+                      <div style="display:flex;gap:6px;margin-top:8px">
+                        <div style="flex:1;border-radius:10px;background:#F0EDE7;padding:8px 10px">
+                          <div style="font-size:10px;font-weight:500;letter-spacing:0.09em;text-transform:uppercase;color:#8A8175">Cash in</div>
+                          <div class="tnum" style="font-size:17px;font-weight:600;color:#1A1A1A;margin-top:1px">{{ tCashLabel }}</div>
+                        </div>
+                        <div style="flex:1;border-radius:10px;background:{{ tChangeBg }};padding:8px 10px">
+                          <div style="font-size:10px;font-weight:500;letter-spacing:0.09em;text-transform:uppercase;color:#8A8175">{{ tChangeTitle }}</div>
+                          <div class="tnum" style="font-size:17px;font-weight:600;color:{{ tChangeFg }};margin-top:1px">{{ tChangeValue }}</div>
+                        </div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ tNotCash }}" hint-placeholder-val="{{ false }}">
+                      <div style="margin-top:8px;border-radius:10px;background:#F0EDE7;padding:9px 10px">
+                        <div style="font-size:10px;font-weight:500;letter-spacing:0.09em;text-transform:uppercase;color:#8A8175">Amount due</div>
+                        <div class="tnum" style="font-size:17px;font-weight:600;color:#1A1A1A;margin-top:1px">{{ cartTotal }}</div>
+                        <div style="font-size:11.5px;color:#6B6459;margin-top:4px;text-wrap:pretty">{{ tPayNote }}</div>
+                      </div>
+                    </sc-if>
+                  </div>
+                </sc-if>
+
+                <div style="height:1px;background:#ECE7E0"></div>
+                <div style="padding:10px 12px;display:grid;grid-template-columns:repeat(3,1fr);gap:5px">
+                  <sc-for list="{{ tPadKeys }}" as="k" hint-placeholder-count="12">
+                    <div onClick="{{ k.onPress }}" class="tnum" style="height:38px;border-radius:9px;background:#FDFCFA;border:1px solid #ECE7E0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;color:{{ k.fg }};cursor:pointer;user-select:none" style-active="background:#ECE7E0">{{ k.label }}</div>
+                  </sc-for>
+                </div>
+
+                <div style="padding:4px 16px 16px">
+                  <div style="display:flex;align-items:center;margin-bottom:10px">
+                    <div style="flex:1;font-size:13px;color:#6B6459">Total</div>
+                    <div class="tnum" style="font-size:24px;font-weight:500;color:#1A1A1A;letter-spacing:-0.01em">{{ cartTotal }}</div>
+                  </div>
+                  <div onClick="{{ tCharge }}" style="padding:18px;border-radius:14px;background:{{ tChargeBg }};display:flex;align-items:center;justify-content:center;cursor:{{ tChargeCursor }}">
+                    <span class="tnum" style="font-size:17px;font-weight:500;color:{{ tChargeFgText }};white-space:nowrap">{{ tChargeLabel }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ tIsStock }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;min-height:0;display:flex">
+              <div style="flex:1;min-width:0;overflow-y:auto;padding:18px 20px 28px">
+                <div style="border:1px solid #ECE7E0;border-radius:14px;padding:14px;background:#FBF9F6;margin-bottom:22px">
+                  <div style="font-size:10.5px;font-weight:500;letter-spacing:0.11em;text-transform:uppercase;color:#8A8175;margin-bottom:12px">Week ahead</div>
+                  <div style="display:flex;gap:8px">
+                    <sc-for list="{{ weekAhead }}" as="d" hint-placeholder-count="7">
+                      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px">
+                        <div style="width:100%;height:56px;border-radius:6px;background:#F0EDE7;position:relative;overflow:hidden">
+                          <div style="position:absolute;left:0;right:0;bottom:0;height:{{ d.h }}%;background:{{ d.c }};border-radius:6px"></div>
+                        </div>
+                        <div style="font-size:11px;font-weight:500;color:{{ d.labelFg }}">{{ d.day }}</div>
+                        <div class="tnum" style="font-size:12px;font-weight:600;color:{{ d.c }}">{{ d.n }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="font-size:12.5px;color:#6B6459;margin-top:12px">{{ weekSummary }}</div>
+                </div>
+
+                <sc-for list="{{ tStockSections }}" as="sec" hint-placeholder-count="3">
+                  <div style="margin-bottom:24px">
+                    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px">
+                      <div style="font-size:10.5px;font-weight:500;letter-spacing:0.11em;text-transform:uppercase;color:#8A8175">{{ sec.title }}</div>
+                      <div class="tnum" style="font-size:11px;font-weight:500;color:#A89F94">{{ sec.count }}</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:1px">
+                      <sc-for list="{{ sec.rows }}" as="r" hint-placeholder-count="3">
+                        <div onClick="{{ r.onClick }}" style="display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:12px;cursor:pointer;background:{{ r.bg }};box-shadow:inset 0 0 0 1px {{ r.ring }}">
+                          <div style="flex:1;min-width:0">
+                            <div style="font-size:14.5px;font-weight:500;color:{{ r.nameFg }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</div>
+                            <div class="tnum" style="font-size:11.5px;color:#8A8175;margin-top:1px">{{ r.meta }}</div>
+                          </div>
+                          <div style="display:flex;gap:2px;width:52px;height:16px;flex:none">
+                            <sc-for list="{{ r.segs }}" as="s" hint-placeholder-count="7">
+                              <div style="flex:1;border-radius:1.5px;background:{{ s.c }};border:1px solid {{ s.b }};box-sizing:border-box"></div>
+                            </sc-for>
+                          </div>
+                          <div style="text-align:right;flex:none;min-width:64px">
+                            <sc-if value="{{ r.stopped }}" hint-placeholder-val="{{ false }}">
+                              <div style="display:inline-flex;height:22px;align-items:center;padding:0 9px;border-radius:11px;background:#1A1A1A;color:#FDFCFA;font-size:11.5px;font-weight:500">Out</div>
+                            </sc-if>
+                            <sc-if value="{{ r.showValue }}" hint-placeholder-val="{{ true }}">
+                              <div class="tnum" style="font-size:14.5px;font-weight:600;color:{{ r.valueFg }}">{{ r.value }}</div>
+                            </sc-if>
+                            <div class="tnum" style="font-size:11px;color:#8A8175;margin-top:1px">{{ r.sub }}</div>
+                          </div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="width:340px;flex:none;border-left:1px solid #ECE7E0;background:#FBF9F6;display:flex;flex-direction:column;overflow-y:auto">
+                <div style="padding:18px 18px 14px;border-bottom:1px solid #ECE7E0">
+                  <div style="font-size:17px;font-weight:600;color:#1A1A1A;letter-spacing:-0.01em">{{ detail.name }}</div>
+                  <div class="tnum" style="font-size:12.5px;color:#6B6459;margin-top:3px">{{ detail.meta }}</div>
+                  <div style="display:flex;align-items:center;gap:12px;margin-top:14px">
+                    <div style="display:flex;gap:3px;width:80px;height:20px;flex:none">
+                      <sc-for list="{{ detail.segs }}" as="s" hint-placeholder-count="7">
+                        <div style="flex:1;border-radius:2px;background:{{ s.c }};border:1px solid {{ s.b }};box-sizing:border-box"></div>
+                      </sc-for>
+                    </div>
+                    <div class="tnum" style="font-size:13px;font-weight:500;color:{{ detail.runwayFg }}">{{ detail.runway }}</div>
+                  </div>
+                </div>
+
+                <div style="padding:16px 18px 8px">
+                  <div style="font-size:10.5px;font-weight:500;letter-spacing:0.11em;text-transform:uppercase;color:#8A8175">Why it says {{ detail.qty }}</div>
+                </div>
+                <div style="padding:0 10px 16px">
+                  <sc-for list="{{ detail.ledger }}" as="e" hint-placeholder-count="5">
+                    <div style="display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:9px">
+                      <div style="flex:1;min-width:0">
+                        <div style="font-size:13px;color:#1A1A1A">{{ e.what }}</div>
+                        <div class="tnum" style="font-size:11px;color:#8A8175;margin-top:1px">{{ e.when }}</div>
+                      </div>
+                      <div class="tnum" style="font-size:13px;font-weight:600;color:{{ e.deltaFg }};min-width:34px;text-align:right">{{ e.delta }}</div>
+                      <div class="tnum" style="font-size:12px;color:#8A8175;min-width:26px;text-align:right">{{ e.balance }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <div style="margin-top:auto;padding:14px 18px 18px;border-top:1px solid #ECE7E0;display:flex;gap:8px">
+                  <div style="flex:1;height:44px;border-radius:12px;background:#005B52;display:flex;align-items:center;justify-content:center;cursor:pointer">
+                    <span style="font-size:14px;font-weight:500;color:#FDFCFA">Add to order list</span>
+                  </div>
+                  <div style="height:44px;padding:0 14px;border-radius:12px;border:1px solid #DDD6CC;display:flex;align-items:center;cursor:pointer">
+                    <span style="font-size:14px;font-weight:500;color:#1A1A1A">Adjust</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="width:280px;flex:none;position:sticky;top:56px">
+    <div style="font-size:11px;font-weight:500;letter-spacing:0.11em;text-transform:uppercase;color:#8A8175;margin-bottom:8px">What changes at EXPANDED</div>
+    <div style="font-size:12.5px;color:#6B6459;line-height:1.55;text-wrap:pretty">The rail expands back to the full 84dp sidebar with labels, and the header gains the centred clock. POS becomes the three fixed zones — product area, 1px divider, 240dp sale ticket with the number pad always visible. Tap a ticket line to select it, then type a quantity; loose goods need manual entry on nearly every sale.</div>
+    <div style="font-size:12.5px;color:#6B6459;line-height:1.55;margin-top:12px;text-wrap:pretty">Everywhere else the phone's bottom sheet becomes a right-hand panel pinned to the sheet edge — same content, two containers. On Stock that panel is where "why does it say 6?" gets answered, as a ledger.</div>
+    <div style="font-size:12.5px;color:#6B6459;line-height:1.55;margin-top:12px;text-wrap:pretty">Medium behaves as Expanded. There is no third bucket, and POS never reflows between them.</div>
+  </div>
+</section>
+
+<div style="display:flex;gap:48px;padding:56px 64px;align-items:flex-start;min-height:100vh;box-sizing:border-box">
+
+  <div style="display:flex;flex-direction:column;gap:18px;position:sticky;top:56px">
+    <div style="font-size:11px;font-weight:500;letter-spacing:0.11em;text-transform:uppercase;color:#8A8175">ShopMate · phone</div>
+
+    <div style="width:410px;height:864px;background:#1A1A1A;border-radius:48px;padding:10px;box-sizing:border-box">
+      <div style="width:390px;height:844px;border-radius:38px;overflow:hidden;background:#005B52;display:flex;flex-direction:column;position:relative">
+
+        <div style="height:44px;background:#005B52;display:flex;align-items:center;justify-content:space-between;padding:0 22px 0 26px;color:#FFFFFF;flex:none">
+          <div class="tnum" style="font-size:13px;font-weight:600">08:42</div>
+          <div style="display:flex;align-items:center;gap:5px">
+            <svg width="15" height="11" viewBox="0 0 15 11" fill="none"><path d="M1 8h2v3H1zM5 5.5h2V11H5zM9 3h2v8H9zM13 0h2v11h-2z" fill="#fff" fill-opacity=".9"/></svg>
+            <svg width="13" height="11" viewBox="0 0 13 11" fill="none"><path d="M6.5 9.2 1 4a8 8 0 0 1 11 0L6.5 9.2Z" fill="#fff" fill-opacity=".9"/></svg>
+            <svg width="20" height="11" viewBox="0 0 20 11" fill="none"><rect x=".6" y=".6" width="16" height="9.8" rx="2.4" stroke="#fff" stroke-opacity=".55"/><rect x="2" y="2" width="11" height="7" rx="1.4" fill="#fff" fill-opacity=".9"/></svg>
+          </div>
+        </div>
+
+        <div style="flex:1;display:flex;min-height:0">
+
+          <div style="width:64px;flex:none;display:flex;flex-direction:column;align-items:center;padding:10px 0 14px;position:relative">
+            <div style="width:38px;height:38px;border-radius:13px;background:#99FFAA;display:flex;align-items:center;justify-content:center;flex:none">
+              <svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M3.5 8.5 5 3.5h14l1.5 5M3.5 8.5h17M3.5 8.5A2.5 2.5 0 0 0 8 10a2.5 2.5 0 0 0 4 0 2.5 2.5 0 0 0 4 0 2.5 2.5 0 0 0 4.5-1.5M5 11v9.5h14V11" stroke="#1A1A1A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+
+            <div style="height:20px"></div>
+
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;width:100%">
+              <div onClick="{{ goPos }}" onMouseDown="{{ holdPos }}" onMouseUp="{{ release }}" onMouseLeave="{{ release }}" style="width:100%;display:flex;justify-content:center;padding:7px 0;cursor:pointer;user-select:none">
+                <div style="width:46px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center;transition:background 180ms;background:{{ pillPos }}">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3.5 8.5 5 3.5h14l1.5 5M3.5 8.5h17M3.5 8.5A2.5 2.5 0 0 0 8 10a2.5 2.5 0 0 0 4 0 2.5 2.5 0 0 0 4 0 2.5 2.5 0 0 0 4.5-1.5M5 11v9.5h14V11" stroke="{{ inkPos }}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+              </div>
+
+              <div onClick="{{ goProducts }}" onMouseDown="{{ holdProducts }}" onMouseUp="{{ release }}" onMouseLeave="{{ release }}" style="width:100%;display:flex;justify-content:center;padding:7px 0;cursor:pointer;user-select:none;position:relative">
+                <div style="width:46px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center;transition:background 180ms;background:{{ pillProducts }}">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12.6 3H5a2 2 0 0 0-2 2v7.6a2 2 0 0 0 .6 1.4l6.4 6.4a2 2 0 0 0 2.8 0l7.6-7.6a2 2 0 0 0 0-2.8L14 3.6a2 2 0 0 0-1.4-.6Z" stroke="{{ inkProducts }}" stroke-width="1.7" stroke-linejoin="round"/><circle cx="8" cy="8" r="1.5" fill="{{ inkProducts }}"/></svg>
+                </div>
+                <div style="position:absolute;top:4px;right:8px;min-width:16px;height:16px;border-radius:8px;background:#E07B39;color:#fff;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box">3</div>
+              </div>
+
+              <div onClick="{{ goStock }}" onMouseDown="{{ holdStock }}" onMouseUp="{{ release }}" onMouseLeave="{{ release }}" style="width:100%;display:flex;justify-content:center;padding:7px 0;cursor:pointer;user-select:none">
+                <div style="width:46px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center;transition:background 180ms;background:{{ pillStock }}">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5v-9Z" stroke="{{ inkStock }}" stroke-width="1.7" stroke-linejoin="round"/><path d="M3.5 7.5 12 12m0 0 8.5-4.5M12 12v9" stroke="{{ inkStock }}" stroke-width="1.7" stroke-linejoin="round"/></svg>
+                </div>
+              </div>
+
+              <div onClick="{{ goReports }}" onMouseDown="{{ holdReports }}" onMouseUp="{{ release }}" onMouseLeave="{{ release }}" style="width:100%;display:flex;justify-content:center;padding:7px 0;cursor:pointer;user-select:none">
+                <div style="width:46px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center;transition:background 180ms;background:{{ pillReports }}">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 20V10m5 10V4m5 16v-7m5 7V8" stroke="{{ inkReports }}" stroke-width="1.9" stroke-linecap="round"/></svg>
+                </div>
+              </div>
+
+              <div onClick="{{ goSync }}" onMouseDown="{{ holdSync }}" onMouseUp="{{ release }}" onMouseLeave="{{ release }}" style="width:100%;display:flex;justify-content:center;padding:7px 0;cursor:pointer;user-select:none">
+                <div style="width:46px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center;transition:background 180ms;background:{{ pillSync }}">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6.5 18.5A4.5 4.5 0 0 1 6 9.6a6 6 0 0 1 11.6-1.2A4 4 0 0 1 17.5 18.5h-11Z" stroke="{{ inkSync }}" stroke-width="1.7" stroke-linejoin="round"/></svg>
+                </div>
+              </div>
+            </div>
+
+            <div onClick="{{ goSettings }}" onMouseDown="{{ holdSettings }}" onMouseUp="{{ release }}" onMouseLeave="{{ release }}" style="width:100%;display:flex;justify-content:center;padding:7px 0;cursor:pointer;user-select:none">
+              <div style="width:46px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center;transition:background 180ms;background:{{ pillSettings }}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="{{ inkSettings }}" stroke-width="1.7"/><path d="M12 2.8v2.4M12 18.8v2.4M21.2 12h-2.4M5.2 12H2.8m15-6.4-1.7 1.7M7.9 16.1l-1.7 1.7m0-12.2 1.7 1.7m8.2 8.2 1.7 1.7" stroke="{{ inkSettings }}" stroke-width="1.7" stroke-linecap="round"/></svg>
+              </div>
+            </div>
+
+            <sc-if value="{{ heldLabel }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;left:58px;top:{{ heldTop }}px;background:#1A1A1A;color:#FDFCFA;font-size:12px;font-weight:500;padding:6px 11px;border-radius:8px;white-space:nowrap;z-index:30;pointer-events:none">{{ heldLabel }}</div>
+            </sc-if>
+          </div>
+
+          <div style="flex:1;min-width:0;background:#FDFCFA;border-top-left-radius:24px;display:flex;flex-direction:column;position:relative;overflow:hidden">
+
+            <div style="height:60px;flex:none;display:flex;align-items:center;gap:10px;padding:0 18px;border-bottom:1px solid #ECE7E0">
+              <sc-if value="{{ showBack }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ back }}" style="width:30px;height:30px;margin-left:-6px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#1A1A1A" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+              </sc-if>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:16px;font-weight:600;color:#1A1A1A;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ title }}</div>
+                <div style="display:flex;align-items:center;gap:5px;margin-top:1px">
+                  <div style="width:6px;height:6px;border-radius:3px;background:{{ syncDot }}"></div>
+                  <div class="tnum" style="font-size:11.5px;color:#6B6459">{{ syncText }}</div>
+                </div>
+              </div>
+              <sc-if value="{{ showPosActions }}" hint-placeholder-val="{{ true }}">
+                <div onClick="{{ goSales }}" style="width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:#F0EDE7">
+                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M6 3v18l2-1.4 2 1.4 2-1.4 2 1.4 2-1.4 2 1.4V3H6Z" stroke="#1A1A1A" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.5 8h5M9.5 12h5" stroke="#1A1A1A" stroke-width="1.6" stroke-linecap="round"/></svg>
+                </div>
+              </sc-if>
+            </div>
+
+            <div style="flex:1;min-height:0;overflow-y:auto;position:relative">
+
+              <sc-if value="{{ isPos }}" hint-placeholder-val="{{ true }}">
+                <div style="padding:14px 16px 120px">
+                  <div style="height:44px;border-radius:12px;background:#F0EDE7;display:flex;align-items:center;gap:9px;padding:0 12px;margin-bottom:12px">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="#8A8175" stroke-width="1.8"/><path d="m16 16 4.5 4.5" stroke="#8A8175" stroke-width="1.8" stroke-linecap="round"/></svg>
+                    <div style="flex:1;font-size:14px;color:#A89F94">Search products</div>
+                    <div onClick="{{ openScan }}" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 8V5a2 2 0 0 1 2-2h3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3M3 12h18" stroke="#005B52" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                  </div>
+
+                  <div style="display:flex;gap:6px;overflow-x:auto;margin:0 -16px 14px;padding:0 16px">
+                    <sc-for list="{{ categories }}" as="cat" hint-placeholder-count="4">
+                      <div onClick="{{ cat.onClick }}" style="flex:none;height:30px;padding:0 13px;border-radius:15px;display:flex;align-items:center;font-size:13px;font-weight:500;cursor:pointer;border:1px solid {{ cat.border }};background:{{ cat.bg }};color:{{ cat.fg }}">{{ cat.name }}</div>
+                    </sc-for>
+                  </div>
+
+                  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px">
+                    <sc-for list="{{ gridProducts }}" as="p" hint-placeholder-count="6">
+                      <div onClick="{{ p.add }}" style="border:1px solid #ECE7E0;border-radius:12px;padding:12px;background:#FDFCFA;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;height:116px;box-sizing:border-box;position:relative;min-width:0" style-hover="border-color:#DDD6CC">
+                        <div style="position:absolute;top:12px;right:12px;width:10px;height:10px;border-radius:5px;background:{{ p.dot }}"></div>
+                        <div style="font-size:14px;font-weight:600;color:#1A1A1A;line-height:1.25;padding-right:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.name }}</div>
+                        <div>
+                          <div class="tnum" style="font-size:15px;font-weight:500;color:#1A1A1A">{{ p.price }}</div>
+                          <sc-if value="{{ p.stopped }}" hint-placeholder-val="{{ false }}">
+                            <div style="display:inline-flex;height:20px;align-items:center;padding:0 8px;border-radius:10px;background:#1A1A1A;color:#FDFCFA;font-size:11px;font-weight:500;margin-top:4px">Out</div>
+                          </sc-if>
+                          <sc-if value="{{ p.inStock }}" hint-placeholder-val="{{ true }}">
+                            <div class="tnum" style="font-size:11.5px;font-weight:500;color:{{ p.stockFg }};margin-top:3px">{{ p.stockLabel }}</div>
+                          </sc-if>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+
+                <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px 20px;background:linear-gradient(180deg, rgba(253,252,250,0) 0%, #FDFCFA 34%)">
+                  <div onClick="{{ openTender }}" style="height:60px;border-radius:16px;background:#1A1A1A;display:flex;align-items:center;padding:0 8px 0 16px;cursor:pointer;gap:12px">
+                    <div style="flex:1;min-width:0">
+                      <div class="tnum" style="font-size:11px;font-weight:500;letter-spacing:0.09em;text-transform:uppercase;color:#A89F94">{{ cartCountLabel }}</div>
+                      <div class="tnum" style="font-size:19px;font-weight:600;color:#FDFCFA;line-height:1.2">{{ cartTotal }}</div>
+                    </div>
+                    <div style="height:44px;padding:0 18px;border-radius:12px;background:#99FFAA;display:flex;align-items:center;gap:7px;flex:none">
+                      <span style="font-size:15px;font-weight:600;color:#1A1A1A">Charge</span>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ isStock }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:16px 16px 96px">
+                  <div style="border:1px solid #ECE7E0;border-radius:14px;padding:12px 12px 10px;background:#FBF9F6;margin-bottom:20px">
+                    <div style="font-size:10.5px;font-weight:500;letter-spacing:0.11em;text-transform:uppercase;color:#8A8175;margin-bottom:10px">Week ahead</div>
+                    <div style="display:flex;gap:5px">
+                      <sc-for list="{{ weekAhead }}" as="d" hint-placeholder-count="7">
+                        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
+                          <div style="width:100%;height:44px;border-radius:6px;background:#F0EDE7;position:relative;overflow:hidden">
+                            <div style="position:absolute;left:0;right:0;bottom:0;height:{{ d.h }}%;background:{{ d.c }};border-radius:6px"></div>
+                          </div>
+                          <div style="font-size:10.5px;font-weight:500;color:{{ d.labelFg }}">{{ d.day }}</div>
+                          <div class="tnum" style="font-size:11px;font-weight:600;color:{{ d.c }}">{{ d.n }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div style="font-size:12px;color:#6B6459;margin-top:10px;text-wrap:pretty">{{ weekSummary }}</div>
+                  </div>
+
+                  <sc-for list="{{ stockSections }}" as="sec" hint-placeholder-count="2">
+                    <div style="margin-bottom:22px">
+                      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px">
+                        <div style="font-size:10.5px;font-weight:500;letter-spacing:0.11em;text-transform:uppercase;color:#8A8175">{{ sec.title }}</div>
+                        <div class="tnum" style="font-size:11px;font-weight:500;color:#A89F94">{{ sec.count }}</div>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:1px">
+                        <sc-for list="{{ sec.rows }}" as="r" hint-placeholder-count="3">
+                          <div style="display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:12px;background:{{ r.bg }}">
+                            <div style="flex:1;min-width:0">
+                              <div style="font-size:14px;font-weight:500;color:{{ r.nameFg }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</div>
+                              <div class="tnum" style="font-size:11.5px;color:#8A8175;margin-top:1px">{{ r.meta }}</div>
+                            </div>
+                            <div style="display:flex;gap:2px;width:52px;height:16px;flex:none">
+                              <sc-for list="{{ r.segs }}" as="s" hint-placeholder-count="7">
+                                <div style="flex:1;border-radius:1.5px;background:{{ s.c }};border:1px solid {{ s.b }};box-sizing:border-box"></div>
+                              </sc-for>
+                            </div>
+                            <div style="text-align:right;flex:none;min-width:58px">
+                              <sc-if value="{{ r.stopped }}" hint-placeholder-val="{{ false }}">
+                                <div style="display:inline-flex;height:22px;align-items:center;padding:0 9px;border-radius:11px;background:#1A1A1A;color:#FDFCFA;font-size:11.5px;font-weight:500">Out</div>
+                              </sc-if>
+                              <sc-if value="{{ r.showValue }}" hint-placeholder-val="{{ true }}">
+                                <div class="tnum" style="font-size:14.5px;font-weight:600;color:{{ r.valueFg }}">{{ r.value }}</div>
+                              </sc-if>
+                              <div class="tnum" style="font-size:11px;color:#8A8175;margin-top:1px">{{ r.sub }}</div>
+                            </div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <div style="position:absolute;right:16px;bottom:20px">
+                  <div onClick="{{ goCount }}" style="height:48px;padding:0 18px;border-radius:14px;background:#005B52;display:flex;align-items:center;gap:9px;cursor:pointer">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 11.5l2.2 2.2L15.5 9" stroke="#99FFAA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="4" y="3.5" width="16" height="17" rx="3" stroke="#99FFAA" stroke-width="1.7"/></svg>
+                    <span style="font-size:14.5px;font-weight:500;color:#FDFCFA">Count stock</span>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ isProducts }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:16px 16px 40px">
+                  <div onClick="{{ goInbox }}" style="display:flex;align-items:center;gap:11px;padding:12px;border-radius:14px;background:#FBF0E7;margin-bottom:20px;cursor:pointer">
+                    <div style="width:34px;height:34px;border-radius:10px;background:#E07B39;display:flex;align-items:center;justify-content:center;flex:none">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 5v14M8 5v14M11 5v14M15 5v14M20 5v14" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg>
+                    </div>
+                    <div style="flex:1">
+                      <div style="font-size:13.5px;font-weight:500;color:#1A1A1A">3 codes scanned but not named</div>
+                      <div style="font-size:11.5px;color:#6B6459;margin-top:1px">They sold anyway. Name them when you have a minute.</div>
+                    </div>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="#6B6459" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
+
+                  <sc-for list="{{ productSections }}" as="sec" hint-placeholder-count="2">
+                    <div style="margin-bottom:22px">
+                      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px">
+                        <div style="font-size:10.5px;font-weight:500;letter-spacing:0.11em;text-transform:uppercase;color:#8A8175">{{ sec.title }}</div>
+                        <div class="tnum" style="font-size:11px;font-weight:500;color:#A89F94">{{ sec.count }}</div>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:1px">
+                        <sc-for list="{{ sec.rows }}" as="r" hint-placeholder-count="3">
+                          <div style="display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:12px;background:{{ r.bg }}">
+                            <div style="flex:1;min-width:0">
+                              <div style="font-size:14px;font-weight:500;color:{{ r.nameFg }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</div>
+                              <div class="tnum" style="font-size:11.5px;color:#8A8175;margin-top:1px">{{ r.meta }}</div>
+                            </div>
+                            <div style="width:52px;height:16px;border-radius:3px;background:#F0EDE7;position:relative;flex:none;overflow:hidden">
+                              <div style="position:absolute;left:0;top:0;bottom:0;width:{{ r.costPct }}%;background:{{ r.fillColor }}"></div>
+                              <div style="position:absolute;top:0;bottom:0;left:{{ r.overPct }}%;width:{{ r.overW }}%;background:#E07B39"></div>
+                              <div style="position:absolute;top:-1px;bottom:-1px;left:{{ r.notchPct }}%;width:2px;background:#1A1A1A"></div>
+                            </div>
+                            <div style="text-align:right;flex:none;min-width:56px">
+                              <div class="tnum" style="font-size:14.5px;font-weight:600;color:{{ r.valueFg }}">{{ r.value }}</div>
+                              <div class="tnum" style="font-size:11px;color:#8A8175;margin-top:1px">{{ r.sub }}</div>
+                            </div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ isReports }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:16px 16px 40px">
+                  <div style="display:flex;gap:6px;margin-bottom:18px">
+                    <sc-for list="{{ periods }}" as="p" hint-placeholder-count="4">
+                      <div onClick="{{ p.onClick }}" style="flex:1;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;cursor:pointer;background:{{ p.bg }};color:{{ p.fg }};border:1px solid {{ p.border }}">{{ p.name }}</div>
+                    </sc-for>
+                  </div>
+
+                  <div class="tnum" style="font-size:38px;font-weight:600;color:#1A1A1A;letter-spacing:-0.03em;line-height:1">$412.60</div>
+                  <div style="display:flex;align-items:center;gap:6px;margin-top:7px">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 19V6m0 0-6 6m6-6 6 6" stroke="#2E7D32" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="tnum" style="font-size:12.5px;font-weight:500;color:#2E7D32">14% on last week</span>
+                    <span style="font-size:12.5px;color:#8A8175">· 168 sales</span>
+                  </div>
+
+                  <div style="display:flex;align-items:flex-end;gap:7px;height:120px;margin:24px 0 8px">
+                    <sc-for list="{{ bars }}" as="b" hint-placeholder-count="7">
+                      <div style="flex:1;min-width:0;height:100%;display:flex;flex-direction:column;gap:7px">
+                        <div style="flex:1;position:relative">
+                          <div style="position:absolute;left:0;right:0;bottom:0;height:{{ b.h }}%;background:{{ b.c }};border-radius:5px 5px 3px 3px"></div>
+                        </div>
+                        <div style="font-size:10.5px;font-weight:500;color:#8A8175;text-align:center">{{ b.day }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+
+                  <div style="height:1px;background:#ECE7E0;margin:18px 0"></div>
+
+                  <div style="font-size:10.5px;font-weight:500;letter-spacing:0.11em;text-transform:uppercase;color:#8A8175;margin-bottom:10px">Top sellers</div>
+                  <div style="display:flex;flex-direction:column;gap:1px">
+                    <sc-for list="{{ topSellers }}" as="t" hint-placeholder-count="4">
+                      <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:12px;background:{{ t.bg }}">
+                        <div class="tnum" style="width:20px;font-size:13px;font-weight:600;color:{{ t.rankFg }}">{{ t.rank }}</div>
+                        <div style="flex:1;font-size:14px;font-weight:500;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.name }}</div>
+                        <div class="tnum" style="font-size:12px;color:#8A8175">{{ t.units }}</div>
+                        <div class="tnum" style="font-size:14px;font-weight:600;color:#1A1A1A;min-width:52px;text-align:right">{{ t.value }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ isSync }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:20px 16px 40px">
+                  <div style="border-radius:16px;background:#FBF9F6;border:1px solid #ECE7E0;padding:18px">
+                    <div class="tnum" style="font-size:32px;font-weight:600;color:#1A1A1A;letter-spacing:-0.02em">2 sales</div>
+                    <div style="font-size:13.5px;color:#6B6459;margin-top:4px;text-wrap:pretty">held on this device. Held until you're back on a network — nothing is lost.</div>
+                    <div style="display:flex;align-items:center;gap:7px;margin-top:14px;padding-top:14px;border-top:1px solid #ECE7E0">
+                      <div style="width:7px;height:7px;border-radius:4px;background:#E07B39"></div>
+                      <div class="tnum" style="font-size:12.5px;color:#6B6459">Last upload 07:15 · 34 minutes ago</div>
+                    </div>
+                  </div>
+
+                  <div style="font-size:10.5px;font-weight:500;letter-spacing:0.11em;text-transform:uppercase;color:#8A8175;margin:22px 0 8px">Queue</div>
+                  <div style="display:flex;flex-direction:column;gap:1px">
+                    <sc-for list="{{ queue }}" as="q" hint-placeholder-count="4">
+                      <div style="display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:12px;background:{{ q.bg }}">
+                        <div style="width:20px;height:20px;border-radius:10px;background:{{ q.dotBg }};display:flex;align-items:center;justify-content:center;flex:none">
+                          <sc-if value="{{ q.done }}" hint-placeholder-val="{{ true }}">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#1A1A1A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                          </sc-if>
+                        </div>
+                        <div style="flex:1;min-width:0">
+                          <div class="tnum" style="font-size:13.5px;font-weight:500;color:#1A1A1A">{{ q.name }}</div>
+                          <div class="tnum" style="font-size:11.5px;color:#8A8175;margin-top:1px">{{ q.meta }}</div>
+                        </div>
+                        <div class="tnum" style="font-size:13.5px;font-weight:600;color:#1A1A1A">{{ q.value }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ isCount }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:16px 16px 110px">
+                  <div style="display:flex;gap:8px;margin-bottom:16px">
+                    <div style="flex:1;border:1px solid #ECE7E0;border-radius:12px;padding:11px 12px;background:#FBF9F6">
+                      <div class="tnum" style="font-size:20px;font-weight:600;color:#1A1A1A">12</div>
+                      <div style="font-size:11px;color:#8A8175;margin-top:1px">counted</div>
+                    </div>
+                    <div style="flex:1;border:1px solid #ECE7E0;border-radius:12px;padding:11px 12px;background:#FBF0E7">
+                      <div class="tnum" style="font-size:20px;font-weight:600;color:#E07B39">3</div>
+                      <div style="font-size:11px;color:#8A8175;margin-top:1px">don't match</div>
+                    </div>
+                    <div style="flex:1;border:1px solid #ECE7E0;border-radius:12px;padding:11px 12px;background:#FBF9F6">
+                      <div class="tnum" style="font-size:20px;font-weight:600;color:#1A1A1A">$6.20</div>
+                      <div style="font-size:11px;color:#8A8175;margin-top:1px">short</div>
+                    </div>
+                  </div>
+
+                  <div style="display:flex;flex-direction:column;gap:1px">
+                    <sc-for list="{{ countRows }}" as="c" hint-placeholder-count="5">
+                      <div style="display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;background:{{ c.bg }}">
+                        <div style="flex:1;min-width:0">
+                          <div style="font-size:14px;font-weight:500;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</div>
+                          <div class="tnum" style="font-size:11.5px;color:#8A8175;margin-top:1px">{{ c.meta }}</div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:2px;flex:none">
+                          <div onClick="{{ c.dec }}" style="width:30px;height:30px;border-radius:9px;background:#F0EDE7;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;font-weight:500;color:#1A1A1A;user-select:none">−</div>
+                          <div class="tnum" style="width:34px;text-align:center;font-size:15px;font-weight:600;color:#1A1A1A">{{ c.counted }}</div>
+                          <div onClick="{{ c.inc }}" style="width:30px;height:30px;border-radius:9px;background:#F0EDE7;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;font-weight:500;color:#1A1A1A;user-select:none">+</div>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+
+                <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px 20px;background:linear-gradient(180deg, rgba(253,252,250,0) 0%, #FDFCFA 34%)">
+                  <div onClick="{{ commitCount }}" style="height:52px;border-radius:14px;background:#99FFAA;display:flex;align-items:center;justify-content:center;cursor:pointer">
+                    <span style="font-size:15.5px;font-weight:600;color:#1A1A1A">{{ commitLabel }}</span>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ isInbox }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:16px 16px 40px">
+                  <div style="font-size:13px;color:#6B6459;margin-bottom:16px;text-wrap:pretty">Codes rung up at the till that aren't in the catalogue. The sale went through — the item just has no name yet.</div>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <sc-for list="{{ inboxRows }}" as="b" hint-placeholder-count="3">
+                      <div style="border:1px solid #ECE7E0;border-radius:14px;padding:13px;background:#FBF9F6">
+                        <div style="display:flex;align-items:center;gap:10px">
+                          <div style="flex:1;min-width:0">
+                            <div class="tnum" style="font-size:15px;font-weight:600;color:#1A1A1A;letter-spacing:0.02em">{{ b.code }}</div>
+                            <div class="tnum" style="font-size:11.5px;color:#8A8175;margin-top:2px">{{ b.meta }}</div>
+                          </div>
+                          <div onClick="{{ b.name }}" style="height:34px;padding:0 14px;border-radius:10px;border:1px solid #005B52;display:flex;align-items:center;cursor:pointer;flex:none">
+                            <span style="font-size:13.5px;font-weight:500;color:#005B52">Name it</span>
+                          </div>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:8px 0 40px">
+                  <sc-for list="{{ settingsGroups }}" as="g" hint-placeholder-count="3">
+                    <div style="margin-top:16px">
+                      <div style="font-size:10.5px;font-weight:500;letter-spacing:0.11em;text-transform:uppercase;color:#8A8175;padding:0 18px 8px">{{ g.title }}</div>
+                      <div>
+                        <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="3">
+                          <div style="display:flex;align-items:center;gap:12px;padding:13px 18px;border-top:1px solid #ECE7E0">
+                            <div style="flex:1;min-width:0">
+                              <div style="font-size:14.5px;color:#1A1A1A">{{ r.name }}</div>
+                              <div style="font-size:11.5px;color:#8A8175;margin-top:1px">{{ r.sub }}</div>
+                            </div>
+                            <div class="tnum" style="font-size:14px;font-weight:500;color:#6B6459">{{ r.value }}</div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ isDigest }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:16px 16px 40px">
+                  <div style="border-radius:16px;background:#005B52;padding:18px;color:#FDFCFA">
+                    <div style="font-size:11px;font-weight:500;letter-spacing:0.11em;text-transform:uppercase;color:#99FFAA">Yesterday</div>
+                    <div class="tnum" style="font-size:34px;font-weight:600;letter-spacing:-0.02em;margin-top:8px">$412.60</div>
+                    <div class="tnum" style="font-size:13px;color:rgba(253,252,250,0.72);margin-top:3px">168 sales · closed 18:04</div>
+                  </div>
+
+                  <div style="font-size:10.5px;font-weight:500;letter-spacing:0.11em;text-transform:uppercase;color:#8A8175;margin:22px 0 8px">Worth knowing</div>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <sc-for list="{{ digestRows }}" as="d" hint-placeholder-count="3">
+                      <div style="border-radius:14px;padding:13px;background:{{ d.bg }};border:1px solid {{ d.border }}">
+                        <div style="font-size:14px;font-weight:500;color:#1A1A1A;text-wrap:pretty">{{ d.title }}</div>
+                        <div style="font-size:12.5px;color:#6B6459;margin-top:3px;text-wrap:pretty">{{ d.body }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ isAuth }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:40px 24px">
+                  <div style="font-size:22px;font-weight:600;color:#1A1A1A;letter-spacing:-0.02em">Open the till</div>
+                  <div style="font-size:14px;color:#6B6459;margin-top:6px;text-wrap:pretty">Mbare Market Stop · Till 2</div>
+
+                  <div style="display:flex;gap:10px;margin:34px 0 6px">
+                    <sc-for list="{{ pinDots }}" as="p" hint-placeholder-count="4">
+                      <div style="flex:1;height:52px;border-radius:12px;background:#F0EDE7;display:flex;align-items:center;justify-content:center">
+                        <div style="width:11px;height:11px;border-radius:6px;background:{{ p.c }}"></div>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="font-size:12px;color:#8A8175;margin-top:10px">Enter your 4-digit till code</div>
+
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:26px">
+                    <sc-for list="{{ pinKeys }}" as="k" hint-placeholder-count="12">
+                      <div onClick="{{ k.onPress }}" class="tnum" style="height:52px;border-radius:12px;background:{{ k.bg }};display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;color:#1A1A1A;cursor:pointer;user-select:none">{{ k.label }}</div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ isSales }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:16px 16px 40px">
+                  <div style="display:flex;flex-direction:column;gap:1px">
+                    <sc-for list="{{ salesRows }}" as="s" hint-placeholder-count="6">
+                      <div style="display:flex;align-items:center;gap:11px;padding:12px;border-radius:12px;background:{{ s.bg }}">
+                        <div style="flex:1;min-width:0">
+                          <div class="tnum" style="font-size:14px;font-weight:500;color:#1A1A1A">{{ s.receipt }}</div>
+                          <div class="tnum" style="font-size:11.5px;color:#8A8175;margin-top:1px">{{ s.meta }}</div>
+                        </div>
+                        <div class="tnum" style="font-size:14.5px;font-weight:600;color:#1A1A1A">{{ s.value }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+
+            <sc-if value="{{ scanOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;inset:0;background:rgba(26,26,26,0.82);display:flex;flex-direction:column;z-index:20">
+                <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px">
+                  <div style="width:100%;aspect-ratio:1.35;border-radius:18px;position:relative;background:rgba(253,252,250,0.06)">
+                    <div style="position:absolute;left:0;top:0;width:34px;height:34px;border-left:3px solid #99FFAA;border-top:3px solid #99FFAA;border-radius:18px 0 0 0"></div>
+                    <div style="position:absolute;right:0;top:0;width:34px;height:34px;border-right:3px solid #99FFAA;border-top:3px solid #99FFAA;border-radius:0 18px 0 0"></div>
+                    <div style="position:absolute;left:0;bottom:0;width:34px;height:34px;border-left:3px solid #99FFAA;border-bottom:3px solid #99FFAA;border-radius:0 0 0 18px"></div>
+                    <div style="position:absolute;right:0;bottom:0;width:34px;height:34px;border-right:3px solid #99FFAA;border-bottom:3px solid #99FFAA;border-radius:0 0 18px 0"></div>
+                    <div style="position:absolute;left:16px;right:16px;top:50%;height:2px;background:#99FFAA;opacity:.55"></div>
+                  </div>
+                </div>
+                <div style="background:#FDFCFA;border-radius:22px 22px 0 0;padding:18px 18px 22px">
+                  <div style="font-size:15px;font-weight:600;color:#1A1A1A">{{ scanTitle }}</div>
+                  <div style="font-size:13px;color:#6B6459;margin-top:4px;text-wrap:pretty">{{ scanBody }}</div>
+                  <div style="display:flex;gap:8px;margin-top:16px">
+                    <div onClick="{{ scanKnown }}" style="flex:1;height:46px;border-radius:12px;background:#005B52;display:flex;align-items:center;justify-content:center;cursor:pointer">
+                      <span style="font-size:14px;font-weight:500;color:#FDFCFA">Scan a known code</span>
+                    </div>
+                    <div onClick="{{ scanUnknown }}" style="flex:1;height:46px;border-radius:12px;border:1px solid #DDD6CC;display:flex;align-items:center;justify-content:center;cursor:pointer">
+                      <span style="font-size:14px;font-weight:500;color:#1A1A1A">Scan an unknown one</span>
+                    </div>
+                  </div>
+                  <div onClick="{{ closeScan }}" style="height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-top:6px">
+                    <span style="font-size:13.5px;font-weight:500;color:#6B6459">Close scanner</span>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ tenderOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;inset:0;background:rgba(26,26,26,0.4);display:flex;flex-direction:column;justify-content:flex-end;z-index:22">
+                <div onClick="{{ closeTender }}" style="flex:1"></div>
+                <div style="background:#FDFCFA;border-radius:22px 22px 0 0;padding:14px 16px 20px;max-height:96%;overflow-y:auto">
+                  <div style="width:36px;height:4px;border-radius:2px;background:#DDD6CC;margin:0 auto 14px"></div>
+
+                  <div style="display:flex;flex-direction:column;gap:1px;margin-bottom:14px">
+                    <sc-for list="{{ cartLines }}" as="l" hint-placeholder-count="3">
+                      <div style="display:flex;align-items:center;gap:10px;padding:8px 0">
+                        <div class="tnum" style="width:26px;height:26px;border-radius:8px;background:#F0EDE7;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;color:#1A1A1A;flex:none">{{ l.qty }}</div>
+                        <div style="flex:1;min-width:0;font-size:14px;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.name }}</div>
+                        <div class="tnum" style="font-size:14px;font-weight:500;color:#1A1A1A">{{ l.total }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+
+                  <div style="display:flex;gap:6px;margin-bottom:14px">
+                    <sc-for list="{{ payMethods }}" as="m" hint-placeholder-count="3">
+                      <div onClick="{{ m.onClick }}" style="flex:1;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:500;cursor:pointer;background:{{ m.bg }};color:{{ m.fg }};border:1px solid {{ m.border }}">{{ m.name }}</div>
+                    </sc-for>
+                  </div>
+
+                  <div style="display:flex;gap:8px;margin-bottom:12px">
+                    <div style="flex:1;border-radius:12px;background:#F0EDE7;padding:10px 12px">
+                      <div style="font-size:10.5px;font-weight:500;letter-spacing:0.09em;text-transform:uppercase;color:#8A8175">Cash in</div>
+                      <div class="tnum" style="font-size:19px;font-weight:600;color:#1A1A1A;margin-top:2px">{{ tenderedLabel }}</div>
+                    </div>
+                    <div style="flex:1;border-radius:12px;background:{{ changeBg }};padding:10px 12px">
+                      <div style="font-size:10.5px;font-weight:500;letter-spacing:0.09em;text-transform:uppercase;color:#8A8175">{{ changeLabel }}</div>
+                      <div class="tnum" style="font-size:19px;font-weight:600;color:{{ changeFg }};margin-top:2px">{{ changeValue }}</div>
+                    </div>
+                  </div>
+
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:12px">
+                    <sc-for list="{{ padKeys }}" as="k" hint-placeholder-count="12">
+                      <div onClick="{{ k.onPress }}" class="tnum" style="height:46px;border-radius:9px;background:#FDFCFA;border:1px solid #ECE7E0;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:500;color:{{ k.fg }};cursor:pointer;user-select:none" style-active="background:#ECE7E0">{{ k.label }}</div>
+                    </sc-for>
+                  </div>
+
+                  <div onClick="{{ charge }}" style="height:56px;border-radius:14px;background:#99FFAA;display:flex;align-items:center;justify-content:center;cursor:pointer">
+                    <span class="tnum" style="font-size:16.5px;font-weight:600;color:#1A1A1A">Charge {{ cartTotal }}</span>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ receiptOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;inset:0;background:#FDFCFA;display:flex;flex-direction:column;padding:24px;z-index:24">
+                <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+                  <div style="display:flex;align-items:center;border-radius:12px;background:#E8FFF0;overflow:hidden;min-height:56px">
+                    <div style="width:4px;align-self:stretch;background:#99FFAA;flex:none"></div>
+                    <div style="padding-left:16px;display:flex;align-items:center;flex:none">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#005B52" stroke-width="1.8"/><path d="M8 12.2l2.6 2.6L16 9.4" stroke="#005B52" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <div style="padding:12px 16px;flex:1;min-width:0">
+                      <div class="tnum" style="font-size:15px;font-weight:600;color:#1A1A1A">Charged {{ cartTotal }}</div>
+                      <div class="tnum" style="font-size:12.5px;color:#6B6459;margin-top:1px">{{ receiptMeta }}</div>
+                    </div>
+                  </div>
+                  <div class="tnum" style="font-size:38px;font-weight:600;color:#1A1A1A;letter-spacing:-0.03em;margin-top:26px">{{ changeValue }}</div>
+                  <div style="font-size:14px;color:#6B6459;margin-top:4px">{{ changeLine }}</div>
+                  <div style="display:flex;align-items:center;gap:8px;margin-top:22px;padding:11px 13px;border-radius:12px;background:#FBF9F6;border:1px solid #ECE7E0">
+                    <div style="width:7px;height:7px;border-radius:4px;background:#E07B39;flex:none"></div>
+                    <div style="font-size:12.5px;color:#6B6459;text-wrap:pretty">Held on this device until you're back on a network</div>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div onClick="{{ newSale }}" style="height:54px;border-radius:14px;background:#1A1A1A;display:flex;align-items:center;justify-content:center;cursor:pointer">
+                    <span style="font-size:15.5px;font-weight:600;color:#FDFCFA">Next sale</span>
+                  </div>
+                  <div style="height:46px;display:flex;align-items:center;justify-content:center;cursor:pointer">
+                    <span style="font-size:14px;font-weight:500;color:#6B6459">Print receipt</span>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <div style="height:22px;flex:none;display:flex;align-items:center;justify-content:center">
+              <div style="width:120px;height:4px;border-radius:2px;background:#1A1A1A;opacity:.28"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="width:280px;flex:none;position:sticky;top:56px;display:flex;flex-direction:column;gap:22px">
+    <div>
+      <div style="font-size:11px;font-weight:500;letter-spacing:0.11em;text-transform:uppercase;color:#8A8175;margin-bottom:10px">Screens</div>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <sc-for list="{{ index }}" as="i" hint-placeholder-count="9">
+          <div onClick="{{ i.onClick }}" style="display:flex;align-items:baseline;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;background:{{ i.bg }}">
+            <div style="flex:1;font-size:13.5px;font-weight:500;color:{{ i.fg }}">{{ i.name }}</div>
+            <div style="font-size:11.5px;color:#8A8175;text-align:right">{{ i.q }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid #DDD6CC;padding-top:16px">
+      <div style="font-size:11px;font-weight:500;letter-spacing:0.11em;text-transform:uppercase;color:#8A8175;margin-bottom:8px">The sale flow</div>
+      <div style="font-size:12.5px;color:#6B6459;line-height:1.55;text-wrap:pretty">Tap a product to add it, or the scan button in the header. The black bar at the bottom opens tender — pay method, cash in, change out. Charge is the only Neon in the sheet.</div>
+      <div onClick="{{ runFlow }}" style="margin-top:12px;height:38px;border-radius:10px;background:#005B52;display:flex;align-items:center;justify-content:center;cursor:pointer">
+        <span style="font-size:13.5px;font-weight:500;color:#FDFCFA">Start the sale flow</span>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid #DDD6CC;padding-top:16px">
+      <div style="font-size:11px;font-weight:500;letter-spacing:0.11em;text-transform:uppercase;color:#8A8175;margin-bottom:8px">Nav</div>
+      <div style="font-size:12.5px;color:#6B6459;line-height:1.55;text-wrap:pretty">The 84dp sidebar collapses to a 64dp icon rail on phones. Labels appear on press-and-hold, so the rail costs the sheet 20dp less width and keeps the frame identity intact. No bottom bar.</div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;offline&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Behaviour&quot;},&quot;targetMargin&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:30,&quot;min&quot;:10,&quot;max&quot;:60,&quot;step&quot;:1,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Store&quot;}}">
+const G = "#005B52", NEON = "#99FFAA", INK = "#1A1A1A", INK2 = "#6B6459", MID = "#8A8175",
+      SAND = "#F0EDE7", BORDER = "#ECE7E0", SURF = "#FBF9F6", ORANGE = "#E07B39",
+      ORANGE_SUB = "#FBF0E7", GOLD = "#C9A227", GOLD_SUB = "#F7F0DC", UP = "#2E7D32";
+
+const money = (n) => "$" + n.toFixed(2);
+
+const CATALOGUE = [
+  { name: "Mazoe Orange 2L", price: 3.20, stock: 12, unit: "btl", dot: "#4E9AC7" },
+  { name: "Bakers Inn loaf", price: 1.10, stock: 5, unit: "ea", dot: "#C9A227" },
+  { name: "Dairibord milk 500ml", price: 0.95, stock: 23, unit: "btl", dot: "#4E9AC7" },
+  { name: "Cooking oil 750ml", price: 2.40, stock: 2, unit: "btl", dot: "#8E7CC3" },
+  { name: "Sugar 2kg", price: 2.60, stock: 0, unit: "kg", dot: "#C9A227" },
+  { name: "Colgate 100ml", price: 1.85, stock: 9, unit: "ea", dot: "#7FA87F" },
+  { name: "Chibuku Super 1L", price: 1.40, stock: 31, unit: "btl", dot: "#4E9AC7" },
+  { name: "Rice 2kg", price: 3.75, stock: 7, unit: "kg", dot: "#C9A227" },
+];
+
+const DETAIL = {
+  "Cooking oil 750ml": { name: "Cooking oil 750ml", meta: "sells 1.4 a day · runs out Thursday", days: 1.4, qty: "2", runway: "1 day left",
+    ledger: [
+      { what: "Sale · R-0341", when: "today 08:39", delta: "−1", balance: "2", deltaFg: "#1A1A1A" },
+      { what: "Sale · R-0336", when: "yesterday 16:02", delta: "−1", balance: "3", deltaFg: "#1A1A1A" },
+      { what: "Counted", when: "6 Sep · session 04", delta: "−2", balance: "4", deltaFg: "#E07B39" },
+      { what: "Restock", when: "2 Sep · Mutare wholesale", delta: "+12", balance: "6", deltaFg: "#2E7D32" },
+      { what: "Sale · R-0301", when: "1 Sep 11:20", delta: "−1", balance: "−6", deltaFg: "#1A1A1A" },
+    ] },
+  "Bakers Inn loaf": { name: "Bakers Inn loaf", meta: "sells 2.1 a day · runs out Wednesday", days: 2.4, qty: "5", runway: "2 days left",
+    ledger: [
+      { what: "Sale · R-0341", when: "today 08:39", delta: "−2", balance: "5", deltaFg: "#1A1A1A" },
+      { what: "Restock", when: "today 06:10 · daily delivery", delta: "+20", balance: "7", deltaFg: "#2E7D32" },
+      { what: "Sale · R-0332", when: "yesterday 17:44", delta: "−3", balance: "−13", deltaFg: "#1A1A1A" },
+    ] },
+  "Rice 2kg": { name: "Rice 2kg", meta: "sells 1.1 a day · runs out Friday", days: 6.3, qty: "7", runway: "6 days left",
+    ledger: [
+      { what: "Sale · R-0338", when: "today 07:09", delta: "−1", balance: "7", deltaFg: "#1A1A1A" },
+      { what: "Restock", when: "30 Aug · Mutare wholesale", delta: "+10", balance: "8", deltaFg: "#2E7D32" },
+    ] },
+  "Sugar 2kg": { name: "Sugar 2kg", meta: "empty since Tuesday · about $18 missed", days: 0, qty: "0", runway: "out",
+    ledger: [
+      { what: "Sale · R-0298", when: "Tue 15:31", delta: "−1", balance: "0", deltaFg: "#1A1A1A" },
+      { what: "Sale · R-0294", when: "Tue 12:04", delta: "−2", balance: "1", deltaFg: "#1A1A1A" },
+      { what: "Counted", when: "31 Aug · session 03", delta: "−1", balance: "3", deltaFg: "#E07B39" },
+    ] },
+  "Matches": { name: "Matches", meta: "empty since Friday", days: 0, qty: "0", runway: "out",
+    ledger: [{ what: "Sale · R-0270", when: "Fri 09:12", delta: "−2", balance: "0", deltaFg: "#1A1A1A" }] },
+  "Chibuku Super 1L": { name: "Chibuku Super 1L", meta: "sells 4.2 a day · your top seller", days: 7, qty: "31", runway: "7+ days",
+    ledger: [
+      { what: "Sale · R-0341", when: "today 08:39", delta: "−2", balance: "31", deltaFg: "#1A1A1A" },
+      { what: "Restock", when: "4 Sep · Delta depot", delta: "+48", balance: "33", deltaFg: "#2E7D32" },
+    ] },
+  "Dairibord milk 500ml": { name: "Dairibord milk 500ml", meta: "sells 3.1 a day", days: 7, qty: "23", runway: "7+ days",
+    ledger: [
+      { what: "Sale · R-0341", when: "today 08:39", delta: "−2", balance: "23", deltaFg: "#1A1A1A" },
+      { what: "Restock", when: "today 06:10 · daily delivery", delta: "+24", balance: "25", deltaFg: "#2E7D32" },
+    ] },
+};
+
+class Component extends DCLogic {
+  state = {
+    route: "pos",
+    stack: [],
+    cart: [
+      { name: "Mazoe Orange 2L", price: 3.20, qty: 1 },
+      { name: "Bakers Inn loaf", price: 1.10, qty: 2 },
+      { name: "Dairibord milk 500ml", price: 0.95, qty: 2 },
+    ],
+    category: "All",
+    period: "Week",
+    scanOpen: false,
+    scanState: "idle",
+    tenderOpen: false,
+    receiptOpen: false,
+    tendered: "",
+    pay: "Cash",
+    pin: 0,
+    counted: { 0: 12, 1: 6, 2: 4, 3: 23, 4: 8 },
+    tRoute: "pos",
+    tPhase: "sale",
+    tLine: 0,
+    tBuffer: "",
+    tCash: "",
+    tPay: "Cash",
+    tStock: "Cooking oil 750ml",
+    held: null,
+    committed: false,
+  };
+
+  componentWillUnmount() { clearTimeout(this._hold); }
+
+  go = (route) => this.setState({ route, scanOpen: false, tenderOpen: false, receiptOpen: false });
+  push = (route) => this.setState((s) => ({ route, stack: [...s.stack, s.route] }));
+  back = () => this.setState((s) => ({ route: s.stack[s.stack.length - 1] || "pos", stack: s.stack.slice(0, -1) }));
+
+  hold = (label) => (e) => {
+    const el = e.currentTarget;
+    const top = el.offsetTop + el.offsetHeight / 2 - 14;
+    clearTimeout(this._hold);
+    this._hold = setTimeout(() => this.setState({ held: label, heldTop: top }), 320);
+  };
+  release = () => { clearTimeout(this._hold); if (this.state.held) this.setState({ held: null }); };
+
+  total() { return this.state.cart.reduce((a, l) => a + l.price * l.qty, 0); }
+
+  addItem = (name, price) => () => this.setState((s) => {
+    const i = s.cart.findIndex((l) => l.name === name);
+    if (i >= 0) { const cart = s.cart.slice(); cart[i] = { ...cart[i], qty: cart[i].qty + 1 }; return { cart }; }
+    return { cart: [...s.cart, { name, price, qty: 1 }] };
+  });
+
+  pad = (k) => () => this.setState((s) => {
+    if (k === "⌫") return { tendered: s.tendered.slice(0, -1) };
+    if (k === "." && s.tendered.includes(".")) return null;
+    return { tendered: (s.tendered + k).slice(0, 7) };
+  });
+
+  renderVals() {
+    const s = this.state, r = s.route;
+    const sub = r === "count" || r === "inbox" || r === "sales" || r === "digest" || r === "auth";
+    const railFor = { pos: "pos", sales: "pos", products: "products", inbox: "products", stock: "stock", count: "stock", reports: "reports", sync: "sync", settings: "settings", digest: "reports", auth: "" }[r];
+    const pill = (k) => ({ background: railFor === k ? NEON : "transparent" });
+    const P = (k) => (railFor === k ? NEON : "transparent");
+    const I = (k) => (railFor === k ? INK : "rgba(255,255,255,0.72)");
+
+    const titles = { pos: "Mbare Market Stop", products: "Products", stock: "Stock", reports: "Reports", sync: "Sync", settings: "Settings", count: "Count · 6 Sep", inbox: "Unknown codes", sales: "Today's sales", digest: "Daily digest", auth: "Sign in" };
+
+    const tenderedNum = parseFloat(s.tendered || "0") || 0;
+    const change = tenderedNum - this.total();
+    const tChange = (parseFloat(s.tCash || "0") || 0) - this.total();
+    const cartEmpty = s.cart.length === 0;
+
+    const cat = (name) => ({
+      name, onClick: () => this.setState({ category: name }),
+      bg: s.category === name ? INK : "transparent",
+      fg: s.category === name ? "#FDFCFA" : INK2,
+      border: s.category === name ? INK : "#DDD6CC",
+    });
+
+    const per = (name) => ({
+      name, onClick: () => this.setState({ period: name }),
+      bg: s.period === name ? INK : "transparent",
+      fg: s.period === name ? "#FDFCFA" : INK2,
+      border: s.period === name ? INK : "#DDD6CC",
+    });
+
+    const method = (name) => ({
+      name, onClick: () => this.setState({ pay: name }),
+      bg: s.pay === name ? G : "transparent",
+      fg: s.pay === name ? "#FDFCFA" : INK,
+      border: s.pay === name ? G : "#DDD6CC",
+    });
+
+    const runway = (days) => Array.from({ length: 7 }, (_, i) => {
+      if (days === null) return { c: "transparent", b: BORDER };
+      if (i + 1 <= Math.floor(days)) return { c: G, b: G };
+      if (i < days) return { c: ORANGE, b: ORANGE };
+      return { c: "transparent", b: BORDER };
+    });
+
+    const stockRow = (name, meta, days, value, subT, opts = {}) => ({
+      name, meta, value, sub: subT, segs: runway(days),
+      bg: opts.bg || "transparent",
+      nameFg: opts.dormant ? MID : INK,
+      valueFg: opts.warn ? ORANGE : INK,
+      stopped: !!opts.stopped, showValue: !opts.stopped,
+    });
+
+    const targetMargin = (this.props.targetMargin ?? 30) / 100;
+    const offline = this.props.offline ?? true;
+    const tStockRow = (name, meta, days, value, subT, opts = {}) => {
+      const sel = s.tStock === name;
+      return {
+        name, meta, value, sub: subT, segs: runway(days),
+        bg: sel ? "#F0EDE7" : opts.warn ? ORANGE_SUB : "transparent",
+        ring: sel ? "#DDD6CC" : "transparent",
+        nameFg: INK, valueFg: opts.warn ? ORANGE : INK,
+        stopped: !!opts.stopped, showValue: !opts.stopped,
+        onClick: () => this.setState({ tStock: name }),
+      };
+    };
+
+    const margin = (cost, price, target) => {
+      const costPct = Math.min(100, (cost / price) * 100);
+      const targetCostPct = (1 - target) * 100;
+      const over = costPct > targetCostPct;
+      return {
+        costPct: over ? targetCostPct : costPct,
+        overPct: over ? targetCostPct : 0,
+        overW: over ? costPct - targetCostPct : 0,
+        notchPct: targetCostPct,
+        fillColor: cost >= price ? INK : G,
+      };
+    };
+
+    const prodRow = (name, meta, cost, price, value, subT, opts = {}) => ({
+      name, meta, value, sub: subT, ...margin(cost, price, targetMargin),
+      bg: opts.bg || "transparent",
+      nameFg: opts.dormant ? MID : INK,
+      valueFg: opts.warn ? ORANGE : INK,
+    });
+
+    const idx = (name, q, route) => ({
+      name, q, onClick: () => this.setState({ route, stack: [], scanOpen: false, tenderOpen: false, receiptOpen: false }),
+      bg: r === route ? "#DDD6CC" : "transparent",
+      fg: r === route ? INK : INK2,
+    });
+
+    const padKey = (label, muted) => ({ label, onPress: this.pad(label), fg: muted ? "#A89F94" : INK });
+
+    return {
+      title: titles[r], showBack: sub, back: this.back,
+      showPosActions: r === "pos",
+      syncDot: offline ? ORANGE : G, syncText: offline ? "2 pending" : "Synced",
+
+      pillPos: P("pos"), inkPos: I("pos"),
+      pillProducts: P("products"), inkProducts: I("products"),
+      pillStock: P("stock"), inkStock: I("stock"),
+      pillReports: P("reports"), inkReports: I("reports"),
+      pillSync: P("sync"), inkSync: I("sync"),
+      pillSettings: P("settings"), inkSettings: I("settings"),
+
+      goPos: () => this.go("pos"), goProducts: () => this.go("products"), goStock: () => this.go("stock"),
+      goReports: () => this.go("reports"), goSync: () => this.go("sync"), goSettings: () => this.go("settings"),
+      goCount: () => this.push("count"), goInbox: () => this.push("inbox"), goSales: () => this.push("sales"),
+
+      holdPos: this.hold("Sale"), holdProducts: this.hold("Products"),
+      holdStock: this.hold("Stock"), holdReports: this.hold("Reports"),
+      holdSync: this.hold("Sync"), holdSettings: this.hold("Settings"),
+      release: this.release, heldLabel: s.held, heldTop: s.heldTop || 68,
+
+      isPos: r === "pos", isStock: r === "stock", isProducts: r === "products", isReports: r === "reports",
+      isSync: r === "sync", isSettings: r === "settings", isCount: r === "count", isInbox: r === "inbox",
+      isDigest: r === "digest", isAuth: r === "auth", isSales: r === "sales",
+
+      categories: ["All", "Drinks", "Staples", "Snacks", "Household"].map(cat),
+      gridProducts: CATALOGUE.map((p) => ({
+        name: p.name, price: money(p.price), add: this.addItem(p.name, p.price),
+        dot: p.dot, stopped: p.stock === 0, inStock: p.stock > 0,
+        stockLabel: p.stock + " " + p.unit,
+        stockFg: p.stock <= 5 ? ORANGE : UP,
+      })),
+      cartCountLabel: s.cart.reduce((a, l) => a + l.qty, 0) + " items in this sale",
+      cartTotal: money(this.total()),
+      cartLines: s.cart.map((l) => ({ name: l.name, qty: l.qty, total: money(l.price * l.qty) })),
+
+      openScan: () => this.setState({ scanOpen: true, scanState: "idle" }),
+      closeScan: () => this.setState({ scanOpen: false }),
+      scanOpen: s.scanOpen,
+      scanTitle: s.scanState === "known" ? "Cooking oil 750ml added" : s.scanState === "unknown" ? "6001234567890 isn't in the catalogue" : "Point at a barcode",
+      scanBody: s.scanState === "known" ? "$2.40 · 2 left after this sale." : s.scanState === "unknown" ? "The sale continues. The code is saved to unknown codes — name it when you have a minute." : "Codes not in the catalogue never block a sale.",
+      scanKnown: () => { this.addItem("Cooking oil 750ml", 2.40)(); this.setState({ scanState: "known" }); },
+      scanUnknown: () => this.setState({ scanState: "unknown" }),
+
+      openTender: () => this.setState({ tenderOpen: true }),
+      closeTender: () => this.setState({ tenderOpen: false }),
+      tenderOpen: s.tenderOpen,
+      payMethods: ["Cash", "EcoCash", "Card"].map(method),
+      padKeys: ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "⌫"].map((k) => padKey(k, k === "⌫" || k === ".")),
+      tenderedLabel: s.tendered ? "$" + s.tendered : "$0.00",
+      changeLabel: change < 0 ? "Still owing" : "Change out",
+      changeValue: money(Math.abs(change)),
+      changeBg: change < 0 ? ORANGE_SUB : SAND,
+      changeFg: change < 0 ? ORANGE : INK,
+
+      charge: () => this.setState({ tenderOpen: false, receiptOpen: true }),
+      receiptOpen: s.receiptOpen,
+      receiptMeta: "Receipt R-0342 · " + s.pay + " · 08:42",
+      changeLine: change > 0 ? "change out of " + money(tenderedNum) : "exact money · no change",
+      newSale: () => this.setState({ receiptOpen: false, cart: [], tendered: "" }),
+
+      weekAhead: [
+        { day: "Sat", n: 4, h: 40, c: G, labelFg: MID },
+        { day: "Sun", n: 2, h: 22, c: G, labelFg: MID },
+        { day: "Mon", n: 5, h: 50, c: G, labelFg: MID },
+        { day: "Tue", n: 3, h: 32, c: G, labelFg: MID },
+        { day: "Wed", n: 6, h: 62, c: ORANGE, labelFg: ORANGE },
+        { day: "Thu", n: 9, h: 90, c: ORANGE, labelFg: ORANGE },
+        { day: "Fri", n: 2, h: 22, c: INK, labelFg: INK },
+      ],
+      weekSummary: "Six items run out Wednesday and Thursday. Two are already out.",
+
+      stockSections: [
+        { title: "Runs out this week", count: "3", rows: [
+          stockRow("Cooking oil 750ml", "sells 1.4 a day", 1.4, "Thu", "2 left", { bg: ORANGE_SUB, warn: true }),
+          stockRow("Bakers Inn loaf", "sells 2.1 a day", 2.4, "Wed", "5 left", { bg: ORANGE_SUB, warn: true }),
+          stockRow("Rice 2kg", "sells 1.1 a day", 6.3, "Fri", "7 left", { bg: ORANGE_SUB, warn: true }),
+        ]},
+        { title: "Stopped", count: "2", rows: [
+          stockRow("Sugar 2kg", "empty since Tuesday · $18 missed", 0, "", "", { stopped: true }),
+          stockRow("Matches", "empty since Friday", 0, "", "", { stopped: true }),
+        ]},
+        { title: "Healthy", count: "24", rows: [
+          stockRow("Chibuku Super 1L", "sells 4.2 a day", 7, "31", "left", {}),
+          stockRow("Dairibord milk 500ml", "sells 3.1 a day", 7, "23", "left", {}),
+          stockRow("Mazoe Orange 2L", "sells 1.6 a day", 7, "12", "left", {}),
+        ]},
+        { title: "Not moving", count: "6", rows: [
+          stockRow("Shoe polish", "no sales in 21 days", null, "9", "left", { dormant: true }),
+          stockRow("Batteries AA", "not enough history yet", null, "14", "left", { dormant: true }),
+        ]},
+      ],
+
+      productSections: [
+        { title: "Cost went up", count: "2", rows: [
+          prodRow("Cooking oil 750ml", "cost $1.95 → $2.12 on 28 Aug", 2.12, 2.40, "12%", "was 19%", { bg: ORANGE_SUB, warn: true }),
+          prodRow("Rice 2kg", "cost $2.80 → $3.05 on 30 Aug", 3.05, 3.75, "19%", "was 25%", { bg: ORANGE_SUB, warn: true }),
+        ]},
+        { title: "Selling at a loss", count: "1", rows: [
+          prodRow("Sugar 2kg", "cost $2.72 · price $2.60", 2.72, 2.60, "−5%", "since 12 Aug", { bg: ORANGE_SUB, warn: true }),
+        ]},
+        { title: "Holding target", count: "31", rows: [
+          prodRow("Mazoe Orange 2L", "cost $2.05 · price $3.20", 2.05, 3.20, "36%", "$1.15 a unit", {}),
+          prodRow("Chibuku Super 1L", "cost $0.92 · price $1.40", 0.92, 1.40, "34%", "$0.48 a unit", {}),
+          prodRow("Colgate 100ml", "cost $1.24 · price $1.85", 1.24, 1.85, "33%", "$0.61 a unit", {}),
+        ]},
+      ],
+
+      periods: ["Today", "Week", "Month", "Year"].map(per),
+      bars: [
+        { day: "Sat", h: 74, c: SAND }, { day: "Sun", h: 41, c: SAND }, { day: "Mon", h: 58, c: SAND },
+        { day: "Tue", h: 66, c: SAND }, { day: "Wed", h: 52, c: SAND }, { day: "Thu", h: 88, c: SAND },
+        { day: "Fri", h: 100, c: G },
+      ],
+      topSellers: [
+        { rank: "1", name: "Chibuku Super 1L", units: "94 units", value: "$131.60", bg: GOLD_SUB, rankFg: GOLD },
+        { rank: "2", name: "Bakers Inn loaf", units: "76 units", value: "$83.60", bg: "transparent", rankFg: MID },
+        { rank: "3", name: "Dairibord milk 500ml", units: "61 units", value: "$57.95", bg: "transparent", rankFg: MID },
+        { rank: "4", name: "Mazoe Orange 2L", units: "18 units", value: "$57.60", bg: "transparent", rankFg: MID },
+      ],
+
+      queue: [
+        { name: "R-0341 · $7.30", meta: "Cash · 08:39", value: "held", done: false, bg: SURF, dotBg: SAND },
+        { name: "R-0340 · $2.60", meta: "EcoCash · 08:31", value: "held", done: false, bg: SURF, dotBg: SAND },
+        { name: "R-0339 · $12.85", meta: "Cash · 07:14", value: "sent", done: true, bg: "transparent", dotBg: NEON },
+        { name: "R-0338 · $4.20", meta: "Card · 07:09", value: "sent", done: true, bg: "transparent", dotBg: NEON },
+      ],
+
+      countRows: ["Mazoe Orange 2L", "Bakers Inn loaf", "Cooking oil 750ml", "Dairibord milk 500ml", "Rice 2kg"].map((name, i) => {
+        const expected = [12, 5, 2, 23, 7][i];
+        const counted = s.counted[i];
+        const diff = counted - expected;
+        return {
+          name, counted,
+          meta: diff === 0 ? "expected " + expected : "expected " + expected + " · " + (diff > 0 ? "+" : "") + diff,
+          bg: diff === 0 ? "transparent" : ORANGE_SUB,
+          inc: () => this.setState((st) => ({ counted: { ...st.counted, [i]: st.counted[i] + 1 } })),
+          dec: () => this.setState((st) => ({ counted: { ...st.counted, [i]: Math.max(0, st.counted[i] - 1) } })),
+        };
+      }),
+      commitLabel: s.committed ? "Counted 5 items" : "Commit count",
+      commitCount: () => this.setState({ committed: true }),
+
+      inboxRows: [
+        { code: "6001234567890", meta: "7 hits · first seen 28 Aug · till 2", name: () => this.setState({ route: "products", stack: [] }) },
+        { code: "6009876543217", meta: "3 hits · first seen 2 Sep · till 1", name: () => this.setState({ route: "products", stack: [] }) },
+        { code: "2000004411903", meta: "1 hit · seen this morning · till 2", name: () => this.setState({ route: "products", stack: [] }) },
+      ],
+
+      settingsGroups: [
+        { title: "Store", rows: [
+          { name: "Store name", sub: "shown on receipts", value: "Mbare Market Stop" },
+          { name: "Currency", sub: "", value: "USD" },
+          { name: "Target margin", sub: "sets the gauge notch", value: Math.round(targetMargin * 100) + "%" },
+        ]},
+        { title: "Till", rows: [
+          { name: "Till name", sub: "", value: "Till 2" },
+          { name: "Scanner", sub: "", value: "Camera" },
+          { name: "Low stock threshold", sub: "default for new products", value: "5" },
+        ]},
+        { title: "Data", rows: [
+          { name: "Sync", sub: "uploads when a network appears", value: "On" },
+          { name: "Held sales", sub: "", value: "2" },
+        ]},
+      ],
+
+      digestRows: [
+        { title: "Sugar 2kg has been empty since Tuesday", body: "About $18 of sales missed. It was your fourth-best seller last month.", bg: ORANGE_SUB, border: "#F2E0CF" },
+        { title: "Cooking oil cost rose 9% on 28 August", body: "Margin fell from 19% to 12%. Price hasn't moved since June.", bg: ORANGE_SUB, border: "#F2E0CF" },
+        { title: "Three short counts on the morning shift", body: "6 Sep, 2 Sep and 28 Aug. All on the same shift, $6.20 short yesterday.", bg: SURF, border: BORDER },
+      ],
+
+      salesRows: [
+        { receipt: "R-0341", meta: "3 items · Cash · 08:39", value: "$7.30", bg: SURF },
+        { receipt: "R-0340", meta: "1 item · EcoCash · 08:31", value: "$2.60", bg: "transparent" },
+        { receipt: "R-0339", meta: "6 items · Cash · 07:14", value: "$12.85", bg: SURF },
+        { receipt: "R-0338", meta: "2 items · Card · 07:09", value: "$4.20", bg: "transparent" },
+        { receipt: "R-0337", meta: "1 item · Cash · 06:58", value: "$1.10", bg: SURF },
+      ],
+
+      pinDots: [0, 1, 2, 3].map((i) => ({ c: i < s.pin ? INK : "#DDD6CC" })),
+      pinKeys: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "⌫"].map((k) => ({
+        label: k, bg: k === "" ? "transparent" : SAND,
+        onPress: () => {
+          if (k === "⌫") return this.setState((st) => ({ pin: Math.max(0, st.pin - 1) }));
+          if (k === "") return;
+          this.setState((st) => {
+            const pin = Math.min(4, st.pin + 1);
+            if (pin === 4) setTimeout(() => this.setState({ route: "pos", stack: [], pin: 0 }), 350);
+            return { pin };
+          });
+        },
+      })),
+
+      index: [
+        idx("Sale", "how fast can I take this money?", "pos"),
+        idx("Tender & receipt", "seconds", "pos"),
+        idx("Stock", "when do I run out?", "stock"),
+        idx("Stock count", "what's actually on the shelf?", "count"),
+        idx("Products", "am I still making money?", "products"),
+        idx("Unknown codes", "what did we ring up blind?", "inbox"),
+        idx("Reports", "what happened?", "reports"),
+        idx("Sync", "where is my data?", "sync"),
+        idx("Owner digest", "anything wrong before it costs?", "digest"),
+        idx("Settings", "", "settings"),
+        idx("Sign in", "open the till", "auth"),
+      ],
+
+      runFlow: () => this.setState({ route: "pos", stack: [], tenderOpen: true, receiptOpen: false, tendered: "10" }),
+
+      tabletTabs: [
+        { name: "Sale", onClick: () => this.setState({ tRoute: "pos" }), bg: s.tRoute === "pos" ? INK : "#DDD6CC", fg: s.tRoute === "pos" ? "#FDFCFA" : INK2 },
+        { name: "Stock", onClick: () => this.setState({ tRoute: "stock" }), bg: s.tRoute === "stock" ? INK : "#DDD6CC", fg: s.tRoute === "stock" ? "#FDFCFA" : INK2 },
+      ],
+      tIsPos: s.tRoute === "pos", tIsStock: s.tRoute === "stock",
+      tTitle: s.tRoute === "stock" ? "Stock" : "Mbare Market Stop",
+      tGoPos: () => this.setState({ tRoute: "pos", tPhase: "sale" }),
+      tGoStock: () => this.setState({ tRoute: "stock" }),
+      tPillPos: s.tRoute === "pos" ? NEON : "transparent",
+      tInkPos: s.tRoute === "pos" ? INK : "rgba(255,255,255,0.72)",
+      tLabelPos: s.tRoute === "pos" ? "#FDFCFA" : "rgba(255,255,255,0.72)",
+      tPillStock: s.tRoute === "stock" ? NEON : "transparent",
+      tInkStock: s.tRoute === "stock" ? INK : "rgba(255,255,255,0.72)",
+      tLabelStock: s.tRoute === "stock" ? "#FDFCFA" : "rgba(255,255,255,0.72)",
+
+      tItemCount: s.cart.reduce((a, l) => a + l.qty, 0) + " items",
+      tLines: s.cart.map((l, i) => {
+        const editing = i === s.tLine && s.tPhase === "sale" && s.tBuffer !== "";
+        return {
+          name: l.name, total: money(l.price * l.qty), unit: money(l.price),
+          qty: editing ? s.tBuffer : l.qty,
+          qtyFg: editing ? G : "#A89F94", qtyWeight: editing ? 600 : 400,
+          bg: i === s.tLine ? "rgba(236,231,224,0.45)" : "transparent",
+          onClick: () => this.setState({ tLine: i, tBuffer: "" }),
+        };
+      }),
+      tShowApply: s.tPhase === "sale" && s.tBuffer !== "",
+      tShowHint: s.tPhase === "sale" && s.tBuffer === "",
+      tPadHint: s.tPhase === "sale" && s.tBuffer
+        ? "Quantity " + s.tBuffer + " on " + (s.cart[s.tLine] ? s.cart[s.tLine].name : "")
+        : s.cart.length ? "Tap a line, then type a quantity" : "Tap a product to start the sale",
+      tTender: s.tPhase === "tender",
+      tIsCash: s.tPay === "Cash", tNotCash: s.tPay !== "Cash",
+      tPayCash: () => this.setState({ tPay: "Cash" }),
+      tPayEco: () => this.setState({ tPay: "EcoCash", tCash: "" }),
+      tPayCard: () => this.setState({ tPay: "Card", tCash: "" }),
+      payCashOn: s.tPay === "Cash", payEcoOn: s.tPay === "EcoCash", payCardOn: s.tPay === "Card",
+      payCashBg: s.tPay === "Cash" ? "rgba(0,91,82,0.08)" : "#FDFCFA",
+      payEcoBg: s.tPay === "EcoCash" ? "rgba(0,91,82,0.08)" : "#FDFCFA",
+      payCardBg: s.tPay === "Card" ? "rgba(0,91,82,0.08)" : "#FDFCFA",
+      payCashRing: s.tPay === "Cash" ? "2px #005B52" : "1px #DDD6CC",
+      payEcoRing: s.tPay === "EcoCash" ? "2px #005B52" : "1px #DDD6CC",
+      payCardRing: s.tPay === "Card" ? "2px #005B52" : "1px #DDD6CC",
+      tPayNote: s.tPay === "EcoCash" ? "Customer confirms on their phone. The sale is held here until they do." : "Tap the card machine, then charge.",
+      tCashLabel: s.tCash ? "$" + s.tCash : "$0.00",
+      tChangeTitle: tChange < 0 ? "Still owing" : "Change out",
+      tChangeValue: money(Math.abs(tChange)),
+      tChangeBg: tChange < 0 ? ORANGE_SUB : SAND,
+      tChangeFg: tChange < 0 ? ORANGE : INK,
+      tPadKeys: ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "⌫"].map((k) => ({
+        label: k, fg: k === "." || k === "⌫" ? "#A89F94" : INK,
+        onPress: () => this.setState((st) => {
+          if (st.tPhase === "tender" && st.tPay !== "Cash") return null;
+          const key = st.tPhase === "tender" ? "tCash" : "tBuffer";
+          const cur = st[key];
+          if (k === "⌫") return { [key]: cur.slice(0, -1) };
+          if (k === ".") return st.tPhase === "tender" && !cur.includes(".") ? { tCash: cur + "." } : null;
+          return { [key]: (cur + k).slice(0, st.tPhase === "tender" ? 7 : 3) };
+        }),
+      })),
+      tApplyQty: () => this.setState((st) => {
+        const cart = st.cart.slice();
+        cart[st.tLine] = { ...cart[st.tLine], qty: Math.max(1, parseInt(st.tBuffer, 10) || 1) };
+        return { cart, tBuffer: "" };
+      }),
+      tChargeLabel: s.tPhase === "tender" ? "Charge " + money(this.total()) : s.tPhase === "done" ? "Next sale" : "Charge " + money(this.total()),
+      tChargeBg: cartEmpty ? "rgba(153,255,170,0.38)" : NEON,
+      tChargeFgText: cartEmpty ? "rgba(26,26,26,0.5)" : INK,
+      tChargeCursor: cartEmpty ? "default" : "pointer",
+      tCharge: () => this.setState((st) => {
+        if (!st.cart.length) return null;
+        if (st.tPhase === "sale") return { tPhase: "tender", tBuffer: "" };
+        if (st.tPhase === "tender") return { tPhase: "done" };
+        return { tPhase: "sale", tCash: "", cart: [] };
+      }),
+      tDone: s.tPhase === "done",
+      tDoneTitle: "Charged " + money(this.total()),
+      tDoneMeta: "Receipt R-0342 · " + s.tPay + " · " + (s.tPay !== "Cash" ? "paid in full" : tChange > 0 ? "change out " + money(tChange) : "exact money") + " · held on this device",
+
+      tStockSections: [
+        { title: "Runs out this week", count: "3", rows: [
+          tStockRow("Cooking oil 750ml", "sells 1.4 a day · 2 left", 1.4, "Thu", "2 left", { warn: true }),
+          tStockRow("Bakers Inn loaf", "sells 2.1 a day · 5 left", 2.4, "Wed", "5 left", { warn: true }),
+          tStockRow("Rice 2kg", "sells 1.1 a day · 7 left", 6.3, "Fri", "7 left", { warn: true }),
+        ]},
+        { title: "Stopped", count: "2", rows: [
+          tStockRow("Sugar 2kg", "empty since Tuesday · $18 missed", 0, "", "", { stopped: true }),
+          tStockRow("Matches", "empty since Friday", 0, "", "", { stopped: true }),
+        ]},
+        { title: "Healthy", count: "24", rows: [
+          tStockRow("Chibuku Super 1L", "sells 4.2 a day", 7, "31", "left", {}),
+          tStockRow("Dairibord milk 500ml", "sells 3.1 a day", 7, "23", "left", {}),
+        ]},
+      ],
+      detail: DETAIL[s.tStock] ? { ...DETAIL[s.tStock], segs: runway(DETAIL[s.tStock].days), runwayFg: DETAIL[s.tStock].days < 7 ? ORANGE : G } : null,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

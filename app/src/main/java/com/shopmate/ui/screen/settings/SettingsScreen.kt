@@ -1,0 +1,115 @@
+package com.shopmate.ui.screen.settings
+
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.shopmate.R
+import com.shopmate.ui.components.ConstrainedContent
+import com.shopmate.ui.components.FormMaxWidth
+import com.shopmate.ui.theme.ErrorRed
+import com.shopmate.ui.theme.ReceiptBeige
+
+@Composable
+fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
+    val state by viewModel.uiState.collectAsState()
+    var showReset by remember { mutableStateOf(false) }
+    var showSignOut by remember { mutableStateOf(false) }
+
+    SettingsContent(
+        state = state,
+        onStoreNameChange = viewModel::updateStoreName,
+        onCurrencyChange = viewModel::updateCurrencySymbol,
+        onSignOut = { showSignOut = true },
+        onSwitchStore = viewModel::switchStore,
+        onRetryFailed = viewModel::retryFailedSyncs,
+        onResetRequest = { showReset = true },
+    )
+
+    if (showReset) {
+        ResetConfirmationDialog(
+            onDismiss = { showReset = false },
+            onConfirmed = {
+                viewModel.resetAllData()
+                showReset = false
+            },
+        )
+    }
+
+    if (showSignOut) {
+        AlertDialog(
+            onDismissRequest = { showSignOut = false },
+            title = { Text(stringResource(R.string.settings_sign_out)) },
+            text = { Text(stringResource(R.string.settings_sign_out_confirm)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.signOut()
+                    showSignOut = false
+                }) { Text(stringResource(R.string.settings_sign_out), color = ErrorRed) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSignOut = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            },
+        )
+    }
+}
+
+@Composable
+private fun SettingsContent(
+    state: SettingsUiState,
+    onStoreNameChange: (String) -> Unit,
+    onCurrencyChange: (String) -> Unit,
+    onSignOut: () -> Unit,
+    onSwitchStore: (String) -> Unit,
+    onRetryFailed: () -> Unit,
+    onResetRequest: () -> Unit,
+) {
+    ConstrainedContent(maxWidth = FormMaxWidth) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
+        ) {
+            StoreSection(
+                storeName = state.storeName,
+                currencySymbol = state.currencySymbol,
+                onStoreNameChange = onStoreNameChange,
+                onCurrencyChange = onCurrencyChange,
+            )
+            HorizontalDivider(color = ReceiptBeige, modifier = Modifier.padding(top = 20.dp))
+            CloudSyncSection(
+                state = state,
+                onSignOut = onSignOut,
+                onSwitchStore = onSwitchStore,
+            )
+            HorizontalDivider(color = ReceiptBeige, modifier = Modifier.padding(top = 20.dp))
+            DataManagementSection(
+                onRetryFailed = onRetryFailed,
+                onReset = onResetRequest,
+            )
+            HorizontalDivider(color = ReceiptBeige, modifier = Modifier.padding(top = 20.dp))
+            AboutSection(appVersion = state.appVersion)
+            Spacer(Modifier.height(32.dp))
+        }
+    }
+}
