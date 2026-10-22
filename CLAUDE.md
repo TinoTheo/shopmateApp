@@ -719,6 +719,18 @@ com.shopmate/
 - Only two payload types leave the device: **denormalised sale records** and **periodic
   store snapshots**. Everything else stays local.
 
+### Release build
+
+- **R8 full mode** with resource shrinking. `app/proguard-rules.pro` holds only ShopMate's own
+  rules — kotlinx.serialization, Hilt, Room, WorkManager and Ktor ship theirs. Every rule
+  added there carries a comment naming the crash or R8 error it answers.
+- **Signing** comes from `local.properties`: `RELEASE_STORE_FILE` (relative to the project
+  root), `RELEASE_STORE_PASSWORD`, `RELEASE_KEY_ALIAS`, `RELEASE_KEY_PASSWORD`. Never committed.
+- **Versioning** is `shopmate.versionCode` / `shopmate.versionName` in `gradle.properties`;
+  CI may override with `-P`. `versionCode` only ever goes up.
+- **`verifyReleaseConfig`** fails any release build missing the Supabase keys or signing —
+  a till must never ship pointing at the placeholder project. Debug builds are unaffected.
+
 ---
 
 ## Build status
