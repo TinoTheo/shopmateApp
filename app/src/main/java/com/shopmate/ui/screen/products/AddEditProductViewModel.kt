@@ -4,11 +4,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shopmate.domain.model.Category
-import com.shopmate.domain.model.DeltaReason
 import com.shopmate.domain.model.Product
 import com.shopmate.domain.repository.BarcodeRepository
 import com.shopmate.domain.repository.CategoryRepository
 import com.shopmate.domain.repository.ProductRepository
+import com.shopmate.domain.repository.StorePermissionRepository
 import com.shopmate.domain.util.BarcodeNormaliser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +28,12 @@ class AddEditProductViewModel @Inject constructor(
     private val productRepository: ProductRepository,
     private val categoryRepository: CategoryRepository,
     private val barcodeRepository: BarcodeRepository,
+    storePermissions: StorePermissionRepository,
 ) : ViewModel() {
+
+    /** Whether the form offers opening stock; see [StorePermissionRepository.canManageStock]. */
+    val canManageStock: StateFlow<Boolean> = storePermissions.canManageStock
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     private val productId: String? = savedStateHandle["productId"]
     val isEditMode: Boolean = productId != null
@@ -97,7 +102,7 @@ class AddEditProductViewModel @Inject constructor(
             } else {
                 val id = UUID.randomUUID().toString()
                 productRepository.add(
-                    Product(
+                    product = Product(
                         id = id,
                         name = name,
                         sku = sku,
@@ -111,12 +116,10 @@ class AddEditProductViewModel @Inject constructor(
                         sellingPriceSetAt = Instant.now(),
                         createdAt = Instant.now(),
                         updatedAt = Instant.now(),
-                    )
+                    ),
+                    openingStock = initialStock,
                 )
                 registerBarcode(id, barcode)
-                if (initialStock > 0) {
-                    productRepository.adjustStock(id, initialStock, DeltaReason.PURCHASE)
-                }
             }
         }.onSuccess { _uiState.value = ProductUiState.Success }
             .onFailure { _uiState.value = ProductUiState.Error(it.message ?: "Error") }
