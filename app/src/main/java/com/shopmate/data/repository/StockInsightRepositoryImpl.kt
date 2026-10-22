@@ -1,10 +1,12 @@
 package com.shopmate.data.repository
 
 import com.shopmate.data.local.dao.ProductDao
+import com.shopmate.data.local.dao.ProductLastSaleRow
 import com.shopmate.data.local.dao.StockInsightDao
 import com.shopmate.data.mapper.toDomain
 import com.shopmate.domain.model.Product
 import com.shopmate.domain.model.ProductInsight
+import com.shopmate.domain.model.RunOut
 import com.shopmate.domain.repository.StockInsightRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -12,6 +14,7 @@ import kotlinx.coroutines.flow.map
 import java.math.BigDecimal
 import java.time.Duration
 import java.time.Instant
+import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,13 +34,13 @@ class StockInsightRepositoryImpl @Inject constructor(
             stockInsightDao.getLastSaleTimes(),
         ) { products, velocities, lastSales ->
             val byProduct = velocities.associateBy { it.productId }
-            val lastSaleByProduct = lastSales.associate { it.productId to it.lastSaleAt }
+            val lastSaleByProduct = lastSales.associateBy { it.productId }
             val now = Instant.now()
             products.map { entity ->
                 insightFor(
                     product = entity.toDomain(),
                     velocity = byProduct[entity.id],
-                    lastSaleAt = lastSaleByProduct[entity.id],
+                    lastSale = lastSaleByProduct[entity.id],
                     now = now,
                 )
             }
@@ -50,9 +53,10 @@ class StockInsightRepositoryImpl @Inject constructor(
     private fun insightFor(
         product: Product,
         velocity: com.shopmate.data.local.dao.ProductVelocityRow?,
-        lastSaleAt: Long?,
+        lastSale: ProductLastSaleRow?,
         now: Instant,
     ): ProductInsight {
+        val lastSaleAt = lastSale?.lastSaleAt
         // Velocity confidence rule (CLAUDE.md § Derived, never stored): fewer than 7 days of
         // sales history in the trailing window, or none at all, and we do not project.
         val confident = velocity != null &&
@@ -85,6 +89,17 @@ class StockInsightRepositoryImpl @Inject constructor(
             marginBefore = product.previousCostPrice
                 ?.let { marginOf(product.sellingPrice, it) },
             confident = confident,
+            runOut = RunOut.of(
+                stock = product.stockQuantity,
+                unitsPerDay = unitsPerDay,
+                daysSinceLastSale = daysSinceLastSale,
+                lastSaleAt = lastSale?.lastSaleAt?.let { Instant.ofEpochMilli(it) },
+                unitsSoldAllTime = lastSale?.unitsSold?.toInt() ?: 0,
+                addedAt = product.createdAt,
+                updatedAt = product.updatedAt,
+                now = now,
+                zone = ZoneId.systemDefault(),
+            ),
         )
     }
 

@@ -33,6 +33,7 @@ import com.shopmate.ui.components.RunwayGauge
 import com.shopmate.ui.components.ShopMateSecondaryButton
 import com.shopmate.ui.theme.ReceiptBeige
 import com.shopmate.ui.theme.ShopBlack
+import com.shopmate.ui.theme.ShopBlackTertiary
 import com.shopmate.ui.theme.ShopBlackMid
 import com.shopmate.ui.theme.ShopWhite
 import com.shopmate.ui.util.DeviceLayout
@@ -99,18 +100,13 @@ private fun StockDetailContent(
                 modifier = Modifier.width(80.dp),
             )
             Spacer(Modifier.width(10.dp))
-            Text(
-                text = when {
-                    insight.outOfStock -> stringResource(R.string.stock_meta_out)
-                    !insight.confident -> stringResource(R.string.stock_meta_thin_history)
-                    else -> stringResource(
-                        R.string.stock_meta_days_left,
-                        (insight.daysOfCover ?: 0.0).toInt(),
-                    )
-                },
-                fontSize = 12.sp,
-                color = ShopBlackMid,
-            )
+            // The same RunOut the list row reads, so the two can never disagree.
+            Column {
+                Text(text = insight.runOut.detailLabel(), fontSize = 12.sp, color = ShopBlackMid)
+                insight.runOutBasis()?.let { basis ->
+                    Text(text = basis, fontSize = 11.sp, color = ShopBlackTertiary)
+                }
+            }
         }
 
         Spacer(Modifier.height(18.dp))

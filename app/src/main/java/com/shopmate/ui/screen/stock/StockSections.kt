@@ -1,7 +1,7 @@
 package com.shopmate.ui.screen.stock
 
 import com.shopmate.domain.model.ProductInsight
-import kotlin.math.ceil
+import com.shopmate.domain.model.RunOut
 
 /**
  * The four sections the Stock screen reads top to bottom, in this order. The screen answers
@@ -9,7 +9,7 @@ import kotlin.math.ceil
  * by table order.
  */
 enum class StockSection {
-    /** Cover runs out inside the seven-day window. Warning tier. */
+    /** Runs out today or in the next six days — the strip's seven. Warning tier. */
     RunsOutThisWeek,
 
     /** Already out. Stopped tier — a black chip, never red. */
@@ -29,22 +29,11 @@ enum class StockSection {
  * we cannot project for is Not moving rather than being guessed into Healthy. **Never project
  * a run-out day from thin data** (§ Velocity confidence rule).
  */
-fun ProductInsight.section(): StockSection = when {
-    outOfStock -> StockSection.Stopped
-    !confident || dormant -> StockSection.NotMoving
-    (daysOfCover ?: Double.MAX_VALUE) <= WEEK_AHEAD_DAYS -> StockSection.RunsOutThisWeek
-    else -> StockSection.Healthy
-}
-
-/**
- * Which day in the week ahead this item runs out on, as an offset from today (0 = today), or
- * null when it does not run out inside the window or we cannot honestly say.
- */
-fun ProductInsight.runsOutOnDayOffset(): Int? {
-    if (!confident || outOfStock) return null
-    val cover = daysOfCover ?: return null
-    val day = ceil(cover).toInt()
-    return day.takeIf { it in 0..WEEK_AHEAD_DAYS }
+fun ProductInsight.section(): StockSection = when (runOut) {
+    is RunOut.Out -> StockSection.Stopped
+    is RunOut.NoHistory, is RunOut.Dormant -> StockSection.NotMoving
+    RunOut.Today, RunOut.Tomorrow, is RunOut.OnDay -> StockSection.RunsOutThisWeek
+    RunOut.OverAWeek, is RunOut.OverWeeks, RunOut.OverAMonth -> StockSection.Healthy
 }
 
 /** The window the strip and the "Runs out this week" section share. */

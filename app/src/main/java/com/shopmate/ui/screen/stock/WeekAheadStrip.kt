@@ -14,10 +14,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.shopmate.R
 import com.shopmate.ui.theme.NumberRowSub
 import com.shopmate.ui.theme.ShopBlack
 import com.shopmate.ui.theme.ShopBlackMid
@@ -86,8 +89,14 @@ fun WeekAheadStrip(
                     }
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = today.plusDays(offset.toLong()).dayOfWeek.shortLabel(),
+                        // The window starts today, so the first column says so.
+                        text = if (offset == 0) {
+                            stringResource(R.string.reports_chip_today)
+                        } else {
+                            today.plusDays(offset.toLong()).dayOfWeek.shortLabel()
+                        },
                         fontSize = 10.sp,
+                        fontWeight = if (offset == 0) FontWeight.Medium else FontWeight.Normal,
                         color = ShopBlackMid,
                         textAlign = TextAlign.Center,
                     )
@@ -123,7 +132,7 @@ private fun WeekAheadStripPreview() {
     ShopMateTheme {
         WeekAheadStrip(
             countsByDay = listOf(0, 0, 4, 2, 0, 1, 0),
-            summary = "Six items run out Wednesday and Thursday. Two are already out.",
+            summary = "7 items run out in the next 7 days, the first on Saturday. 1 is already out.",
             deviceLayout = DeviceLayout.COMPACT,
             modifier = Modifier.padding(vertical = 12.dp),
         )

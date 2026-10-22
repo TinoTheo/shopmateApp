@@ -60,7 +60,6 @@ data class StockUiState(
     val sections: Map<StockSection, List<StockRow>> = emptyMap(),
     /** Items running out per day, index 0 = today. Always seven entries. */
     val weekAhead: List<Int> = List(7) { 0 },
-    val weekAheadSummary: String = "",
     /** The running balance after each movement, for the selected product's ledger. */
     val selectedLedger: List<LedgerEntry> = emptyList(),
     val searchQuery: String = "",
@@ -141,7 +140,7 @@ class StockViewModel @Inject constructor(
 
         val weekAhead = MutableList(WEEK_AHEAD_DAYS) { 0 }
         filtered.forEach { insight ->
-            insight.runsOutOnDayOffset()
+            insight.runOut.stripOffset
                 ?.takeIf { it < WEEK_AHEAD_DAYS }
                 ?.let { weekAhead[it] = weekAhead[it] + 1 }
         }
@@ -152,44 +151,7 @@ class StockViewModel @Inject constructor(
             outCount = outCount,
             sections = sections,
             weekAhead = weekAhead,
-            weekAheadSummary = weekAheadSummary(weekAhead, outCount),
         )
-    }
-
-    /**
-     * Specific over clever: name the days and the counts. "Six items run out Wednesday and
-     * Thursday. Two are already out." beats "Low stock" (§ Copy and voice).
-     */
-    private fun weekAheadSummary(counts: List<Int>, outCount: Int): String {
-        val today = LocalDate.now()
-        val busyDays = counts.mapIndexedNotNull { offset, count ->
-            if (count > 0) today.plusDays(offset.toLong()) else null
-        }
-        val runningOut = counts.sum()
-
-        val head = when {
-            runningOut == 0 -> "Nothing runs out this week."
-            else -> {
-                val dayNames = busyDays.map {
-                    it.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, Locale.getDefault())
-                }
-                val item = if (runningOut == 1) "item runs" else "items run"
-                "$runningOut $item out ${dayNames.joinAnd()}."
-            }
-        }
-        val tail = when (outCount) {
-            0 -> ""
-            1 -> " One is already out."
-            else -> " $outCount are already out."
-        }
-        return head + tail
-    }
-
-    private fun List<String>.joinAnd(): String = when (size) {
-        0 -> ""
-        1 -> first()
-        2 -> "${first()} and ${last()}"
-        else -> "${dropLast(1).joinToString(", ")} and ${last()}"
     }
 
     private val netDeltas: Flow<Map<String, Int>> =
@@ -256,7 +218,6 @@ class StockViewModel @Inject constructor(
             products = section.products,
             sections = section.sections,
             weekAhead = section.weekAhead,
-            weekAheadSummary = section.weekAheadSummary,
             selectedLedger = selection.ledger,
             searchQuery = input.query,
             filterMode = input.filter,
@@ -326,7 +287,6 @@ class StockViewModel @Inject constructor(
         val outCount: Int,
         val sections: Map<StockSection, List<StockRow>> = emptyMap(),
         val weekAhead: List<Int> = List(WEEK_AHEAD_DAYS) { 0 },
-        val weekAheadSummary: String = "",
     )
 
     private data class DeltaBundle(

@@ -222,14 +222,7 @@
     <string name="stock_trend_7d">%1$s (7d)</string>
     <string name="stock_empty_title">Nothing on the shelves yet</string>
     <string name="stock_empty_action">Add a product</string>
-    <string name="stock_section_runs_out">Runs out this week</string>
-    <string name="stock_section_stopped">Stopped</string>
-    <string name="stock_section_healthy">Healthy</string>
     <string name="stock_stopped_out">Out</string>
-    <string name="stock_meta_out">Out of stock</string>
-    <string name="stock_meta_thin_history">Not enough history yet</string>
-    <string name="stock_meta_dormant">Not sold in %1$d days</string>
-    <string name="stock_meta_days_left">%1$d days left</string>
     <string name="stock_count_stock">Count stock</string>
     <string name="stock_why_it_says">Why it says %1$d</string>
     <string name="stock_add_to_order">Add to order list</string>
