@@ -26,6 +26,7 @@ import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.shopmate.ui.util.CurrencyFormatter
 import java.math.BigDecimal
@@ -44,17 +45,26 @@ fun RevenueChart(chart: ReportChartData, modifier: Modifier = Modifier) {
         return
     }
 
-    val labels = remember(chart) { chart.bars.map { it.label } }
     val modelProducer = remember { CartesianChartModelProducer() }
 
+    // Labels travel inside the model, in the same transaction as the bars. Read from Compose
+    // state they changed the moment the period did, while the chart still held the old bars —
+    // switching Today → This week asked for label 12 of 7, got "", and Vico threw.
     LaunchedEffect(chart) {
         modelProducer.runTransaction {
             columnSeries { series(chart.bars.map { it.value }) }
+            extras { it[BarLabelsKey] = chart.bars.map { bar -> bar.label } }
         }
     }
 
-    val bottomFormatter = remember(labels) {
-        CartesianValueFormatter { _, x, _ -> labels.getOrNull(x.toInt()).orEmpty() }
+    val bottomFormatter = remember {
+        CartesianValueFormatter { context, x, _ ->
+            // Vico rejects an empty label; a bar without one gets a blank space instead.
+            context.model.extraStore.getOrNull(BarLabelsKey)
+                ?.getOrNull(x.toInt())
+                ?.takeIf { it.isNotEmpty() }
+                ?: " "
+        }
     }
     val startFormatter = remember {
         CartesianValueFormatter { _, y, _ -> CurrencyFormatter.format(BigDecimal.valueOf(y)) }
@@ -72,6 +82,8 @@ fun RevenueChart(chart: ReportChartData, modifier: Modifier = Modifier) {
             .height(CHART_HEIGHT_DP.dp),
     )
 }
+
+private val BarLabelsKey = ExtraStore.Key<List<String>>()
 
 @Composable
 private fun EmptyChart(modifier: Modifier = Modifier) {
