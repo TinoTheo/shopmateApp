@@ -5,6 +5,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.shopmate.R
 
@@ -208,5 +209,16 @@ val NumberLedgerBalance = TextStyle(
     fontWeight = FontWeight.Normal,
     fontSize = 12.sp,
     lineHeight = 16.sp,
+    fontFeatureSettings = "tnum",
+)
+
+/**
+ * Any other figure-bearing text — counts in copy ("3 waiting to send"), times, receipt numbers.
+ * Same family and tabular figures as the named styles above, at the size the layout asks for.
+ */
+fun NumberStyle(size: TextUnit, weight: FontWeight = FontWeight.Normal) = TextStyle(
+    fontFamily = Inter,
+    fontWeight = weight,
+    fontSize = size,
     fontFeatureSettings = "tnum",
 )

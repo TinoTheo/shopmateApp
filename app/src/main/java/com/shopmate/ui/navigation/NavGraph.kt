@@ -184,7 +184,7 @@ fun AppNavGraph(
                         }
                         composable(Screen.Reports.route) { ReportsScreen() }
                         composable(Screen.Sync.route) {
-                            SyncScreen(onOpenSettings = { navigateTopLevel(Screen.Settings) })
+                            SyncScreen(deviceLayout = deviceLayout)
                         }
                         composable(Screen.Settings.route) { SettingsScreen() }
                         composable(Screen.Categories.route) { CategoriesScreen() }

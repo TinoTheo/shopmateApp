@@ -50,6 +50,14 @@ interface SaleDao {
     @Query("UPDATE sales SET synced_at = :syncedAt WHERE id = :id")
     suspend fun markSynced(id: String, syncedAt: Long)
 
-    @Query("UPDATE sales SET receipt_number = :receiptNumber WHERE id = :id")
+    /** Renumbers a sale, keeping its first number (the one on the paper receipt) the first time. */
+    @Query(
+        "UPDATE sales SET original_receipt_number = COALESCE(original_receipt_number, receipt_number), " +
+            "receipt_number = :receiptNumber WHERE id = :id"
+    )
     suspend fun updateReceiptNumber(id: String, receiptNumber: String)
+
+    /** When a sale last reached the store, for "Last sent at". */
+    @Query("SELECT MAX(synced_at) FROM sales")
+    fun lastSyncedAt(): Flow<Long?>
 }

@@ -54,28 +54,10 @@
     <string name="action_save">Save</string>
 
     <!-- Sync screen -->
-    <string name="sync_all_synced">Everything\'s up to date</string>
     <string name="sync_pending">%1$d waiting</string>
     <string name="sync_header_failed">%1$d not sent</string>
-    <string name="sync_failed_one">1 update didn\u2019t reach your store</string>
-    <string name="sync_failed_many">%1$d updates didn\u2019t reach your store</string>
-    <string name="sync_failed_hint">Your store turned it down. It\u2019s still on this device \u2014 send it again, or tap it in the history below to see why.</string>
-    <string name="sync_one_pending">1 sale waiting to sync</string>
-    <string name="sync_items_pending">%1$d sales waiting to sync</string>
-    <string name="sync_waiting_connection">Waiting for a connection</string>
-    <string name="sync_failed">Couldn\'t reach the cloud — we\'ll try again</string>
-    <string name="sync_last_synced">Last synced %1$s</string>
-    <string name="sync_never">Nothing synced yet</string>
-    <string name="sync_now">Sync now</string>
-    <string name="sync_syncing">Syncing…</string>
-    <string name="sync_connect_title">Sync paused</string>
-    <string name="sync_connect_subtitle">Your session has expired. Sign out and sign back in to resume syncing — nothing is lost, sales stay saved on this device.</string>
-    <string name="sync_open_settings">Open Settings</string>
     <string name="sync_history">Sync history</string>
     <string name="sync_empty_title">Nothing\'s synced yet</string>
-    <string name="sync_empty_subtitle">Sales and stock updates will show up here.</string>
-    <string name="sync_type_sale">Sale sync</string>
-    <string name="sync_type_snapshot">Store snapshot</string>
     <string name="sync_connected_to">Connected to: %1$s</string>
 
     <!-- Common actions -->
@@ -378,7 +360,7 @@
 
     <string name="sync_details_toggle">Details</string>
     <string name="sync_details_label">For the owner or support</string>
-    <string name="sync_details_context">%1$s · %2$s · Till %3$d</string>
+    <string name="sync_details_context">%1$s · %2$s · Till %3$s</string>
     <string name="sync_details_copy">Copy details</string>
     <string name="sync_details_copied">Details copied</string>
 
