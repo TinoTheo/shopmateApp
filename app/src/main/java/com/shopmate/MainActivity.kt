@@ -1,5 +1,6 @@
 package com.shopmate
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.KeyEvent
 import androidx.activity.ComponentActivity
@@ -46,7 +47,14 @@ class MainActivity : ComponentActivity() {
      *
      * Characters the scanner buffer consumes are swallowed so a scan never leaks into the
      * search field mid-sale. Anything else falls through to normal text input untouched.
+     *
+     * `RestrictedApi` is suppressed because it is a false positive here: this overrides the
+     * framework's public `Activity.dispatchKeyEvent`, which `androidx.core.app.ComponentActivity`
+     * re-declares with `@RestrictTo(LIBRARY_GROUP_PREFIX)`. Compose's `onPreviewKeyEvent` is not a
+     * substitute — it only sees keys while something is focused, and a till waiting for a scan
+     * often has nothing focused.
      */
+    @SuppressLint("RestrictedApi")
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (event.action == KeyEvent.ACTION_DOWN) {
             val char = event.unicodeChar.toChar()
