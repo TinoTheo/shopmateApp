@@ -30,26 +30,23 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.shopmate.R
 import com.shopmate.domain.model.PeriodSummary
+import com.shopmate.domain.model.ReportPeriod
+import com.shopmate.domain.model.ReportWindow
 import com.shopmate.ui.components.ConstrainedContent
 import com.shopmate.ui.components.GoldMoment
-import com.shopmate.ui.navigation.AppBarViewModel
 import com.shopmate.ui.theme.Ink
 import com.shopmate.ui.theme.InkSecondary
 import com.shopmate.ui.theme.Spacing
-import java.time.LocalTime
 
 @Composable
 fun ReportsScreen(
     viewModel: ReportsViewModel = hiltViewModel(),
-    appBarViewModel: AppBarViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
-    val storeName by appBarViewModel.storeName.collectAsState()
     var showDatePicker by remember { mutableStateOf(false) }
 
     ReportsContent(
         state = state,
-        storeName = storeName,
         onSelectPeriod = viewModel::selectPeriod,
         onCustomClick = { showDatePicker = true },
     )
@@ -68,7 +65,6 @@ fun ReportsScreen(
 @Composable
 private fun ReportsContent(
     state: ReportsUiState,
-    storeName: String,
     onSelectPeriod: (ReportPeriod) -> Unit,
     onCustomClick: () -> Unit,
 ) {
@@ -82,10 +78,8 @@ private fun ReportsContent(
         ) {
             Spacer(Modifier.height(Spacing.sm))
 
-            // A greeting before the numbers — the shop is a person's, not a dashboard's.
-            if (state.selectedPeriod == ReportPeriod.TODAY) {
-                GreetingRow(storeName = storeName)
-            }
+            // A greeting before the numbers, then the dates the numbers cover.
+            state.window?.let { GreetingRow(window = it) }
 
             PeriodSelector(
                 selected = state.selectedPeriod,
@@ -114,55 +108,40 @@ private fun ReportsContent(
 
 @Composable
 private fun LoadedReports(state: ReportsUiState, summary: PeriodSummary) {
+    val window = state.window ?: return
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.xl)) {
-        RevenueHeroCard(
-            summary = summary,
-            comparisonLabel = state.comparisonLabel,
-            isToday = state.selectedPeriod == ReportPeriod.TODAY,
-        )
+        RevenueHeroCard(summary = summary, window = window)
 
-        // The one gold moment on the screen: whatever is selling fastest right now.
+        // The one gold moment on the screen: whatever sold most in this period.
         summary.topProducts.firstOrNull()?.let { top ->
             GoldMoment(
                 icon = Icons.Outlined.LocalFireDepartment,
-                title = stringResource(R.string.report_top_seller_title, top.productName),
-                subtitle = stringResource(R.string.report_top_seller_subtitle, top.quantitySold),
+                title = stringResource(R.string.reports_top_title, top.productName),
+                subtitle = window.soldText(top.quantitySold),
             )
         }
 
-        RevenueChart(chart = state.chart)
+        RevenueChart(chart = state.chart, emptyText = stringResource(R.string.reports_empty_chart))
 
         if (summary.paymentBreakdown.isNotEmpty()) {
             PaymentBreakdownBar(breakdown = summary.paymentBreakdown)
         }
 
-        TopProductsList(products = summary.topProducts, periodLabel = summary.periodLabel)
+        TopProductsList(products = summary.topProducts, emptyText = window.emptyText())
     }
 }
 
-/** Time-aware greeting. Uses the store name when the merchant has set one. */
+/** Time-aware greeting, with no name: the store name is already in the header. */
 @Composable
-private fun GreetingRow(storeName: String) {
-    val hour = remember { LocalTime.now().hour }
-    val greeting = stringResource(
-        when {
-            hour < 12 -> R.string.greeting_morning
-            hour < 17 -> R.string.greeting_afternoon
-            else -> R.string.greeting_evening
-        },
-    )
+private fun GreetingRow(window: ReportWindow) {
     Column {
         Text(
-            text = if (storeName.isBlank()) {
-                stringResource(R.string.greeting_plain, greeting)
-            } else {
-                stringResource(R.string.greeting_named, greeting, storeName)
-            },
+            text = reportsGreeting(),
             style = MaterialTheme.typography.displaySmall,
             color = Ink,
         )
         Text(
-            text = stringResource(R.string.greeting_subtitle),
+            text = window.rangeText(),
             style = MaterialTheme.typography.bodyMedium,
             color = InkSecondary,
             modifier = Modifier.padding(top = Spacing.xs),

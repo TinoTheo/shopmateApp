@@ -77,6 +77,9 @@ val ErrorRed = Color(0xFFCC4436)
 val TrendUp = Color(0xFF2E7D32)          // NOT CheckoutNeon — v3.0 ruled Neon loses here
 val TrendDown = Color(0xFFE08A7D)        // warmed, softer than pure red
 
+/** Reports chart gridlines — quieter than [ReceiptBeige] so the bars carry the eye. */
+val ChartGrid = Color(0xFFEEEAE5)
+
 // === LEGACY TOKEN NAMES ===
 // Kept as aliases pointing at the warm palette so every existing screen inherits the warmth
 // without a 90-file rename. Prefer the warm names above in new code.

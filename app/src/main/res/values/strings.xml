@@ -226,31 +226,7 @@
     <string name="activity_yesterday">Yesterday</string>
 
     <!-- Reports -->
-    <string name="report_period_today">Today</string>
-    <string name="report_period_this_week">This Week</string>
-    <string name="report_period_this_month">This Month</string>
-    <string name="report_period_last_month">Last Month</string>
-    <string name="report_period_custom">Custom</string>
     <string name="report_apply">Apply</string>
-    <string name="report_best_sellers">Selling best</string>
-    <string name="report_payments">How they paid</string>
-    <string name="report_no_sales">No sales yet in this stretch.</string>
-    <string name="report_no_chart_data">Nothing to chart yet.</string>
-
-    <!-- Reports greeting (time-aware) -->
-    <string name="greeting_morning">Good morning</string>
-    <string name="greeting_afternoon">Good afternoon</string>
-    <string name="greeting_evening">Good evening</string>
-    <string name="greeting_named">%1$s, %2$s.</string>
-    <string name="greeting_plain">%1$s.</string>
-    <string name="greeting_subtitle">Here\'s how the shop\'s doing.</string>
-    <string name="report_earned_today">Earned today</string>
-    <string name="report_earned_period">Earned this stretch</string>
-    <string name="report_trend_up">Up %1$s — better than yesterday</string>
-    <string name="report_trend_down">Down %1$s on yesterday</string>
-    <string name="report_trend_flat">About the same as yesterday</string>
-    <string name="report_top_seller_title">%1$s is flying</string>
-    <string name="report_top_seller_subtitle">%1$d sold in this stretch</string>
 
     <!-- Stock movement reasons -->
     <string name="reason_sale">Sale</string>

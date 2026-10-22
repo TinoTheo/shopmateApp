@@ -14,11 +14,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.shopmate.R
 import com.shopmate.domain.model.PeriodSummary
+import com.shopmate.domain.model.ReportWindow
 import com.shopmate.ui.components.AnimatedCounter
 import com.shopmate.ui.components.CardMaxWidth
 import com.shopmate.ui.components.TrendIndicator
@@ -28,7 +30,6 @@ import com.shopmate.ui.theme.Spacing
 import com.shopmate.ui.theme.TradeGreen
 import com.shopmate.ui.theme.WarmWhite
 import com.shopmate.ui.util.CurrencyFormatter
-import kotlin.math.abs
 
 /**
  * The flagship figure. "Earned today" in plain words, the amount typeset large with tabular
@@ -38,16 +39,11 @@ import kotlin.math.abs
 @Composable
 fun RevenueHeroCard(
     summary: PeriodSummary,
-    comparisonLabel: String,
+    window: ReportWindow,
     modifier: Modifier = Modifier,
-    isToday: Boolean = false,
 ) {
-    val change = summary.revenueTrend.percentageChange
-    val trendText = when {
-        change > 1f -> stringResource(R.string.report_trend_up, "%.0f%%".format(change))
-        change < -1f -> stringResource(R.string.report_trend_down, "%.0f%%".format(abs(change)))
-        else -> stringResource(R.string.report_trend_flat)
-    }
+    // Nothing to compare with: no arrow, so the line makes no claim either way.
+    val change = if (summary.revenueTrend.comparable) summary.revenueTrend.percentageChange else 0f
 
     Card(
         modifier = modifier.widthIn(max = CardMaxWidth),
@@ -60,9 +56,7 @@ fun RevenueHeroCard(
             verticalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
             Text(
-                text = stringResource(
-                    if (isToday) R.string.report_earned_today else R.string.report_earned_period,
-                ),
+                text = window.heroLabel(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = WarmWhite.copy(alpha = 0.72f),
             )
@@ -74,8 +68,8 @@ fun RevenueHeroCard(
             )
             TrendIndicator(
                 percentageChange = change,
-                label = comparisonLabel,
-                text = trendText,
+                label = "",
+                text = window.trendText(summary.revenueTrend),
                 modifier = Modifier.padding(top = Spacing.xs),
             )
             Row(
@@ -84,9 +78,18 @@ fun RevenueHeroCard(
                     .padding(top = Spacing.lg),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                MiniStat(value = "${summary.totalSales}", label = "sales")
-                MiniStat(value = "${summary.totalItemsSold}", label = "items")
-                MiniStat(value = CurrencyFormatter.format(summary.averageSaleValue), label = "average")
+                MiniStat(
+                    value = "${summary.totalSales}",
+                    label = pluralStringResource(R.plurals.reports_stat_sales, summary.totalSales),
+                )
+                MiniStat(
+                    value = "${summary.totalItemsSold}",
+                    label = pluralStringResource(R.plurals.reports_stat_items, summary.totalItemsSold),
+                )
+                MiniStat(
+                    value = CurrencyFormatter.format(summary.averageSaleValue),
+                    label = stringResource(R.string.reports_stat_average),
+                )
             }
         }
     }

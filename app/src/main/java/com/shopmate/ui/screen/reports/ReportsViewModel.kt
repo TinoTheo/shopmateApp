@@ -5,8 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.shopmate.domain.model.DailyRevenue
 import com.shopmate.domain.model.HourlyRevenue
 import com.shopmate.domain.model.PeriodSummary
+import com.shopmate.domain.model.ReportPeriod
+import com.shopmate.domain.model.ReportWindow
 import com.shopmate.domain.repository.ReportRepository
-import com.shopmate.ui.util.CurrencyFormatter
 import com.shopmate.ui.util.DateFormatter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -19,30 +20,34 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import java.math.BigDecimal
-import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.time.temporal.WeekFields
 import java.util.Locale
 import javax.inject.Inject
 
-enum class ReportPeriod { TODAY, THIS_WEEK, THIS_MONTH, LAST_MONTH, CUSTOM }
-
+/** One chart column. A [future] day hasn't happened yet: an empty slot, never a zero. */
 data class ReportBar(
     val label: String,
     val value: Float,
-    val tooltip: String,
+    val future: Boolean = false,
 )
 
+/**
+ * [partialIndex] is the column still filling — this hour on Today, today on a week or month —
+ * drawn lighter so it isn't read as a finished, low figure.
+ */
 data class ReportChartData(
     val bars: List<ReportBar> = emptyList(),
     val isHourly: Boolean = false,
+    val partialIndex: Int? = null,
 )
 
 data class ReportsUiState(
     val selectedPeriod: ReportPeriod = ReportPeriod.TODAY,
-    val periodLabel: String = "Today",
-    val comparisonLabel: String = "vs yesterday",
+    /** What the period covers and what it's compared with; the screen words it. */
+    val window: ReportWindow? = null,
     val summary: PeriodSummary? = null,
     val chart: ReportChartData = ReportChartData(),
     val customRange: Pair<LocalDate, LocalDate>? = null,
@@ -59,104 +64,88 @@ class ReportsViewModel @Inject constructor(
     private val _selectedPeriod = MutableStateFlow(ReportPeriod.TODAY)
     private val _customRange = MutableStateFlow<Pair<LocalDate, LocalDate>?>(null)
 
-    /** Overridable for deterministic testing; defaults to the device clock. */
-    private fun today(): LocalDate = LocalDate.now()
-
     val uiState: StateFlow<ReportsUiState> =
-        combine(_selectedPeriod, _customRange) { period, custom -> resolveConfig(period, custom) }
-            .flatMapLatest { config ->
-                val summaryFlow = reportRepository.getPeriodSummary(
-                    periodLabel = config.periodLabel,
-                    startDate = config.start,
-                    endDate = config.end,
-                    comparisonStart = config.comparisonStart,
-                    comparisonEnd = config.comparisonEnd,
-                )
-                if (config.period == ReportPeriod.TODAY) {
-                    combine(summaryFlow, reportRepository.getHourlyRevenues(config.end)) { summary, hourly ->
-                        buildState(config, summary, hourlyBars(hourly))
+        combine(_selectedPeriod, _customRange) { period, custom ->
+            ReportWindow.resolve(period, ZonedDateTime.now(), custom)
+        }
+            .flatMapLatest { window ->
+                val summaryFlow = reportRepository.getPeriodSummary(window)
+                if (window.period == ReportPeriod.TODAY) {
+                    combine(summaryFlow, reportRepository.getHourlyRevenues(window.end)) { summary, hourly ->
+                        buildState(window, summary, hourlyBars(hourly))
                     }
                 } else {
-                    summaryFlow.map { summary ->
-                        buildState(config, summary, dailyBars(config, summary.dailyRevenues))
-                    }
+                    summaryFlow.map { summary -> buildState(window, summary, dailyBars(window, summary.dailyRevenues)) }
                 }
             }
-            .catch { emit(ReportsUiState(isLoading = false, error = it.message ?: "Could not load reports")) }
+            .catch { emit(ReportsUiState(isLoading = false, error = it.message)) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ReportsUiState())
 
     fun selectPeriod(period: ReportPeriod) {
-        if (period == ReportPeriod.CUSTOM && _customRange.value == null) {
-            // Wait for a range to be picked before switching; the screen opens the picker.
-            _selectedPeriod.value = ReportPeriod.CUSTOM
-            return
-        }
         _selectedPeriod.value = period
     }
 
     fun selectCustomRange(start: LocalDate, end: LocalDate) {
-        val ordered = if (end.isBefore(start)) end to start else start to end
-        _customRange.value = ordered
+        _customRange.value = if (end.isBefore(start)) end to start else start to end
         _selectedPeriod.value = ReportPeriod.CUSTOM
     }
 
-    private fun buildState(config: PeriodConfig, summary: PeriodSummary, chart: ReportChartData) =
+    private fun buildState(window: ReportWindow, summary: PeriodSummary, chart: ReportChartData) =
         ReportsUiState(
-            selectedPeriod = config.period,
-            periodLabel = config.periodLabel,
-            comparisonLabel = config.comparisonLabel,
+            selectedPeriod = window.period,
+            window = window,
             summary = summary,
             chart = chart,
             customRange = _customRange.value,
             isLoading = false,
-            error = null,
         )
 
-    // ---- Chart bar building ----
+    // ---- Chart bars ----
 
     private fun hourlyBars(hourly: List<HourlyRevenue>): ReportChartData {
-        val bars = hourly.map { hr ->
-            val label = DateFormatter.formatHour(hr.hour)
-            ReportBar(label, hr.revenue.toFloat(), "$label • ${CurrencyFormatter.format(hr.revenue)}")
-        }
-        return ReportChartData(bars = bars, isHourly = true)
+        val bars = hourly.map { ReportBar(DateFormatter.formatHour(it.hour), it.revenue.toFloat()) }
+        val currentHour = ZonedDateTime.now().hour
+        return ReportChartData(
+            bars = bars,
+            isHourly = true,
+            partialIndex = hourly.indexOfFirst { it.hour == currentHour }.takeIf { it >= 0 },
+        )
     }
 
-    private fun dailyBars(config: PeriodConfig, daily: List<DailyRevenue>): ReportChartData {
+    private fun dailyBars(window: ReportWindow, daily: List<DailyRevenue>): ReportChartData {
         val revenueByDate = daily.associate { it.date to it.revenue }
-        val days = datesBetween(config.start, config.end)
-        val spanDays = days.size
+        val today = LocalDate.now()
+        // Through the period's last day, so the days still to come show as empty slots.
+        val days = datesBetween(window.start, window.periodEnd)
 
-        // CUSTOM ranges longer than a month read better bucketed by week.
-        if (config.period == ReportPeriod.CUSTOM && spanDays > 31) {
+        if (window.period == ReportPeriod.CUSTOM && days.size > 31) {
+            // Long ranges read better bucketed by week.
             val weekFields = WeekFields.of(Locale.getDefault())
             val buckets = LinkedHashMap<LocalDate, BigDecimal>()
-            days.forEach { date ->
+            days.filterNot { it.isAfter(today) }.forEach { date ->
                 val weekStart = date.with(weekFields.dayOfWeek(), 1)
-                val revenue = revenueByDate[date] ?: BigDecimal.ZERO
-                buckets[weekStart] = (buckets[weekStart] ?: BigDecimal.ZERO).add(revenue)
+                buckets[weekStart] = (buckets[weekStart] ?: BigDecimal.ZERO).add(revenueByDate[date] ?: BigDecimal.ZERO)
             }
-            val bars = buckets.entries.map { (weekStart, revenue) ->
-                val label = DateFormatter.formatShortDate(weekStart)
-                ReportBar(label, revenue.toFloat(), "Week of $label • ${CurrencyFormatter.format(revenue)}")
-            }
-            return ReportChartData(bars = bars, isHourly = false)
+            return ReportChartData(
+                bars = buckets.map { (weekStart, revenue) -> ReportBar(DateFormatter.formatShortDate(weekStart), revenue.toFloat()) },
+            )
         }
 
         val bars = days.map { date ->
-            val revenue = revenueByDate[date] ?: BigDecimal.ZERO
-            val label = when (config.period) {
-                ReportPeriod.THIS_WEEK -> DateFormatter.formatDayOfWeek(date)
-                ReportPeriod.THIS_MONTH, ReportPeriod.LAST_MONTH -> DateFormatter.formatDayNumber(date)
-                else -> DateFormatter.formatShortDate(date)
-            }
             ReportBar(
-                label = label,
-                value = revenue.toFloat(),
-                tooltip = "${DateFormatter.formatShortDate(date)} • ${CurrencyFormatter.format(revenue)}",
+                label = when (window.period) {
+                    ReportPeriod.THIS_WEEK -> DateFormatter.formatDayOfWeek(date)
+                    ReportPeriod.THIS_MONTH, ReportPeriod.LAST_MONTH -> DateFormatter.formatDayNumber(date)
+                    else -> DateFormatter.formatShortDate(date)
+                },
+                value = (revenueByDate[date] ?: BigDecimal.ZERO).toFloat(),
+                future = date.isAfter(today),
             )
         }
-        return ReportChartData(bars = bars, isHourly = false)
+        return ReportChartData(
+            bars = bars,
+            partialIndex = if (window.open) days.indexOf(today).takeIf { it >= 0 } else null,
+        )
     }
 
     private fun datesBetween(start: LocalDate, end: LocalDate): List<LocalDate> {
@@ -164,90 +153,6 @@ class ReportsViewModel @Inject constructor(
         val count = ChronoUnit.DAYS.between(start, end).toInt().coerceAtMost(MAX_DAILY_BARS)
         return (0..count).map { start.plusDays(it.toLong()) }
     }
-
-    // ---- Date-range resolution ----
-
-    private fun resolveConfig(period: ReportPeriod, custom: Pair<LocalDate, LocalDate>?): PeriodConfig {
-        val today = today()
-        return when (period) {
-            ReportPeriod.TODAY -> PeriodConfig(
-                period = period,
-                start = today,
-                end = today,
-                comparisonStart = today.minusDays(1),
-                comparisonEnd = today.minusDays(1),
-                periodLabel = "Today",
-                comparisonLabel = "vs yesterday",
-            )
-
-            ReportPeriod.THIS_WEEK -> {
-                val weekStart = today.with(DayOfWeek.MONDAY)
-                PeriodConfig(
-                    period = period,
-                    start = weekStart,
-                    end = today,
-                    comparisonStart = weekStart.minusWeeks(1),
-                    comparisonEnd = today.minusWeeks(1),
-                    periodLabel = "This Week",
-                    comparisonLabel = "vs last week",
-                )
-            }
-
-            ReportPeriod.THIS_MONTH -> {
-                val monthStart = today.withDayOfMonth(1)
-                PeriodConfig(
-                    period = period,
-                    start = monthStart,
-                    end = today,
-                    comparisonStart = monthStart.minusMonths(1),
-                    comparisonEnd = today.minusMonths(1),
-                    periodLabel = "This Month",
-                    comparisonLabel = "vs last month",
-                )
-            }
-
-            ReportPeriod.LAST_MONTH -> {
-                val lastMonthStart = today.minusMonths(1).withDayOfMonth(1)
-                val lastMonthEnd = lastMonthStart.plusMonths(1).minusDays(1)
-                PeriodConfig(
-                    period = period,
-                    start = lastMonthStart,
-                    end = lastMonthEnd,
-                    comparisonStart = lastMonthStart.minusMonths(1),
-                    comparisonEnd = lastMonthStart.minusDays(1),
-                    periodLabel = DateFormatter.formatMonthYear(lastMonthStart),
-                    comparisonLabel = "vs previous month",
-                )
-            }
-
-            ReportPeriod.CUSTOM -> {
-                val range = custom ?: (today to today)
-                val (start, end) = range
-                val span = ChronoUnit.DAYS.between(start, end)
-                val comparisonEnd = start.minusDays(1)
-                val comparisonStart = comparisonEnd.minusDays(span)
-                PeriodConfig(
-                    period = period,
-                    start = start,
-                    end = end,
-                    comparisonStart = comparisonStart,
-                    comparisonEnd = comparisonEnd,
-                    periodLabel = "${DateFormatter.formatShortDate(start)} – ${DateFormatter.formatShortDate(end)}",
-                    comparisonLabel = "vs previous period",
-                )
-            }
-        }
-    }
-
-    private data class PeriodConfig(
-        val period: ReportPeriod,
-        val start: LocalDate,
-        val end: LocalDate,
-        val comparisonStart: LocalDate,
-        val comparisonEnd: LocalDate,
-        val periodLabel: String,
-        val comparisonLabel: String,
-    )
 
     private companion object {
         const val MAX_DAILY_BARS = 61

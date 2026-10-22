@@ -2,6 +2,7 @@ package com.shopmate.domain.repository
 
 import com.shopmate.domain.model.HourlyRevenue
 import com.shopmate.domain.model.PeriodSummary
+import com.shopmate.domain.model.ReportWindow
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
@@ -15,15 +16,11 @@ import java.time.LocalDate
 interface ReportRepository {
 
     /**
-     * Full summary for [startDate]..[endDate], including a revenue trend computed against the
-     * equivalent previous period [comparisonStart]..[comparisonEnd].
+     * Full summary for the [window]'s days, with a revenue trend against the window's comparison
+     * span — which for an unfinished period stops at the same time of day (like with like).
      */
     fun getPeriodSummary(
-        periodLabel: String,
-        startDate: LocalDate,
-        endDate: LocalDate,
-        comparisonStart: LocalDate,
-        comparisonEnd: LocalDate,
+        window: ReportWindow,
         topProductLimit: Int = 10,
     ): Flow<PeriodSummary>
 
