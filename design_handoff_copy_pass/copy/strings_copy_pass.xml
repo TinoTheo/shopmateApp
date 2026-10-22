@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ShopMate copy pass. Source of truth: ShopMate Copy Pass.dc.html, option 3a. -->
+<resources>
+
+    <!-- 1 · Sync history -->
+    <string name="sync_row_sale_title">Sale · %1$s</string>
+    <string name="sync_row_meta">%1$s · %2$s</string>
+    <string name="sync_row_snapshot_title">Product list</string>
+    <string name="sync_row_snapshot_meta">Prices and stock on this till · %1$s</string>
+    <string name="sync_row_restock_title">Restock · %1$s +%2$d</string>
+    <string name="sync_row_correction_title">Stock correction · %1$s −%2$d</string>
+    <plurals name="sync_row_count_title">
+        <item quantity="one">Stock count · %d item</item>
+        <item quantity="other">Stock count · %d items</item>
+    </plurals>
+    <string name="sync_row_price_title">New price · %1$s %2$s</string>
+
+    <string name="sync_status_waiting">Waiting</string>
+    <string name="sync_status_sending">Sending…</string>
+    <string name="sync_status_sent">Sent</string>
+    <string name="sync_status_paused">Paused</string>
+    <string name="sync_status_not_sent">Not sent</string>
+
+    <string name="sync_reason_renumbering">Number already used on another till. Renumbering…</string>
+    <string name="sync_reason_renumbered_meta">Sent as %1$s · %2$s</string>
+    <string name="sync_reason_renumbered">Its first number, %1$s, was already used on another till. The customer’s paper receipt still shows the first number.</string>
+
+    <string name="sync_reason_forbidden_stock">This account isn’t allowed to change stock, so your store didn’t accept it. It’s still counted on this till.</string>
+    <string name="sync_reason_forbidden_price">This account isn’t allowed to change prices, so your store didn’t accept it. It’s still saved on this till.</string>
+    <string name="sync_reason_forbidden_sale">This account isn’t allowed to record sales, so your store didn’t accept it. It’s still saved on this till.</string>
+    <string name="sync_todo_title">What to do</string>
+    <string name="sync_todo_forbidden_stock">Ask the owner to turn on stock changes for your account, then tap Send again.</string>
+    <string name="sync_todo_forbidden_price">Ask the owner to turn on price changes for your account, then tap Send again.</string>
+    <string name="sync_todo_forbidden_sale">Ask the owner to turn on selling for your account, then tap Send again.</string>
+
+    <string name="sync_reason_signed_out_meta">Sends once you sign in</string>
+    <string name="sync_reason_no_answer">Your store didn’t answer. Trying again by itself.</string>
+    <string name="sync_reason_other_sale">Your store didn’t accept this sale. It’s still saved on this till.</string>
+    <string name="sync_reason_other_change">Your store didn’t accept this change. It’s still saved on this till.</string>
+    <string name="sync_todo_other">Tap Send again. If it’s refused again, open Details and send them to whoever set up ShopMate.</string>
+
+    <string name="sync_details_toggle">Details</string>
+    <string name="sync_details_label">For the owner or support</string>
+    <string name="sync_details_context">%1$s · %2$s · Till %3$d</string>
+    <string name="sync_details_copy">Copy details</string>
+    <string name="sync_details_copied">Details copied</string>
+
+    <string name="sync_send_again">Send again</string>
+    <string name="sync_refused_again">Refused again. Open Details to see why.</string>
+    <string name="sync_send_now">Send now</string>
+
+    <plurals name="sync_card_not_sent_title">
+        <item quantity="one">%d change not sent</item>
+        <item quantity="other">%d changes not sent</item>
+    </plurals>
+    <plurals name="sync_card_not_sent_body">
+        <item quantity="one">Your store refused it. It’s still saved on this till.</item>
+        <item quantity="other">Your store refused them. They’re still saved on this till.</item>
+    </plurals>
+    <string name="sync_card_not_sent_action">See why</string>
+
+    <plurals name="sync_card_waiting_title">
+        <item quantity="one">%d waiting to send</item>
+        <item quantity="other">%d waiting to send</item>
+    </plurals>
+    <plurals name="sync_kind_sales">
+        <item quantity="one">%d sale</item>
+        <item quantity="other">%d sales</item>
+    </plurals>
+    <plurals name="sync_kind_product_lists">
+        <item quantity="one">%d product list</item>
+        <item quantity="other">%d product lists</item>
+    </plurals>
+    <plurals name="sync_kind_stock_changes">
+        <item quantity="one">%d stock change</item>
+        <item quantity="other">%d stock changes</item>
+    </plurals>
+    <string name="sync_card_offline_body">You’re offline. They’re saved on this till and send by themselves when you’re back.</string>
+    <string name="sync_card_offline_since">Offline since %1$s</string>
+    <string name="sync_card_paused_title">Sending is paused</string>
+    <plurals name="sync_card_paused_body">
+        <item quantity="one">You’re signed out on this till. %d is saved here and sends once you sign in.</item>
+        <item quantity="other">You’re signed out on this till. %d are saved here and send once you sign in.</item>
+    </plurals>
+    <string name="sync_card_paused_action">Sign in</string>
+    <string name="sync_card_all_sent_title">Everything is sent</string>
+    <string name="sync_card_all_sent_body">Last sent at %1$s</string>
+    <string name="sync_footer">Sends to the %1$s store account</string>
+
+    <!-- 2 · Counts -->
+    <string name="header_status_up_to_date">Up to date</string>
+    <plurals name="header_status_waiting">
+        <item quantity="one">%d waiting</item>
+        <item quantity="other">%d waiting</item>
+    </plurals>
+    <plurals name="header_status_not_sent">
+        <item quantity="one">%d not sent</item>
+        <item quantity="other">%d not sent</item>
+    </plurals>
+    <string name="header_status_offline">Offline</string>
+    <string name="header_status_paused">Paused</string>
+    <string name="header_status_join">%1$s · %2$s</string>
+
+    <plurals name="pos_items">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+    <string name="pos_cart_empty">No items yet. Tap a product to start the sale.</string>
+
+    <string name="stock_filter_low">Low stock</string>
+    <string name="stock_filter_out">Out of stock</string>
+    <string name="stock_filter_with_count">%1$s · %2$d</string>
+
+    <plurals name="products_unnamed_codes">
+        <item quantity="one">%d code scanned but not named</item>
+        <item quantity="other">%d codes scanned but not named</item>
+    </plurals>
+    <plurals name="barcode_scanned">
+        <item quantity="one">Scanned once · first seen %2$s</item>
+        <item quantity="other">Scanned %1$d times · first seen %2$s</item>
+    </plurals>
+
+    <!-- 4 · Run-out -->
+    <string name="runout_out">Out of stock</string>
+    <string name="runout_out_since">Out since %1$s</string>
+    <string name="runout_today">Runs out today</string>
+    <string name="runout_tomorrow">Runs out tomorrow</string>
+    <string name="runout_day">Runs out %1$s</string>
+    <string name="runout_week">Lasts over a week</string>
+    <plurals name="runout_weeks">
+        <item quantity="one">Lasts over %d week</item>
+        <item quantity="other">Lasts over %d weeks</item>
+    </plurals>
+    <string name="runout_month">Lasts over a month</string>
+    <string name="runout_no_history">Not enough sales to tell yet</string>
+    <plurals name="runout_no_history_basis">
+        <item quantity="one">%1$d sold since it was added on %2$s</item>
+        <item quantity="other">%1$d sold since it was added on %2$s</item>
+    </plurals>
+    <plurals name="runout_dormant">
+        <item quantity="one">Not sold since yesterday</item>
+        <item quantity="other">Not sold in %d days</item>
+    </plurals>
+    <string name="runout_basis">Selling about %1$s a day this week</string>
+
+    <plurals name="stock_week_caption_first">
+        <item quantity="one">%1$d item runs out in the next 7 days, %2$s.</item>
+        <item quantity="other">%1$d items run out in the next 7 days, the first %2$s.</item>
+    </plurals>
+    <string name="stock_week_when_today">today</string>
+    <string name="stock_week_when_tomorrow">tomorrow</string>
+    <string name="stock_week_when_day">on %1$s</string>
+    <plurals name="stock_week_caption_out">
+        <item quantity="one">%d is already out.</item>
+        <item quantity="other">%d are already out.</item>
+    </plurals>
+    <string name="stock_week_caption_none">Nothing runs out in the next 7 days.</string>
+    <string name="stock_section_week">Runs out in the next 7 days · %d</string>
+    <string name="stock_section_out">Out of stock · %d</string>
+    <string name="stock_section_in">In stock · %d</string>
+    <string name="stock_section_not_moving">Not moving · %d</string>
+
+    <!-- 3 · Sign in / onboarding -->
+    <string name="signin_title">Open the till</string>
+    <string name="signin_subtitle">%1$s · Till %2$d</string>
+    <string name="signin_helper">Enter your 4-digit till code</string>
+    <string name="signin_opening">Opening the till</string>
+    <string name="signin_wrong">That code didn’t match. Try again.</string>
+    <string name="onboard_title">Create your shop</string>
+    <string name="onboard_subtitle">You can change these later in Settings.</string>
+    <string name="onboard_shop_name">Shop name</string>
+    <string name="onboard_your_name">Your name</string>
+    <string name="onboard_country">Country</string>
+    <string name="onboard_create">Create shop</string>
+
+    <!-- 5 · Reports -->
+    <string name="reports_greeting_morning">Good morning</string>
+    <string name="reports_greeting_afternoon">Good afternoon</string>
+    <string name="reports_greeting_evening">Good evening</string>
+    <string name="reports_range_so_far">%1$s, so far</string>
+    <string name="reports_range">%1$s to %2$s</string>
+
+    <string name="reports_chip_today">Today</string>
+    <string name="reports_chip_week">This week</string>
+    <string name="reports_chip_month">This month</string>
+    <string name="reports_chip_last_month">Last month</string>
+    <string name="reports_chip_pick">Pick dates</string>
+
+    <string name="reports_hero_today">Sales today</string>
+    <string name="reports_hero_week">Sales this week</string>
+    <string name="reports_hero_month">Sales in %1$s</string>
+    <string name="reports_hero_range">Sales, %1$s</string>
+
+    <string name="reports_trend_up_today">Up %1$s on yesterday by this time</string>
+    <string name="reports_trend_down_today">Down %1$s on yesterday by this time</string>
+    <string name="reports_trend_up_week">Up %1$s on last week by %2$s</string>
+    <string name="reports_trend_down_week">Down %1$s on last week by %2$s</string>
+    <string name="reports_trend_up_month">Up %1$s on %2$s by the %3$s</string>
+    <string name="reports_trend_down_month">Down %1$s on %2$s by the %3$s</string>
+    <string name="reports_trend_up_closed_month">Up %1$s on %2$s</string>
+    <string name="reports_trend_down_closed_month">Down %1$s on %2$s</string>
+    <plurals name="reports_trend_up_range">
+        <item quantity="one">Up %2$s on the day before</item>
+        <item quantity="other">Up %2$s on the %1$d days before</item>
+    </plurals>
+    <plurals name="reports_trend_down_range">
+        <item quantity="one">Down %2$s on the day before</item>
+        <item quantity="other">Down %2$s on the %1$d days before</item>
+    </plurals>
+    <string name="reports_trend_level">Level with %1$s</string>
+    <string name="reports_trend_none">Nothing to compare with yet</string>
+
+    <string name="reports_top_title">%1$s sold most</string>
+    <plurals name="reports_sold_today">
+        <item quantity="one">%d sold today</item>
+        <item quantity="other">%d sold today</item>
+    </plurals>
+    <plurals name="reports_sold_week">
+        <item quantity="one">%d sold this week</item>
+        <item quantity="other">%d sold this week</item>
+    </plurals>
+    <plurals name="reports_sold_month">
+        <item quantity="one">%1$d sold in %2$s</item>
+        <item quantity="other">%1$d sold in %2$s</item>
+    </plurals>
+    <plurals name="reports_stat_sales">
+        <item quantity="one">sale</item>
+        <item quantity="other">sales</item>
+    </plurals>
+    <plurals name="reports_stat_items">
+        <item quantity="one">item</item>
+        <item quantity="other">items</item>
+    </plurals>
+    <string name="reports_stat_average">average sale</string>
+    <string name="reports_section_payments">Payments</string>
+    <string name="reports_section_best">Best sellers</string>
+    <string name="reports_empty_today">No sales yet today.</string>
+    <string name="reports_empty_week">No sales yet this week.</string>
+    <string name="reports_empty_closed">No sales in %1$s.</string>
+    <string name="reports_empty_chart">The chart fills in as you sell.</string>
+    <string name="reports_empty_range">Nothing was sold in these dates.</string>
+    <string name="reports_chart_partial_hour">Lighter bar: this hour, still going</string>
+    <string name="reports_chart_partial_day">Lighter bar: today, still going</string>
+</resources>
