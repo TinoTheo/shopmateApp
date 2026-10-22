@@ -262,7 +262,6 @@
 
     <!-- Auth -->
     <string name="auth_welcome">Welcome to ShopMate</string>
-    <string name="auth_subtitle_sign_in">Welcome back.</string>
     <string name="auth_subtitle_sign_up">Let\'s get your shop set up.</string>
     <string name="auth_email">Email</string>
     <string name="auth_password">Password</string>
@@ -290,12 +289,8 @@
     <string name="auth_error_code_required">Enter the 6-digit code</string>
 
     <!-- Onboarding -->
-    <string name="onboarding_title">Set up your business</string>
-    <string name="onboarding_subtitle">This creates your shop in the cloud. You can add staff later.</string>
     <string name="onboarding_org_name">Business name</string>
-    <string name="onboarding_store_name">Store name</string>
     <string name="onboarding_currency">Currency</string>
-    <string name="onboarding_create">Create shop</string>
     <string name="onboarding_error_org_required">Enter a business name</string>
     <string name="onboarding_error_store_required">Enter a store name</string>
     <string name="onboarding_error_generic">Could not create your shop. Check your connection and try again.</string>
