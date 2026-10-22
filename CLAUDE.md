@@ -269,6 +269,26 @@ Words are design material. They are specified here for the same reason spacing i
   on the surface where the money was taken — the receipt, the queue — and nowhere else.
   Repeating it on every screen turns a calm fact into a nag, which is the same failure as
   error styling by a different route.
+- **Strings come from the copy pass** (`design_handoff_copy_pass/`, merged into
+  `res/values/strings.xml`). Counts go through `<plurals>`, never `"$n items"`. A screen that
+  needs words with no key gets them flagged and added there first, not written in a composable.
+
+### States the copy pass fixed
+
+- **Stock run-out is one `RunOut`** (`domain/model/RunOut.kt`), computed on calendar dates
+  and read by the list, the detail panel, the week-ahead strip and its caption alike — never
+  re-derived per surface. `NoHistory` and `Dormant` are states, not missing values.
+- **Sync has one status card** with a fixed priority: paused (signed out) → not sent
+  (refused) → offline → waiting → all sent. A refused row says why (`SyncFailureReason`:
+  receipt number taken, not allowed, other) and expands to Details. `Send now` is hidden
+  offline — it never waits on a spinner.
+- **The header status** is built from segments (paused or offline, waiting, not sent) with a
+  hollow dot when the till can't send.
+- **Sign-in and onboarding** sit on a Trade Green `BrandBand` with the stacked logo and a
+  white sheet, like the app frame.
+- **Reports compare like with like** (`ReportWindow`): an open period is compared with the
+  same span up to the same time of day, and each period names its own comparison. The open
+  hour or day is drawn lighter with a caption, so it is never read as a slow one.
 
 ---
 
@@ -556,13 +576,15 @@ the window, `confident = false` and the UI **must not** project a run-out day fo
 
 ## Database
 
-- **Room version: 5** (`AppDatabase.kt`), file `shopmate.db`.
+- **Room version: 6** (`AppDatabase.kt`), file `shopmate.db`.
 - **Tables:** `products`, `categories`, `sales`, `sale_items`, `stock_deltas`,
   `receipt_counter`, `sync_events`, `product_barcodes`, `unknown_barcodes`, `stock_counts`.
 - **Migrations are non-destructive** and live in `di/DatabaseModule.kt`: `MIGRATION_1_2`
   (adds `receipt_counter`), `MIGRATION_2_3` (adds `stock_deltas` + indices), `MIGRATION_3_4`
   (see below), `MIGRATION_4_5` (data only: gives every product whose stock its ledger can't
-  explain an opening movement). There is **no destructive fallback** — never add one.
+  explain an opening movement), `MIGRATION_5_6` (adds `sales.original_receipt_number`, so a
+  sale renumbered after a receipt-number clash can still say what it was printed as). There
+  is **no destructive fallback** — never add one.
 - **Opening stock is a movement.** `ProductRepository.add(product, openingStock)` inserts the
   product at zero and records the opening stock as a `PURCHASE` movement noted "Opening stock",
   in one transaction. `ProductRepository.update()` never writes stock — it re-reads it, so an
@@ -643,7 +665,7 @@ com.shopmate/
 │                                DeviceLayout, hosts AppNavGraph
 ├── data/
 │   ├── local/
-│   │   ├── AppDatabase.kt        (version 4; migrations in DatabaseModule)
+│   │   ├── AppDatabase.kt        (version 6; migrations in DatabaseModule)
 │   │   ├── converter/Converters.kt
 │   │   ├── dao/  (ProductDao, CategoryDao, SaleDao, SyncEventDao,
 │   │   │          ReceiptCounterDao, StockDeltaDao, ReportDao,
@@ -725,7 +747,7 @@ com.shopmate/
 9. The `sync_events` table is the event queue — never delete rows; mark them `synced = true`
    or `failed = true`.
 10. Room schema changes ship with a non-destructive `Migration` in `DatabaseModule` (current
-    DB version: 5). Never use destructive migration.
+    DB version: 6). Never use destructive migration.
 11. **Barcode lookups go through `BarcodeRepository`**, which normalises the code, checks
     `product_barcodes`, and on a miss records to `unknown_barcodes` and returns null. The
     caller never blocks on a miss.
