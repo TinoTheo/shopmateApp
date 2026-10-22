@@ -52,7 +52,7 @@ fun ChargeButton(
             containerColor = CheckoutNeon,
             contentColor = ShopBlack,
             disabledContainerColor = CheckoutNeon.copy(alpha = 0.38f),
-            disabledContentColor = ShopBlack,
+            disabledContentColor = ShopBlack.copy(alpha = 0.38f),
         ),
         modifier = modifier.fillMaxWidth(),
     ) {
