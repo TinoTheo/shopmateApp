@@ -196,6 +196,11 @@
     <string name="receipt_cashier">Cashier: %1$s</string>
     <string name="receipt_paid_via">Paid via %1$s</string>
     <string name="receipt_qty_at_price">%1$s × %2$s</string>
+    <string name="receipt_title">Receipt</string>
+    <string name="receipt_held">Held on this device. Sends when you’re back.</string>
+    <string name="receipt_sign_off">Kept by ShopMate</string>
+    <string name="receipt_share">Share receipt</string>
+    <string name="receipt_share_title">Share receipt %1$s</string>
 
     <!-- Payment methods -->
     <string name="payment_cash">Cash</string>

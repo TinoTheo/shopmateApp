@@ -194,6 +194,41 @@ Add a KDoc comment on the `CheckoutNeon` token restating this rule so it survive
 
 ---
 
+## Brand
+
+The looped M and the ShopMate wordmark come from `design_handoff_brand_screens/` (its README is
+the spec; this section is what was decided). Logo art is used as supplied — **never redrawn or
+traced by hand**.
+
+- **Art lives in `res/drawable-nodpi/`** as raster for now: `ic_shopmate_mark`,
+  `ic_shopmate_wordmark` (white alpha masks, tinted at draw time) and `ic_shopmate_stacked`
+  (full colour, launcher only). When the brand owner's SVG masters arrive they become
+  VectorDrawables under the **same names**, and no code changes.
+- **Draw the logo through `ShopMateMark` / `ShopMateWordmark`** (`ui/components/ShopMateLogo.kt`),
+  never an ad-hoc `Image`. The wordmark's leading M is `CheckoutNeon`, the lettering `ShopWhite`,
+  split at 53/240 of its width — frame use only.
+- **Sidebar mark (1c):** a `CheckoutNeon` circle with the M in `TradeGreen` — 40dp / 19×26dp M on
+  COMPACT, 46dp / 22×30dp on EXPANDED, 18dp above the first destination. A circle, never the
+  pill shape, so it can't read as a selection. Not interactive.
+- **Launcher icon (2a):** adaptive. `TradeGreen` background, the stacked logo 62dp wide centred
+  on the 108dp canvas, and a monochrome layer of the M alone for themed icons. Play Store art is
+  `app/src/main/ic_launcher-playstore.png`.
+- **Splash (1h phone / 1i tablet):** the system splash shows the Neon M on `TradeGreen`
+  (`Theme.Shopmate.Starting`); `BrandSplash` takes over while the app is still opening — an
+  oversized M in `TradeGreenDeep` bleeding off the phone screen, or the centred lockup on tablet —
+  and crossfades (200ms) into the app. **No spinner, no progress bar.** `TradeGreenDeep` exists
+  for this splash and nothing else.
+- **The tagline "uncompromising control" is serif logo art.** It ships inside the lockup vector
+  or not at all; it is never set as UI text (§ Typography bans serifs and downloadable fonts).
+- **Receipts:** the store is the headline, ShopMate signs off at the foot ("Kept by ShopMate").
+  `ReceiptContent` resolves the words once; `SharedReceiptImage` renders the 1m card (shared as a
+  PNG through the share sheet from the receipt sheet) and `PrintedReceiptSlip` the 2b 58mm slip,
+  black only, sent as ESC/POS raster via `print/EscPosRaster`. A sale still on the device adds
+  "Held on this device. Sends when you're back." Cash handed over isn't stored, so receipts show
+  "Paid via {method}", never invented cash/change amounts.
+
+---
+
 ## Typography
 
 **Inter is the single app typeface.** One family, three weights, bundled locally:
@@ -349,6 +384,7 @@ one-off buttons, cards, chips, badges, or empty states.**
 | `TrendIndicator` | Up/down trend arrow + colour | built |
 | `SuccessBanner` | Checkout-Neon success feedback | built |
 | `ConstrainedContent` | Max-width wrapper for wide screens | built |
+| `ShopMateMark` / `ShopMateWordmark` | The looped M and the two-colour wordmark (§ Brand) | built |
 | `RunwayGauge` | Seven-day stock runway (§ Gauges) | **to build — spec below** |
 | `MarginGauge` | Cost-to-price track with target notch (§ Gauges) | **to build — spec below** |
 | `InsightRow` | Leading slot · name + meta · gauge · trailing value + sub | **to build — spec below** |
@@ -636,6 +672,7 @@ com.shopmate/
 │   │                StorePermissionRepository)
 │   └── util/ (ReceiptNumberGenerator, BarcodeNormaliser)
 ├── sync/ (SalesSyncWorker, SyncScheduler, NetworkMonitor, ConflictResolver)
+├── print/ (EscPosRaster — 1-bit image → ESC/POS raster bytes; no transport yet)
 └── ui/
     ├── navigation/ (Screen, NavItems, NavGraph, AppSidebar,
     │                ContentHeader, AppBarViewModel)
@@ -651,7 +688,9 @@ com.shopmate/
     │   ├── reports/    (…)
     │   ├── sales/      (…)
     │   ├── sync/       (…)
-    │   └── settings/   (…)
+    │   ├── settings/   (…)
+    │   └── splash/     (BrandSplash)
+    ├── receipt/ (ReceiptContent, SharedReceiptImage, PrintedReceiptSlip, ReceiptShare)
     ├── util/ (CurrencyFormatter, RelativeTimeFormatter, DateFormatter,
     │          DeviceLayout, PaymentMethodLabel)
     └── theme/ (Color, Type, Theme)

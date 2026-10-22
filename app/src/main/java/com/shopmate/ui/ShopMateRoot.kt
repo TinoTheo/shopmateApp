@@ -1,24 +1,18 @@
 package com.shopmate.ui
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.shopmate.ui.navigation.AppNavGraph
 import com.shopmate.ui.screen.auth.AuthScreen
 import com.shopmate.ui.screen.onboarding.OnboardingScreen
-import com.shopmate.ui.theme.TradeGreen
+import com.shopmate.ui.screen.splash.BrandSplash
 import com.shopmate.ui.util.DeviceLayout
 
 /**
@@ -33,29 +27,19 @@ fun ShopMateRoot(
     viewModel: RootViewModel = hiltViewModel(),
 ) {
     val session by viewModel.sessionState.collectAsState()
+    val storeName by viewModel.storeName.collectAsState()
 
+    // 200ms crossfade: BrandSplash into whichever screen the session resolves to.
     AnimatedContent(
         targetState = session,
-        transitionSpec = { fadeIn() togetherWith fadeOut() },
+        transitionSpec = { fadeIn(tween(200)) togetherWith fadeOut(tween(200)) },
         label = "sessionGate",
     ) { state ->
         when (state) {
-            SessionState.LOADING -> LoadingGate()
+            SessionState.LOADING -> BrandSplash(deviceLayout = deviceLayout, storeName = storeName)
             SessionState.SIGNED_OUT -> AuthScreen()
             SessionState.NEEDS_ONBOARDING -> OnboardingScreen()
             SessionState.READY -> AppNavGraph(deviceLayout = deviceLayout)
         }
-    }
-}
-
-@Composable
-private fun LoadingGate() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center,
-    ) {
-        CircularProgressIndicator(color = TradeGreen)
     }
 }

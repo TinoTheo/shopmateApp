@@ -16,18 +16,24 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.shopmate.R
 import com.shopmate.domain.model.Sale
 import com.shopmate.domain.model.SaleItem
+import com.shopmate.ui.components.ShopMateSecondaryButton
+import com.shopmate.ui.receipt.ReceiptContent
+import com.shopmate.ui.receipt.ReceiptShare
 import com.shopmate.ui.theme.ReceiptBeige
 import com.shopmate.ui.theme.StockGreen
 import com.shopmate.ui.util.CurrencyFormatter
 import com.shopmate.ui.util.labelRes
+import kotlinx.coroutines.launch
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -37,9 +43,12 @@ private val receiptDateFormat = DateTimeFormatter.ofPattern("d MMM yyyy, HH:mm")
 @Composable
 fun ReceiptDetailSheet(
     sale: Sale,
+    storeName: String,
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(
@@ -117,6 +126,22 @@ fun ReceiptDetailSheet(
                     },
                 )
             }
+
+            Spacer(Modifier.height(20.dp))
+            // The customer's copy: the 1m image, sent through whatever app they use.
+            ShopMateSecondaryButton(
+                text = stringResource(R.string.receipt_share),
+                onClick = {
+                    scope.launch {
+                        ReceiptShare.share(
+                            context = context,
+                            receipt = ReceiptContent.from(context, sale, storeName),
+                            receiptNumber = sale.receiptNumber,
+                        )
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }

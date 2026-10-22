@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import com.shopmate.ui.ShopMateRoot
 import com.shopmate.ui.theme.ShopMateTheme
@@ -23,6 +24,9 @@ class MainActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Brand splash stage 1 (system): Neon M on Trade Green, until the first frame. Stage 2 is
+        // BrandSplash in ShopMateRoot, shown only while the app is still opening.
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         // Edge-to-edge: the Trade Green app frame (sidebar + status-bar strip) sits behind

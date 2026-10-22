@@ -27,6 +27,7 @@ fun SalesHistoryScreen(
 ) {
     val sales by viewModel.sales.collectAsState()
     val selectedSale by viewModel.selectedSale.collectAsState()
+    val storeName by viewModel.storeName.collectAsState()
 
     if (sales.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -51,6 +52,6 @@ fun SalesHistoryScreen(
     }
 
     selectedSale?.let { sale ->
-        ReceiptDetailSheet(sale = sale, onDismiss = viewModel::closeReceipt)
+        ReceiptDetailSheet(sale = sale, storeName = storeName, onDismiss = viewModel::closeReceipt)
     }
 }
