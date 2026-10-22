@@ -89,7 +89,7 @@ private fun BarcodeInboxCard(count: Int, onClick: () -> Unit) {
             .padding(14.dp),
     ) {
         Text(
-            text = stringResource(R.string.products_unknown_codes_title, count),
+            text = pluralStringResource(R.plurals.products_unnamed_codes, count, count),
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
             color = ShopBlack,

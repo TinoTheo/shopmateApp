@@ -33,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -233,7 +234,7 @@ private fun TicketPanel(
             )
             Spacer(Modifier.weight(1f))
             Text(
-                text = stringResource(R.string.pos_items_n, state.cartItemCount),
+                text = pluralStringResource(R.plurals.pos_items, state.cartItemCount, state.cartItemCount),
                 fontSize = 12.sp,
                 color = ShopBlackTertiary,
             )

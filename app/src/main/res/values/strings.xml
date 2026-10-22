@@ -54,8 +54,6 @@
     <string name="action_save">Save</string>
 
     <!-- Sync screen -->
-    <string name="sync_pending">%1$d waiting</string>
-    <string name="sync_header_failed">%1$d not sent</string>
     <string name="sync_history">Sync history</string>
     <string name="sync_empty_title">Nothing\'s synced yet</string>
     <string name="sync_connected_to">Connected to: %1$s</string>
@@ -96,11 +94,8 @@
     <string name="products_cost_moved">Cost %1$s → %2$s on %3$s</string>
     <string name="products_meta_cost">Cost %1$s</string>
     <string name="products_meta_below_cost">Selling below cost %1$s</string>
-    <string name="products_unknown_codes_title">%1$d codes scanned but not named</string>
     <string name="products_unknown_codes_body">They sold anyway. Name them when you have a minute.</string>
     <string name="barcode_inbox_title">Unknown codes</string>
-    <string name="barcode_inbox_meta">%1$d hits · first seen %2$s</string>
-    <string name="barcode_inbox_meta_till">%1$d hits · first seen %2$s · %3$s</string>
     <string name="barcode_inbox_name_it">Name it</string>
     <string name="barcode_inbox_empty">No unknown codes. Everything scanned at the till has a name.</string>
     <string name="no_products_matching">Nothing matches "%s".</string>
@@ -136,13 +131,11 @@
     <string name="pos_total">Total</string>
     <string name="pos_charge">Charge %1$s</string>
     <string name="pos_checkout_title">Checkout</string>
-    <string name="pos_items_count">%1$d item(s)</string>
     <string name="pos_payment_method">Payment method</string>
     <string name="pos_complete_sale">Complete Sale</string>
     <string name="pos_sale_complete">Done — that\'s %1$s in.</string>
     <string name="pos_receipt">Receipt: %1$s</string>
     <string name="pos_current_sale">Current sale</string>
-    <string name="pos_items_n">%1$d items</string>
     <string name="pos_times">×</string>
     <string name="pos_cash_received">Cash received</string>
     <string name="pos_change_due">Change due</string>
@@ -158,8 +151,6 @@
 
     <!-- Checkout (the till) -->
     <string name="checkout_close">Close checkout</string>
-    <string name="checkout_one_item">1 item</string>
-    <string name="checkout_items">%1$d items</string>
     <string name="checkout_total">Total</string>
     <string name="checkout_cash_received">Cash received</string>
     <string name="checkout_change">Change</string>
