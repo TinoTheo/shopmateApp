@@ -27,5 +27,17 @@ interface AuthManager {
     suspend fun verifyOtp(phone: String, code: String): AuthResult
 
     suspend fun signOut()
-    suspend fun getAccessToken(): String?
+
+    /**
+     * True when a session is loaded and the server has not rejected it. Waits for the session to
+     * load from [com.shopmate.data.remote.SessionStore] first, so a worker in a cold process does
+     * not mistake "not loaded yet" for "signed out".
+     */
+    suspend fun hasUsableSession(): Boolean
+
+    /** True once sync has been refused with `401`; cleared by the next sign-in or refresh. */
+    val needsReauth: Flow<Boolean>
+
+    /** Called by sync on a `401`: stop draining and ask the cashier to sign in again. */
+    suspend fun markSessionRejected()
 }

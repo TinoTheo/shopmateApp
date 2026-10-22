@@ -1,81 +1,118 @@
 package com.shopmate.data.remote.dto
 
-import com.squareup.moshi.Json
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-// === SALE SYNC ===
+// kotlinx.serialization rows for the Supabase PostgREST sync target. Column names map 1:1
+// to the cloud schema (snake_case). Money travels as strings (Postgres casts text → numeric,
+// and numeric → JSON would lose BigDecimal precision on the way back); timestamps as ISO-8601.
 
-data class SyncSalesRequest(
-    @Json(name = "store_id") val storeId: String,
-    @Json(name = "sales") val sales: List<SaleDto>,
+// === STORES ===
+
+@Serializable
+data class StoreDto(
+    @SerialName("id") val id: String,
+    @SerialName("name") val name: String,
+    @SerialName("currency_symbol") val currencySymbol: String? = null,
 )
 
-data class SaleDto(
-    @Json(name = "id") val id: String,
-    @Json(name = "receipt_number") val receiptNumber: String,
-    @Json(name = "items") val items: List<SaleItemDto>,
-    @Json(name = "total_amount") val totalAmount: String,
-    @Json(name = "payment_method") val paymentMethod: String,
-    @Json(name = "cashier_name") val cashierName: String?,
-    @Json(name = "created_at") val createdAt: Long,
+// === SALES (insert-only, matches RLS) ===
+
+@Serializable
+data class SaleRowDto(
+    @SerialName("id") val id: String,
+    @SerialName("store_id") val storeId: String,
+    @SerialName("receipt_number") val receiptNumber: String,
+    @SerialName("total_amount") val totalAmount: String,
+    @SerialName("payment_method") val paymentMethod: String,
+    @SerialName("cashier_name") val cashierName: String?,
+    @SerialName("created_at") val createdAt: String,
 )
 
-data class SaleItemDto(
-    @Json(name = "product_id") val productId: String,
-    @Json(name = "product_name") val productName: String,
-    @Json(name = "category_name") val categoryName: String?,
-    @Json(name = "unit_price") val unitPrice: String,
-    @Json(name = "quantity") val quantity: Int,
-    @Json(name = "line_total") val lineTotal: String,
+// No store_id column — RLS scopes sale_items through the parent sale (sale_id).
+@Serializable
+data class SaleItemRowDto(
+    @SerialName("id") val id: String,
+    @SerialName("sale_id") val saleId: String,
+    @SerialName("product_id") val productId: String,
+    @SerialName("product_name") val productName: String,
+    @SerialName("category_name") val categoryName: String?,
+    @SerialName("unit_price") val unitPrice: String,
+    @SerialName("quantity") val quantity: String,
+    @SerialName("line_total") val lineTotal: String,
 )
 
-data class SyncSalesResponse(
-    @Json(name = "synced_count") val syncedCount: Int,
-    @Json(name = "failed_ids") val failedIds: List<String>,
+// === STOCK DELTAS ===
+
+@Serializable
+data class StockDeltaRowDto(
+    @SerialName("id") val id: String,
+    @SerialName("store_id") val storeId: String,
+    @SerialName("product_id") val productId: String,
+    @SerialName("delta") val delta: Int,
+    @SerialName("reason") val reason: String,
+    @SerialName("note") val note: String?,
+    @SerialName("created_at") val createdAt: String,
 )
 
-// === STORE SNAPSHOT ===
+// === STORE SNAPSHOTS (products + categories inside one jsonb `payload` column) ===
 
-data class StoreSnapshotRequest(
-    @Json(name = "store_id") val storeId: String,
-    @Json(name = "timestamp") val timestamp: Long,
-    @Json(name = "products") val products: List<ProductSnapshotDto>,
-    @Json(name = "categories") val categories: List<CategorySnapshotDto>,
+@Serializable
+data class StoreSnapshotRowDto(
+    @SerialName("store_id") val storeId: String,
+    @SerialName("taken_at") val takenAt: String,
+    @SerialName("payload") val payload: SnapshotPayload,
 )
 
-data class ProductSnapshotDto(
-    @Json(name = "id") val id: String,
-    @Json(name = "name") val name: String,
-    @Json(name = "sku") val sku: String?,
-    @Json(name = "category_id") val categoryId: String?,
-    @Json(name = "category_name") val categoryName: String?,
-    @Json(name = "selling_price") val sellingPrice: String,
-    @Json(name = "cost_price") val costPrice: String?,
-    @Json(name = "stock_quantity") val stockQuantity: Int,
-    @Json(name = "low_stock_threshold") val lowStockThreshold: Int,
-    @Json(name = "unit") val unit: String,
+@Serializable
+data class SnapshotPayload(
+    @SerialName("products") val products: List<ProductSnapshotSbDto>,
+    @SerialName("categories") val categories: List<CategorySnapshotSbDto>,
 )
 
-data class CategorySnapshotDto(
-    @Json(name = "id") val id: String,
-    @Json(name = "name") val name: String,
-    @Json(name = "colour") val colour: String?,
+@Serializable
+data class ProductSnapshotSbDto(
+    @SerialName("id") val id: String,
+    @SerialName("name") val name: String,
+    @SerialName("sku") val sku: String?,
+    @SerialName("category_id") val categoryId: String?,
+    @SerialName("category_name") val categoryName: String?,
+    @SerialName("selling_price") val sellingPrice: String,
+    @SerialName("cost_price") val costPrice: String?,
+    @SerialName("stock_quantity") val stockQuantity: Int,
+    @SerialName("low_stock_threshold") val lowStockThreshold: Int,
+    @SerialName("unit") val unit: String,
 )
 
-data class StoreSnapshotResponse(
-    @Json(name = "received") val received: Boolean,
+@Serializable
+data class CategorySnapshotSbDto(
+    @SerialName("id") val id: String,
+    @SerialName("name") val name: String,
+    @SerialName("colour") val colour: String?,
 )
 
-// === SERVER PRODUCTS (for conflict resolution) ===
+// === SERVER PRODUCTS (pull side; numeric columns cast to text in the select) ===
 
-data class ServerProductsResponse(
-    @Json(name = "products") val products: List<ServerProductDto>,
+@Serializable
+data class SupabaseProductDto(
+    @SerialName("id") val id: String,
+    @SerialName("store_id") val storeId: String,
+    @SerialName("name") val name: String,
+    @SerialName("selling_price") val sellingPrice: String,
+    @SerialName("cost_price") val costPrice: String? = null,
+    @SerialName("stock_quantity") val stockQuantity: Int = 0,
+    @SerialName("updated_at") val updatedAt: String? = null,
 )
 
+// === CONFLICT RESOLUTION (local shape, not a wire row) ===
+
+/** A pulled product, with `updated_at` resolved to epoch millis for [com.shopmate.sync.ConflictResolver]. */
 data class ServerProductDto(
-    @Json(name = "id") val id: String,
-    @Json(name = "name") val name: String,
-    @Json(name = "selling_price") val sellingPrice: String,
-    @Json(name = "cost_price") val costPrice: String?,
-    @Json(name = "stock_quantity") val stockQuantity: Int,
-    @Json(name = "updated_at") val updatedAt: Long,
+    val id: String,
+    val storeId: String,
+    val name: String,
+    val sellingPrice: String,
+    val costPrice: String?,
+    val stockQuantity: Int,
+    val updatedAt: Long,
 )

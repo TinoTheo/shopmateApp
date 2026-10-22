@@ -2,9 +2,8 @@ package com.shopmate.domain.repository
 
 import kotlinx.coroutines.flow.Flow
 
-/** Merchant-configurable settings, backed by DataStore + the auth-token store. */
+/** Merchant-configurable settings, backed by DataStore. */
 interface SettingsRepository {
-    val baseUrl: Flow<String>
     val storeName: Flow<String>
     val currencySymbol: Flow<String>
 
@@ -14,16 +13,12 @@ interface SettingsRepository {
      * (CLAUDE.md § Settings). Default 30%.
      */
     val targetMargin: Flow<Double>
-    val authToken: Flow<String?>
 
-    suspend fun setBaseUrl(url: String)
     suspend fun setStoreName(name: String)
     suspend fun setCurrencySymbol(symbol: String)
 
     /** [margin] is a fraction; values outside 0..0.95 are clamped. */
     suspend fun setTargetMargin(margin: Double)
-    suspend fun setAuthToken(token: String)
-    suspend fun clearAuthToken()
 
     /** Re-queues failed sync events so the worker retries them (does not delete — CLAUDE.md rule 7). */
     suspend fun retryFailedSyncEvents()

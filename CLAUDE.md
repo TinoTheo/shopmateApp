@@ -603,13 +603,16 @@ com.shopmate/
 ├── data/
 │   ├── local/
 │   │   ├── AppDatabase.kt        (version 4; migrations in DatabaseModule)
-│   │   ├── StoreIdProvider.kt    (DataStore-backed store identity)
 │   │   ├── converter/Converters.kt
 │   │   ├── dao/  (ProductDao, CategoryDao, SaleDao, SyncEventDao,
 │   │   │          ReceiptCounterDao, StockDeltaDao, ReportDao,
 │   │   │          ProductBarcodeDao, UnknownBarcodeDao, StockCountDao,
 │   │   │          StockInsightDao)
 │   │   └── entity/ (…Entity for each table)
+│   ├── auth/
+│   │   ├── AuthManager.kt              (interface; SupabaseAuthManager implements it)
+│   │   └── StoreContext.kt             (active store id, chosen from the RLS-scoped
+│   │                                    stores the signed-in member can see)
 │   ├── mapper/ (one per model)
 │   ├── remote/
 │   │   ├── SupabaseClientProvider.kt   (single SupabaseClient: Postgrest + Auth)
@@ -695,10 +698,14 @@ com.shopmate/
   key on a device, ever.
 - **Server shape:** `orgs` → `memberships` (user × org × role) → `stores`. Every synced row
   carries `store_id`; RLS policies allow read/write only where the caller has a membership
-  in that store's org. The device never filters by store in a query — the policy does.
+  in that store's org. **RLS is the only security boundary** — the device never relies on a
+  query filter for access. The device **may narrow** a read to the active store (RLS scopes
+  to the org, the till works for one store); it **never widens** one. Anything pulled back
+  is checked against the active store again before it touches Room.
 - `SupabaseClientProvider` owns one `SupabaseClient`; `SessionStore` persists the session in
-  DataStore so a shop that opens offline stays signed in. `StoreIdProvider` reads the active
-  store from the membership returned at sign-in, not from a hand-entered id.
+  DataStore so a shop that opens offline stays signed in. `StoreContext` picks the active
+  store from the stores the member's RLS policy returns at sign-in (an owner with none is
+  sent to onboarding), never from a hand-entered or locally generated id.
 - **Room stays the source of truth.** Nothing on screen ever reads from Supabase directly;
   sync is one-way out of the device for sales, and snapshots in for catalogue reconciliation.
 - `sync/SalesSyncWorker` (WorkManager) drains the `sync_events` queue when `NetworkMonitor`
@@ -715,6 +722,11 @@ com.shopmate/
 ---
 
 ## Build status
+
+**Supabase cutover: done (app side).** supabase-kt Auth + PostgREST only (no Realtime),
+session in DataStore via `SessionStore`, all uploads through `ShopMateRemote`, a `401`
+stops the drain and flags re-authentication. Retrofit, Moshi, OkHttp interceptors and
+`BASE_URL` are removed.
 
 **Built (Phases 1–7):** Room/Hilt/Compose scaffold · Products + Categories CRUD · POS with
 cart, search, checkout, receipt numbering · Stock levels, filters, adjustment sheet,
@@ -733,19 +745,27 @@ adaptive DeviceLayout, tablet POS, Sales History, shared component library, Inte
 - Stock rework: week-ahead strip, severity sections, count sessions, order list
 - Products rework: margin health, reprice, multi-barcode, unknown-barcode inbox
 - Owner digest — designed, unrouted, see open question 2
-- Backend server (app-side sync layer complete but untested end to end)
-- **Supabase cutover + Auth** (§ Backend & sync) — email/password sign-in, session in
-  DataStore, membership-derived store id. Sales use a hardcoded `"Cashier"` until this
-  lands; it gates `StockDelta.actor`, cashier attribution on sales, and the count-history
-  pattern card, all of which ship immediately after it
+- End-to-end sync check against a real Supabase project with RLS on (app side compiles
+  and builds; not yet run against the server)
+- **Attribution** — the commit after the cutover: `StockDelta.actor`, cashier names on
+  sales (still the hardcoded `"Cashier"`), and the count-history pattern card
 - Final polish pass
 
 ---
 
 ## Open questions — resolve before the next phase
 
-None. All four v3.0 questions are resolved — see below. Add new ones here rather than
-deciding them in a composable.
+None. Add new ones here rather than deciding them in a composable.
+
+### Resolved after v3.1
+
+- **Store filter on the catalogue pull: the rule is amended, RLS is unchanged.** RLS scopes
+  to the org, so a member of a multi-store org can read every store's products. Narrowing
+  RLS to one store would need the active store in the JWT (a custom access-token hook, and
+  a token refresh — impossible offline — on every store switch) or per-store memberships.
+  Instead the device narrows its own reads to the active store, and `ConflictResolver`
+  skips any pulled row whose `store_id` is not the active store, so a wrong or missing
+  filter cannot reprice a till. See § Backend & sync.
 
 ### Resolved in v3.1
 

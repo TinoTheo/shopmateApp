@@ -5,8 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.shopmate.BuildConfig
 import com.shopmate.data.auth.AuthManager
 import com.shopmate.data.auth.StoreContext
-import com.shopmate.data.remote.ShopMateApi
-import com.shopmate.data.remote.dto.StoreDto
 import com.shopmate.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,8 +35,6 @@ class SettingsViewModel @Inject constructor(
     private val settings: SettingsRepository,
     private val authManager: AuthManager,
     private val storeContext: StoreContext,
-    // Kept for the legacy dashboard connection test; no longer surfaced in the UI.
-    private val api: ShopMateApi,
 ) : ViewModel() {
 
     private val stores = MutableStateFlow<List<StoreOption>>(emptyList())

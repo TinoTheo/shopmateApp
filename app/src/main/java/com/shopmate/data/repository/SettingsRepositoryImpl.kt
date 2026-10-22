@@ -5,10 +5,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.shopmate.BuildConfig
 import com.shopmate.data.local.AppDatabase
 import com.shopmate.data.local.dao.SyncEventDao
-import com.shopmate.data.remote.DataStoreAuthTokenProvider
 import com.shopmate.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -18,13 +16,9 @@ import javax.inject.Singleton
 @Singleton
 class SettingsRepositoryImpl @Inject constructor(
     private val dataStore: DataStore<Preferences>,
-    private val authTokenProvider: DataStoreAuthTokenProvider,
     private val syncEventDao: SyncEventDao,
     private val db: AppDatabase,
 ) : SettingsRepository {
-
-    override val baseUrl: Flow<String> =
-        dataStore.data.map { it[BASE_URL_KEY] ?: BuildConfig.BASE_URL }
 
     override val storeName: Flow<String> =
         dataStore.data.map { it[STORE_NAME_KEY] ?: "" }
@@ -34,13 +28,6 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override val targetMargin: Flow<Double> =
         dataStore.data.map { it[TARGET_MARGIN_KEY] ?: DEFAULT_TARGET_MARGIN }
-
-    override val authToken: Flow<String?> =
-        dataStore.data.map { it[DataStoreAuthTokenProvider.AUTH_TOKEN_KEY] }
-
-    override suspend fun setBaseUrl(url: String) {
-        dataStore.edit { it[BASE_URL_KEY] = url }
-    }
 
     override suspend fun setStoreName(name: String) {
         dataStore.edit { it[STORE_NAME_KEY] = name }
@@ -54,10 +41,6 @@ class SettingsRepositoryImpl @Inject constructor(
         dataStore.edit { it[TARGET_MARGIN_KEY] = margin.coerceIn(0.0, MAX_TARGET_MARGIN) }
     }
 
-    override suspend fun setAuthToken(token: String) = authTokenProvider.saveToken(token)
-
-    override suspend fun clearAuthToken() = authTokenProvider.clearToken()
-
     override suspend fun retryFailedSyncEvents() = syncEventDao.retryFailed()
 
     override suspend fun resetAllData() {
@@ -68,7 +51,6 @@ class SettingsRepositoryImpl @Inject constructor(
 
     companion object {
         const val DEFAULT_SYMBOL = "$"
-        val BASE_URL_KEY = stringPreferencesKey("base_url")
         val STORE_NAME_KEY = stringPreferencesKey("store_name")
         val CURRENCY_SYMBOL_KEY = stringPreferencesKey("currency_symbol")
 
