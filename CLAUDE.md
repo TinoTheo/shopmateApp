@@ -715,7 +715,14 @@ com.shopmate/
   stops draining and surfaces re-authentication rather than marking events failed.
 - **No Realtime subscriptions.** A till on a thin connection does not hold a socket open.
 - **WorkManager's 15-minute periodic minimum** is why sync responsiveness relies on an
-  immediate `SyncWorker` enqueue plus `NetworkMonitor`, not on the periodic schedule.
+  immediate `SyncWorker` enqueue plus `NetworkMonitor`, not on the periodic schedule. A sync
+  is enqueued on every one of these, so a cashier never needs "Sync now": checkout
+  (`SalesSyncWorker`), the network returning (`NetworkMonitor`), and the till becoming able
+  to upload again — sign-in, re-sign-in, store picked (`SessionSyncTrigger`).
+- **Stock movements upload as two requests**: SALE movements, then everything else. RLS
+  lets any member insert SALE movements but only owners and managers insert the rest, and
+  one INSERT is all-or-nothing — a single batch would let one cashier restock hold back
+  every sale movement.
 - Only two payload types leave the device: **denormalised sale records** and **periodic
   store snapshots**. Everything else stays local.
 
@@ -767,7 +774,14 @@ adaptive DeviceLayout, tablet POS, Sales History, shared component library, Inte
 
 ## Open questions — resolve before the next phase
 
-None. Add new ones here rather than deciding them in a composable.
+Add new ones here rather than deciding them in a composable.
+
+1. **Can cashiers move stock other than by selling?** The app lets anyone signed in restock,
+   adjust and count; RLS only accepts non-sale movements from owners and managers. A
+   cashier's restock is applied on the till but rejected by the server, so it stays on the
+   device and the server's ledger never sees it. Either RLS allows cashiers these reasons,
+   or the app hides restock/adjust/count from cashiers (needs the role from the membership,
+   which ships with attribution).
 
 ### Resolved after v3.1
 
