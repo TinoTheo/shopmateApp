@@ -1,5 +1,6 @@
 package com.shopmate.ui.receipt
 
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -25,6 +26,9 @@ object ReceiptShare {
         val send = Intent(Intent.ACTION_SEND).apply {
             type = "image/png"
             putExtra(Intent.EXTRA_STREAM, uri)
+            // The URI also goes in ClipData: the read grant then reaches the share sheet itself
+            // (for its preview), not only the app the cashier picks.
+            clipData = ClipData.newRawUri(receiptNumber, uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         context.startActivity(
