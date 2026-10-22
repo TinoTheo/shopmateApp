@@ -50,7 +50,8 @@ fun StockDetailSurface(
     ledger: List<LedgerEntry>,
     deviceLayout: DeviceLayout,
     onAddToOrderList: () -> Unit,
-    onAdjust: () -> Unit,
+    /** Null when the member has no stock rights here — the Adjust action is not offered. */
+    onAdjust: (() -> Unit)?,
     onDismiss: () -> Unit,
 ) {
     when (deviceLayout) {
@@ -78,7 +79,7 @@ private fun StockDetailContent(
     insight: ProductInsight,
     ledger: List<LedgerEntry>,
     onAddToOrderList: () -> Unit,
-    onAdjust: () -> Unit,
+    onAdjust: (() -> Unit)?,
 ) {
     val product = insight.product
 
@@ -151,11 +152,13 @@ private fun StockDetailContent(
             onClick = onAddToOrderList,
             modifier = Modifier.weight(1f),
         )
-        ShopMateSecondaryButton(
-            text = stringResource(R.string.stock_adjust),
-            onClick = onAdjust,
-            modifier = Modifier.weight(1f),
-        )
+        if (onAdjust != null) {
+            ShopMateSecondaryButton(
+                text = stringResource(R.string.stock_adjust),
+                onClick = onAdjust,
+                modifier = Modifier.weight(1f),
+            )
+        }
     }
 }
 

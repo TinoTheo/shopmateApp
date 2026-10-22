@@ -66,8 +66,11 @@ fun StockScreen(
         }
     }
 
+    val canManageStock by viewModel.canManageStock.collectAsState()
+
     StockContent(
         state = state,
+        canManageStock = canManageStock,
         categories = categories,
         deviceLayout = deviceLayout,
         snackbarHostState = snackbarHostState,
@@ -83,6 +86,8 @@ fun StockScreen(
 @Composable
 fun StockContent(
     state: StockUiState,
+    /** Owners, managers, and cashiers given stock rights. Everyone else sees stock read-only. */
+    canManageStock: Boolean,
     categories: List<Category>,
     deviceLayout: DeviceLayout,
     snackbarHostState: SnackbarHostState,
@@ -104,14 +109,16 @@ fun StockContent(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = onCountStock,
-                containerColor = TradeGreen,
-                contentColor = ShopWhite,
-                shape = RoundedCornerShape(14.dp),
-                icon = { Icon(Icons.Outlined.Checklist, contentDescription = null) },
-                text = { Text(stringResource(R.string.stock_count_stock)) },
-            )
+            if (canManageStock) {
+                ExtendedFloatingActionButton(
+                    onClick = onCountStock,
+                    containerColor = TradeGreen,
+                    contentColor = ShopWhite,
+                    shape = RoundedCornerShape(14.dp),
+                    icon = { Icon(Icons.Outlined.Checklist, contentDescription = null) },
+                    text = { Text(stringResource(R.string.stock_count_stock)) },
+                )
+            }
         },
     ) { padding ->
         Row(Modifier.fillMaxSize().padding(padding)) {
@@ -136,7 +143,7 @@ fun StockContent(
                     ledger = state.selectedLedger,
                     deviceLayout = deviceLayout,
                     onAddToOrderList = onCloseSheet,
-                    onAdjust = { showAdjustment = true },
+                    onAdjust = if (canManageStock) ({ showAdjustment = true }) else null,
                     onDismiss = onCloseSheet,
                 )
             }
@@ -151,12 +158,12 @@ fun StockContent(
                 ledger = state.selectedLedger,
                 deviceLayout = deviceLayout,
                 onAddToOrderList = onCloseSheet,
-                onAdjust = { showAdjustment = true },
+                onAdjust = if (canManageStock) ({ showAdjustment = true }) else null,
                 onDismiss = onCloseSheet,
             )
         }
 
-        if (showAdjustment && state.selectedProduct != null) {
+        if (showAdjustment && canManageStock && state.selectedProduct != null) {
             StockAdjustmentSheet(
                 product = state.selectedProduct,
                 history = state.selectedHistory,

@@ -39,7 +39,7 @@ import com.shopmate.data.local.entity.UnknownBarcodeEntity
         UnknownBarcodeEntity::class,
         StockCountEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)

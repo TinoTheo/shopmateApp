@@ -104,7 +104,7 @@ class ProductsViewModel @Inject constructor(
 
     fun addProduct(product: Product) = viewModelScope.launch {
         _uiState.value = ProductUiState.Loading
-        runCatching { productRepository.add(product) }
+        runCatching { productRepository.add(product, openingStock = product.stockQuantity) }
             .onSuccess { _uiState.value = ProductUiState.Success }
             .onFailure { _uiState.value = ProductUiState.Error(it.message ?: "Error") }
     }

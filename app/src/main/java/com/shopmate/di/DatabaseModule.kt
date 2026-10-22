@@ -21,6 +21,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import java.util.UUID
 import javax.inject.Singleton
 
 @Module
@@ -136,11 +137,51 @@ object DatabaseModule {
         }
     }
 
+    /**
+     * v4 → v5: data only, no schema change. Products created before opening stock went through
+     * the ledger carry a stock figure their movements can't explain (stock 9, movements summing
+     * to −3). For each such product, append the missing balance as its earliest movement, dated
+     * at the product's creation — so "why does it say 9?" adds up. Stock itself is not touched.
+     *
+     * A positive gap is the opening stock (PURCHASE). A negative one can't be an opening
+     * balance, so it is recorded as a CORRECTION and named as such.
+     */
+    private val MIGRATION_4_5 = object : Migration(4, 5) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            val gaps = mutableListOf<Triple<String, Int, Long>>()
+            db.query(
+                "SELECT p.`id`, p.`stock_quantity` - IFNULL(SUM(d.`delta`), 0) AS gap, p.`created_at` " +
+                    "FROM `products` p LEFT JOIN `stock_deltas` d ON d.`product_id` = p.`id` " +
+                    "GROUP BY p.`id` HAVING gap != 0"
+            ).use { cursor ->
+                while (cursor.moveToNext()) {
+                    gaps += Triple(cursor.getString(0), cursor.getInt(1), cursor.getLong(2))
+                }
+            }
+            gaps.forEach { (productId, gap, createdAt) ->
+                val opening = gap > 0
+                db.execSQL(
+                    "INSERT INTO `stock_deltas` (`id`, `product_id`, `delta`, `reason`, `note`, " +
+                        "`count_session_id`, `actor`, `created_at`, `synced`) " +
+                        "VALUES (?, ?, ?, ?, ?, NULL, NULL, ?, 0)",
+                    arrayOf<Any>(
+                        UUID.randomUUID().toString(),
+                        productId,
+                        gap,
+                        if (opening) "PURCHASE" else "CORRECTION",
+                        if (opening) "Opening stock" else "Balance from before the ledger",
+                        createdAt,
+                    ),
+                )
+            }
+        }
+    }
+
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, "shopmate.db")
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
             .build()
 
     @Provides

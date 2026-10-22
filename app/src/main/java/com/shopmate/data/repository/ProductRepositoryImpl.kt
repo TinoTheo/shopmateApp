@@ -12,7 +12,10 @@ import com.shopmate.data.mapper.toEntity
 import com.shopmate.domain.model.DeltaReason
 import com.shopmate.domain.model.Product
 import com.shopmate.domain.repository.ProductRepository
+import com.shopmate.domain.repository.StockPermissionRequired
+import com.shopmate.domain.repository.StorePermissionRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.time.Instant
 import java.util.UUID
@@ -25,6 +28,7 @@ class ProductRepositoryImpl @Inject constructor(
     private val productDao: ProductDao,
     private val stockDeltaDao: StockDeltaDao,
     private val syncEventDao: SyncEventDao,
+    private val storePermissions: StorePermissionRepository,
 ) : ProductRepository {
 
     override fun getAll(): Flow<List<Product>> =
@@ -33,11 +37,22 @@ class ProductRepositoryImpl @Inject constructor(
     override suspend fun getById(id: String): Product? =
         productDao.getById(id)?.toDomain()
 
-    override suspend fun add(product: Product) =
-        productDao.insert(product.toEntity())
+    override suspend fun add(product: Product, openingStock: Int) = db.withTransaction {
+        productDao.insert(product.toEntity().copy(stockQuantity = 0))
+        if (openingStock > 0) {
+            adjustStock(product.id, openingStock, DeltaReason.PURCHASE, note = OPENING_STOCK_NOTE)
+        }
+    }
 
-    override suspend fun update(product: Product) =
-        productDao.update(product.toEntity())
+    /**
+     * Stock is re-read inside the transaction, never taken from [product]: an edit screen holds
+     * the product as it was when it opened, and writing that back would undo every sale made
+     * while it was open.
+     */
+    override suspend fun update(product: Product) = db.withTransaction {
+        val currentStock = productDao.getById(product.id)?.stockQuantity ?: return@withTransaction
+        productDao.update(product.toEntity().copy(stockQuantity = currentStock))
+    }
 
     /**
      * Stock is only ever changed by a signed delta. One atomic transaction:
@@ -50,7 +65,20 @@ class ProductRepositoryImpl @Inject constructor(
         reason: DeltaReason,
         note: String?,
         countSessionId: String?,
-    ) = db.withTransaction {
+    ) {
+        if (reason != DeltaReason.SALE && !storePermissions.canManageStock.first()) {
+            throw StockPermissionRequired()
+        }
+        db.withTransaction { applyDelta(productId, delta, reason, note, countSessionId) }
+    }
+
+    private suspend fun applyDelta(
+        productId: String,
+        delta: Int,
+        reason: DeltaReason,
+        note: String?,
+        countSessionId: String?,
+    ) {
         productDao.incrementStock(productId, delta)
         stockDeltaDao.insert(
             StockDeltaEntity(
@@ -81,4 +109,9 @@ class ProductRepositoryImpl @Inject constructor(
 
     override fun search(query: String): Flow<List<Product>> =
         productDao.search(query).map { list -> list.map { it.toDomain() } }
+
+    companion object {
+        /** The ledger line for a product's first stock. Shown as-is in "why does it say N?". */
+        const val OPENING_STOCK_NOTE = "Opening stock"
+    }
 }

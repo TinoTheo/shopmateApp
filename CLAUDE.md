@@ -520,12 +520,17 @@ the window, `confident = false` and the UI **must not** project a run-out day fo
 
 ## Database
 
-- **Room version: 4** (`AppDatabase.kt`), file `shopmate.db`.
+- **Room version: 5** (`AppDatabase.kt`), file `shopmate.db`.
 - **Tables:** `products`, `categories`, `sales`, `sale_items`, `stock_deltas`,
   `receipt_counter`, `sync_events`, `product_barcodes`, `unknown_barcodes`, `stock_counts`.
 - **Migrations are non-destructive** and live in `di/DatabaseModule.kt`: `MIGRATION_1_2`
   (adds `receipt_counter`), `MIGRATION_2_3` (adds `stock_deltas` + indices), `MIGRATION_3_4`
-  (see below). There is **no destructive fallback** — never add one.
+  (see below), `MIGRATION_4_5` (data only: gives every product whose stock its ledger can't
+  explain an opening movement). There is **no destructive fallback** — never add one.
+- **Opening stock is a movement.** `ProductRepository.add(product, openingStock)` inserts the
+  product at zero and records the opening stock as a `PURCHASE` movement noted "Opening stock",
+  in one transaction. `ProductRepository.update()` never writes stock — it re-reads it, so an
+  edit screen held open across a sale cannot undo the sale.
 
 ### Schema debt — MIGRATION_3_4
 
@@ -627,7 +632,8 @@ com.shopmate/
 │   ├── model/ (all models above + ReportModels + ProductInsight)
 │   ├── repository/ (ProductRepository, CategoryRepository, SaleRepository,
 │   │                ReportRepository, SyncRepository, SettingsRepository,
-│   │                StockInsightRepository, BarcodeRepository)
+│   │                StockInsightRepository, BarcodeRepository,
+│   │                StorePermissionRepository)
 │   └── util/ (ReceiptNumberGenerator, BarcodeNormaliser)
 ├── sync/ (SalesSyncWorker, SyncScheduler, NetworkMonitor, ConflictResolver)
 └── ui/
@@ -680,10 +686,16 @@ com.shopmate/
 9. The `sync_events` table is the event queue — never delete rows; mark them `synced = true`
    or `failed = true`.
 10. Room schema changes ship with a non-destructive `Migration` in `DatabaseModule` (current
-    DB version: 4). Never use destructive migration.
+    DB version: 5). Never use destructive migration.
 11. **Barcode lookups go through `BarcodeRepository`**, which normalises the code, checks
     `product_barcodes`, and on a miss records to `unknown_barcodes` and returns null. The
     caller never blocks on a miss.
+12. **Stock rights.** Selling is open to every member. Any other movement — restock, adjust,
+    count, opening stock — needs `StorePermissionRepository.canManageStock`: owners and
+    managers always, a cashier only when the owner has granted it for that store
+    (`store_access.can_manage_stock`). `ProductRepository.adjustStock()` refuses without it,
+    the UI hides those actions, and RLS on `stock_deltas` enforces the same rule on upload.
+    The answer is fetched at sign-in / store pick and kept on the device for offline use.
 
 ---
 
@@ -774,16 +786,12 @@ adaptive DeviceLayout, tablet POS, Sales History, shared component library, Inte
 
 ## Open questions — resolve before the next phase
 
-Add new ones here rather than deciding them in a composable.
-
-1. **Can cashiers move stock other than by selling?** The app lets anyone signed in restock,
-   adjust and count; RLS only accepts non-sale movements from owners and managers. A
-   cashier's restock is applied on the till but rejected by the server, so it stays on the
-   device and the server's ledger never sees it. Either RLS allows cashiers these reasons,
-   or the app hides restock/adjust/count from cashiers (needs the role from the membership,
-   which ships with attribution).
+None. Add new ones here rather than deciding them in a composable.
 
 ### Resolved after v3.1
+
+- **Who moves stock other than by selling: owners and managers; a cashier only with the
+  owner's grant**, per store. See architecture rule 12.
 
 - **Store filter on the catalogue pull: the rule is amended, RLS is unchanged.** RLS scopes
   to the org, so a member of a multi-store org can read every store's products. Narrowing

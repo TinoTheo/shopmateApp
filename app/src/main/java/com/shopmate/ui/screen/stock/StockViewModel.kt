@@ -13,6 +13,7 @@ import com.shopmate.domain.model.StockDeltaWithProduct
 import com.shopmate.domain.repository.CategoryRepository
 import com.shopmate.domain.repository.ProductRepository
 import com.shopmate.domain.repository.StockInsightRepository
+import com.shopmate.domain.repository.StorePermissionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -82,7 +83,12 @@ class StockViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
     private val stockInsightRepository: StockInsightRepository,
     private val stockDeltaDao: StockDeltaDao,
+    storePermissions: StorePermissionRepository,
 ) : ViewModel() {
+
+    /** Gates Count stock and Adjust; see [StorePermissionRepository.canManageStock]. */
+    val canManageStock: StateFlow<Boolean> = storePermissions.canManageStock
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     private val _searchQuery = MutableStateFlow("")
     private val _filterMode = MutableStateFlow(StockFilter.ALL)

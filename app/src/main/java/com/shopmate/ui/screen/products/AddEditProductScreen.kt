@@ -56,6 +56,7 @@ fun AddEditProductScreen(
     val product by viewModel.product.collectAsState()
     val categories by viewModel.categories.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
+    val canSetOpeningStock by viewModel.canManageStock.collectAsState()
 
     LaunchedEffect(uiState) {
         if (uiState is ProductUiState.Success) navController.navigateUp()
@@ -63,6 +64,7 @@ fun AddEditProductScreen(
 
     AddEditProductContent(
         isEditMode = viewModel.isEditMode,
+        canSetOpeningStock = canSetOpeningStock,
         existingProduct = product,
         prefilledBarcode = viewModel.prefilledBarcode,
         categories = categories,
@@ -77,6 +79,11 @@ fun AddEditProductScreen(
 @Composable
 fun AddEditProductContent(
     isEditMode: Boolean,
+    /**
+     * Opening stock is a stock movement, so only owners, managers, and cashiers given stock
+     * rights see the field. Without it the product is created at zero for them to stock later.
+     */
+    canSetOpeningStock: Boolean = true,
     existingProduct: Product?,
     /** Carried in from the unknown-barcode inbox: the form opens with the code already filled. */
     prefilledBarcode: String? = null,
@@ -197,7 +204,7 @@ fun AddEditProductContent(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next),
         )
 
-        if (!isEditMode) {
+        if (!isEditMode && canSetOpeningStock) {
             OutlinedTextField(
                 value = stockText,
                 onValueChange = { if (it.all(Char::isDigit)) { stockText = it; stockError = null } },
@@ -208,7 +215,7 @@ fun AddEditProductContent(
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
             )
-        } else {
+        } else if (isEditMode) {
             OutlinedTextField(
                 value = existingProduct?.stockQuantity?.toString() ?: "",
                 onValueChange = {},
