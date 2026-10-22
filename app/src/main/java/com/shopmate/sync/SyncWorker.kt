@@ -12,12 +12,14 @@ import com.shopmate.data.local.dao.CategoryDao
 import com.shopmate.data.local.dao.ProductDao
 import com.shopmate.data.local.dao.SaleDao
 import com.shopmate.data.local.dao.StockDeltaDao
+import com.shopmate.data.local.entity.StockDeltaEntity
 import com.shopmate.data.mapper.toDomain
 import com.shopmate.data.remote.ShopMateRemote
 import com.shopmate.data.remote.dto.SnapshotPayload
 import com.shopmate.data.remote.dto.StoreSnapshotRowDto
 import com.shopmate.data.remote.mapper.toServerProductDto
 import com.shopmate.data.remote.mapper.toSnapshotSbDto
+import com.shopmate.domain.model.DeltaReason
 import com.shopmate.domain.model.EventType
 import com.shopmate.domain.repository.SyncRepository
 import dagger.assisted.Assisted
@@ -102,18 +104,29 @@ class SyncWorker @AssistedInject constructor(
         }
     }
 
+    /**
+     * Sale movements and every other movement go up as separate requests. RLS lets any member
+     * insert SALE movements but only owners and managers insert the rest, and one INSERT is
+     * all-or-nothing — in a single batch, one restock by a cashier would hold back every sale
+     * movement with it, on every run.
+     */
     private suspend fun syncStockDeltas(storeId: String) {
-        val unsynced = stockDeltaDao.getUnsynced()
-        if (unsynced.isEmpty()) return
+        val (saleMovements, otherMovements) = stockDeltaDao.getUnsynced()
+            .partition { it.reason == DeltaReason.SALE }
+        uploadStockDeltas(saleMovements, storeId)
+        uploadStockDeltas(otherMovements, storeId)
+    }
 
+    private suspend fun uploadStockDeltas(batch: List<StockDeltaEntity>, storeId: String) {
+        if (batch.isEmpty()) return
         try {
-            remote.upsertStockDeltas(unsynced, storeId)
+            remote.upsertStockDeltas(batch, storeId)
         } catch (e: RestException) {
             if (e.statusCode == 401) throw SessionRejected()
-            if (e.statusCode in 400..499) return // schema/RLS rejection — leave flagged locally
+            if (e.statusCode in 400..499) return // schema/RLS rejection — stays on the device
             throw e
         }
-        stockDeltaDao.markSynced(unsynced.map { it.id })
+        stockDeltaDao.markSynced(batch.map { it.id })
     }
 
     private suspend fun syncSnapshot(storeId: String) {
