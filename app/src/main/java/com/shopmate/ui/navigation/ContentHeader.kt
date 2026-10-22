@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shopmate.R
+import com.shopmate.ui.theme.ErrorRed
 import com.shopmate.ui.theme.ShopBlack
 import com.shopmate.ui.theme.ShopBlackSecondary
 import com.shopmate.ui.theme.ShopBlackTertiary
@@ -56,6 +57,7 @@ fun ContentHeader(
     modifier: Modifier = Modifier,
     showClock: Boolean = false,
     pendingSyncCount: Int? = null,
+    failedSyncCount: Int = 0,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     Box(
@@ -87,7 +89,7 @@ fun ContentHeader(
             )
             Spacer(Modifier.weight(1f))
             if (pendingSyncCount != null) {
-                SyncStatusIndicator(pendingCount = pendingSyncCount)
+                SyncStatusIndicator(pendingCount = pendingSyncCount, failedCount = failedSyncCount)
                 Spacer(Modifier.width(6.dp))
             }
             actions()
@@ -133,26 +135,32 @@ private fun HeaderClock(modifier: Modifier = Modifier) {
     }
 }
 
-/** 6dp status dot + label: Trade Green "Synced", or tertiary "N pending". */
+/**
+ * 6dp status dot + label, in order of what the cashier most needs to know:
+ * - **N not sent** — the server refused uploads. A failure, so [ErrorRed] (§ Severity). Shown
+ *   even while other uploads are waiting: a refused sale must never hide behind a queue.
+ * - **N waiting** — held on this device until the next upload. Calm, tertiary.
+ * - **Up to date** — nothing waiting and nothing refused. Trade Green dot.
+ */
 @Composable
-private fun SyncStatusIndicator(pendingCount: Int, modifier: Modifier = Modifier) {
-    val synced = pendingCount == 0
+private fun SyncStatusIndicator(pendingCount: Int, failedCount: Int, modifier: Modifier = Modifier) {
+    val (dot, label, labelColor) = when {
+        failedCount > 0 -> Triple(ErrorRed, stringResource(R.string.sync_header_failed, failedCount), ErrorRed)
+        pendingCount > 0 -> Triple(ShopBlackTertiary, stringResource(R.string.sync_pending, pendingCount), ShopBlackTertiary)
+        else -> Triple(TradeGreen, stringResource(R.string.sales_synced), ShopBlackTertiary)
+    }
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier
                 .size(6.dp)
                 .clip(CircleShape)
-                .background(if (synced) TradeGreen else ShopBlackTertiary),
+                .background(dot),
         )
         Spacer(Modifier.width(5.dp))
         Text(
-            text = if (synced) {
-                stringResource(R.string.sales_synced)
-            } else {
-                stringResource(R.string.sync_pending, pendingCount)
-            },
+            text = label,
             fontSize = 11.sp,
-            color = ShopBlackTertiary,
+            color = labelColor,
         )
     }
 }

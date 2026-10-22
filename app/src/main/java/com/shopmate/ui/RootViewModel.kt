@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shopmate.data.auth.AuthManager
 import com.shopmate.data.auth.StoreContext
+import com.shopmate.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -24,7 +25,12 @@ enum class SessionState { LOADING, SIGNED_OUT, NEEDS_ONBOARDING, READY }
 class RootViewModel @Inject constructor(
     private val authManager: AuthManager,
     private val storeContext: StoreContext,
+    settings: SettingsRepository,
 ) : ViewModel() {
+
+    /** For the tablet splash footer. Empty until a store has been named. */
+    val storeName: StateFlow<String> = settings.storeName
+        .stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val sessionState: StateFlow<SessionState> =

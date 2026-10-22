@@ -30,6 +30,10 @@ interface StockDeltaDao {
     @Query("UPDATE stock_deltas SET synced = 1 WHERE id IN (:ids)")
     suspend fun markSynced(ids: List<String>)
 
+    /** A sale's movements are noted with its receipt number; this follows a renumbering. */
+    @Query("UPDATE stock_deltas SET note = :newNote WHERE reason = 'SALE' AND note = :oldNote")
+    suspend fun renameSaleNote(oldNote: String, newNote: String)
+
     @Query("SELECT * FROM stock_deltas WHERE created_at BETWEEN :start AND :end ORDER BY created_at DESC")
     fun getDeltasByDateRange(start: Long, end: Long): Flow<List<StockDeltaEntity>>
 

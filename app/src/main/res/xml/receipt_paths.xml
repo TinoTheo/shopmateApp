@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Receipt images rendered for sharing live in the cache, never in files/ or backups. -->
+<paths>
+    <cache-path name="receipts" path="receipts/" />
+</paths>

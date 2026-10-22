@@ -13,6 +13,13 @@ import androidx.compose.ui.graphics.Color
 val TradeGreen = Color(0xFF005B52)
 
 /**
+ * Splash only. The oversized looped M that bleeds off the phone splash (brand handoff 1h) is
+ * drawn in this deeper green on [TradeGreen] — the same as [Ink] at 18% over Trade Green.
+ * It is not a third brand colour: nothing else in the app uses it.
+ */
+val TradeGreenDeep = Color(0xFF014A43)
+
+/**
  * Checkout Neon has exactly two jobs, in different parts of the screen (CLAUDE.md § The
  * Checkout Neon rule):
  *

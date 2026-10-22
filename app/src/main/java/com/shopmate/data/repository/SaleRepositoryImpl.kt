@@ -13,10 +13,12 @@ import com.shopmate.data.mapper.toEntity
 import com.shopmate.domain.model.DeltaReason
 import com.shopmate.domain.model.Sale
 import com.shopmate.domain.repository.SaleRepository
+import com.shopmate.domain.util.ReceiptNumberGenerator
 import com.shopmate.sync.SyncScheduler
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.Instant
+import java.time.ZoneId
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -29,6 +31,7 @@ class SaleRepositoryImpl @Inject constructor(
     private val stockDeltaDao: StockDeltaDao,
     private val syncEventDao: SyncEventDao,
     private val syncScheduler: SyncScheduler,
+    private val receiptNumbers: ReceiptNumberGenerator,
 ) : SaleRepository {
 
     override suspend fun recordSale(sale: Sale) {
@@ -69,6 +72,14 @@ class SaleRepositoryImpl @Inject constructor(
                 errorMessage = null,
             )
         )
+    }
+
+    override suspend fun renumber(saleId: String): Sale? = db.withTransaction {
+        val sale = saleDao.getById(saleId)?.toDomain() ?: return@withTransaction null
+        val newNumber = receiptNumbers.next(sale.createdAt.atZone(ZoneId.systemDefault()).toLocalDate())
+        saleDao.updateReceiptNumber(saleId, newNumber)
+        stockDeltaDao.renameSaleNote(sale.receiptNumber, newNumber)
+        sale.copy(receiptNumber = newNumber)
     }
 
     override fun getSalesByDateRange(start: Instant, end: Instant): Flow<List<Sale>> =

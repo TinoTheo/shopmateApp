@@ -22,4 +22,8 @@ class AppBarViewModel @Inject constructor(
     /** Unsynced event count for the header's sync dot. */
     val pendingSyncCount: StateFlow<Int> = syncRepository.getPendingCount()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
+
+    /** Uploads the server refused — shown before anything else, so "Up to date" is never a lie. */
+    val failedSyncCount: StateFlow<Int> = syncRepository.getFailedCount()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 }

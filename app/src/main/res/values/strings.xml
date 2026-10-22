@@ -56,6 +56,11 @@
     <!-- Sync screen -->
     <string name="sync_all_synced">Everything\'s up to date</string>
     <string name="sync_pending">%1$d waiting</string>
+    <string name="sync_header_failed">%1$d not sent</string>
+    <string name="sync_failed_one">1 update didn\u2019t reach your store</string>
+    <string name="sync_failed_many">%1$d updates didn\u2019t reach your store</string>
+    <string name="sync_failed_hint">Your store turned it down. It\u2019s still on this device \u2014 send it again, or tap it in the history below to see why.</string>
+    <string name="sync_send_again">Send again</string>
     <string name="sync_one_pending">1 sale waiting to sync</string>
     <string name="sync_items_pending">%1$d sales waiting to sync</string>
     <string name="sync_waiting_connection">Waiting for a connection</string>
@@ -196,6 +201,11 @@
     <string name="receipt_cashier">Cashier: %1$s</string>
     <string name="receipt_paid_via">Paid via %1$s</string>
     <string name="receipt_qty_at_price">%1$s × %2$s</string>
+    <string name="receipt_title">Receipt</string>
+    <string name="receipt_held">Held on this device. Sends when you’re back.</string>
+    <string name="receipt_sign_off">Kept by ShopMate</string>
+    <string name="receipt_share">Share receipt</string>
+    <string name="receipt_share_title">Share receipt %1$s</string>
 
     <!-- Payment methods -->
     <string name="payment_cash">Cash</string>

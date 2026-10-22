@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Brand colour for XML-only surfaces (launcher icon background), which can't read
+     ui/theme/Color.kt. Same value as TradeGreen there. -->
+<resources>
+    <color name="trade_green">#FF005B52</color>
+</resources>

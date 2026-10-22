@@ -1,19 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- ShopMate adaptive-icon foreground: a simple Trade Green shopping bag, centred in the safe zone. -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-    <!-- Bag body (rounded) -->
-    <path
-        android:fillColor="#005B52"
-        android:pathData="M41,48 L67,48 A5,5 0 0 1 72,53 L72,75 A5,5 0 0 1 67,80 L41,80 A5,5 0 0 1 36,75 L36,53 A5,5 0 0 1 41,48 Z" />
-    <!-- Handle -->
-    <path
-        android:strokeColor="#005B52"
-        android:strokeWidth="4"
-        android:strokeLineCap="round"
-        android:fillColor="#00000000"
-        android:pathData="M46,49 A8,8 0 0 1 62,49" />
-</vector>
+<!-- Adaptive-icon foreground (brand handoff 2a): Stacked Logo-40, 62dp wide (aspect 1.458:1,
+     so 42.5dp tall), centred on the 108dp canvas inside the 66dp safe zone. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_shopmate_stacked"
+    android:insetLeft="23dp"
+    android:insetRight="23dp"
+    android:insetTop="32.75dp"
+    android:insetBottom="32.75dp" />

@@ -19,6 +19,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.shopmate.R
 import com.shopmate.ui.components.ConstrainedContent
 import com.shopmate.ui.components.ShopMatePrimaryButton
+import com.shopmate.ui.components.ShopMateSecondaryButton
 import com.shopmate.ui.theme.ShopBlackTertiary
 
 @Composable
@@ -30,6 +31,7 @@ fun SyncScreen(
     SyncContent(
         state = state,
         onSyncNow = viewModel::syncNow,
+        onSendFailedAgain = viewModel::sendFailedAgain,
         onOpenSettings = onOpenSettings,
     )
 }
@@ -38,6 +40,7 @@ fun SyncScreen(
 fun SyncContent(
     state: SyncUiState,
     onSyncNow: () -> Unit,
+    onSendFailedAgain: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
     // Resolve composable-only resources before entering the LazyListScope builder.
@@ -51,10 +54,22 @@ fun SyncContent(
         item(key = "status") {
             SyncStatusCard(
                 pendingCount = state.pendingCount,
+                failedCount = state.failedCount,
                 lastSyncedAt = state.lastSyncedAt,
                 isError = state.syncStatus == SyncStatus.ERROR || state.error != null,
                 errorMessage = state.error,
             )
+        }
+
+        if (state.failedCount > 0) {
+            item(key = "send-again") {
+                ShopMateSecondaryButton(
+                    text = stringResource(R.string.sync_send_again),
+                    onClick = onSendFailedAgain,
+                    enabled = state.hasAuthToken,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         }
 
         item(key = "sync-button") {

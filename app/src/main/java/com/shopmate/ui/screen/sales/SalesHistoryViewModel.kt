@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shopmate.domain.model.Sale
 import com.shopmate.domain.repository.SaleRepository
+import com.shopmate.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,7 +16,12 @@ import javax.inject.Inject
 @HiltViewModel
 class SalesHistoryViewModel @Inject constructor(
     saleRepository: SaleRepository,
+    settings: SettingsRepository,
 ) : ViewModel() {
+
+    /** The receipt's headline. */
+    val storeName: StateFlow<String> = settings.storeName
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
 
     private val _selectedSaleId = MutableStateFlow<String?>(null)
 

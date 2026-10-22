@@ -14,11 +14,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import java.time.Instant
 import javax.inject.Inject
 
 data class SyncUiState(
     val pendingCount: Int = 0,
+    val failedCount: Int = 0,
     val lastSyncedAt: Instant? = null,
     val syncStatus: SyncStatus = SyncStatus.IDLE,
     val recentEvents: List<SyncEventDisplay> = emptyList(),
@@ -51,15 +53,21 @@ class SyncViewModel @Inject constructor(
     private val manualWorkState = workManager
         .getWorkInfosForUniqueWorkFlow(SyncScheduler.MANUAL_WORK)
 
+    private val counts =
+        combine(syncRepository.getPendingCount(), syncRepository.getFailedCount()) { pending, failed ->
+            pending to failed
+        }
+
     val uiState: StateFlow<SyncUiState> = combine(
-        syncRepository.getPendingCount(),
+        counts,
         syncRepository.getRecentEvents(50),
         manualWorkState,
         authManager.needsReauth,
-    ) { pending, events, workInfos, needsReauth ->
+    ) { (pending, failed), events, workInfos, needsReauth ->
         val displays = events.map { it.toDisplay() }
         SyncUiState(
             pendingCount = pending,
+            failedCount = failed,
             lastSyncedAt = displays.filter { it.status == EventStatus.SYNCED }
                 .maxByOrNull { it.createdAt }?.createdAt,
             syncStatus = workInfos.toSyncStatus(),
@@ -72,6 +80,14 @@ class SyncViewModel @Inject constructor(
 
     fun syncNow() {
         syncScheduler.syncNow()
+    }
+
+    /** Re-queues every refused upload and sends straight away. */
+    fun sendFailedAgain() {
+        viewModelScope.launch {
+            syncRepository.retryFailed()
+            syncScheduler.syncNow()
+        }
     }
 
     private fun SyncEvent.toDisplay() = SyncEventDisplay(

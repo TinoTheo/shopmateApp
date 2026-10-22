@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Themed-icon layer (Android 13+): the M only, 30dp tall, centred. The stacked lettering is
+     unreadable at themed-icon sizes. The launcher tints it, so only its alpha matters. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_shopmate_mark"
+    android:insetLeft="42.75dp"
+    android:insetRight="42.75dp"
+    android:insetTop="39dp"
+    android:insetBottom="39dp" />

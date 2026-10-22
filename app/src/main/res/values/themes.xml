@@ -1,3 +1,12 @@
 <resources>
     <style name="Theme.Shopmate" parent="Theme.AppCompat.DayNight.NoActionBar" />
+
+    <!-- System splash (brand handoff, stage 1): the Neon M on Trade Green. Hands over to
+         BrandSplash in Compose, then the app. No custom timing — it stays as long as the
+         system holds it. -->
+    <style name="Theme.Shopmate.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/trade_green</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_mark</item>
+        <item name="postSplashScreenTheme">@style/Theme.Shopmate</item>
+    </style>
 </resources>

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=EB+Garamond:ital@1&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#E9E4DC;font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;color:#1A1A1A}
+a{color:#005B52;text-decoration:none}a:hover{color:#01423B}
+.dv-turn{padding:48px 56px 40px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 13px/1.2 Inter,sans-serif;color:#1a1a1a}
+.dv-opts{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:10px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 12px/1.35 Inter,sans-serif;color:#6B6459;max-width:420px}
+.dv-card{max-width:100%;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
+.dv-opt:target .dv-oid{background:#005B52;color:#fff}
+.dv-next{margin:28px 0 0;font:12px/1.5 Inter,sans-serif;color:#6B6459}
+.grp{flex-basis:100%;display:flex;align-items:baseline;gap:12px;margin:28px 0 -14px;padding-top:24px;border-top:1px solid #D4CEC9}
+.tnum{font-variant-numeric:tabular-nums}
+</style>
+</helmet>
+
+<section class="dv-turn" id="t2">
+  <div class="dv-thd"><a class="dv-tid" href="#t2">2</a><span class="dv-tname">App icon with the stacked logo, and a print-safe 1m receipt</span></div>
+  <div style="max-width:760px;font-size:13px;line-height:1.55;color:#6B6459;margin:0 0 8px;text-wrap:pretty">Locked in: <a href="#1c">1c</a> for the rail mark and <a href="#1h">1h</a> for the splash. The icon uses Stacked Logo-40 as supplied (Neon M, white lettering) on Trade Green.</div>
+  <div class="dv-opts">
+
+    <div class="dv-opt" id="2a">
+      <div class="dv-olabel"><a class="dv-oid" href="#2a">2a</a>Stacked Logo-40 on Trade Green. Adaptive icon at 192, launcher at 56 and 40. The lettering gets small at 40, so check it on a real home screen.</div>
+      <div class="dv-card" style="padding:28px;display:flex;align-items:flex-end;gap:22px;background:#FDFCFA">
+        <div style="width:192px;height:192px;border-radius:44px;background:#005B52;display:flex;align-items:center;justify-content:center"><img src="assets/stacked-40.png" alt="ShopMate" style="width:132px;height:auto;display:block"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:56px;height:56px;border-radius:28px;background:#005B52;display:flex;align-items:center;justify-content:center"><img src="assets/stacked-40.png" alt="ShopMate" style="width:36px;height:auto;display:block"></div><div style="font-size:11px;color:#1A1A1A">ShopMate</div></div>
+        <div style="width:40px;height:40px;border-radius:12px;background:#005B52;display:flex;align-items:center;justify-content:center;margin-bottom:22px"><img src="assets/stacked-40.png" alt="ShopMate" style="width:28px;height:auto;display:block"></div>
+      </div>
+    </div>
+
+    <div class="dv-opt" id="2b">
+      <div class="dv-olabel"><a class="dv-oid" href="#2b">2b</a>1m's layout for a 58mm thermal printer. Black only: the green header becomes a black band with the store name and M knocked out, so it prints on any mono printer.</div>
+      <div style="padding:28px 40px;background:#D4CEC9;border-radius:8px">
+        <div class="tnum" style="width:232px;background:#FDFCFA;padding:14px 12px 20px;box-sizing:border-box;color:#000;box-shadow:0 1px 2px rgba(0,0,0,.08)">
+          <div style="background:#000;padding:12px 12px 11px;display:flex;align-items:flex-start;gap:10px">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:9px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#fff">Receipt</div>
+              <div style="font-size:14px;font-weight:600;color:#fff;margin-top:4px">Mbare Market Stop</div>
+              <div style="font-size:10px;color:#fff;margin-top:2px">#0418-0212 · 7 Sep, 08:42</div>
+            </div>
+            <div style="width:15px;height:20px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#fff;flex:none"></div>
+          </div>
+          <div style="padding:8px 0 4px">
+            <sc-for list="{{ receiptLines }}" as="l" hint-placeholder-count="4">
+              <div style="display:flex;align-items:baseline;gap:8px;padding:5px 0;border-bottom:1px dashed #000">
+                <div style="flex:1;min-width:0"><div style="font-size:11.5px;font-weight:500">{{ l.name }}</div><div style="font-size:10px">{{ l.qty }}</div></div>
+                <div style="font-size:11.5px;font-weight:500">{{ l.total }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="padding:6px 0 10px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:12px">Total</span><span style="font-size:19px;font-weight:600;letter-spacing:-0.02em">$8.70</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:10.5px;margin-top:3px"><span>Cash $10.00</span><span>Change $1.30</span></div>
+          </div>
+          <div style="border-top:1px solid #000;padding-top:9px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:10px"><div style="width:8px;height:11px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#000"></div>Kept by ShopMate</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="dv-turn" id="t1">
+  <div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Logo mark in the app, plus splash, sign-in, receipt and owner digest</span></div>
+  <div style="max-width:760px;font-size:13px;line-height:1.55;color:#6B6459;margin:0 0 8px;text-wrap:pretty">The looped M is drawn in Trade Green throughout, as you asked. The rail itself is Trade Green, so there the M sits on a Neon surface. Inter is used for all UI text and Receipt Beige is #D4CEC9. The Garamond tagline only appears on the splash and sign-in screens. The logo art is your PNGs recoloured with a CSS mask, not redrawn.</div>
+
+  <div class="dv-opts">
+
+    <div class="grp"><span style="font-size:10.5px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:#8A8175">Sidebar brand mark</span><span style="font-size:12px;color:#6B6459">Each option shows the phone (64dp) and tablet (84dp) rail</span></div>
+
+    <div class="dv-opt" id="1a">
+      <div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Neon tile, Trade Green M. Matches the brief's geometry: 38dp/13 on phone, 42dp/14 on tablet.</div>
+      <div class="dv-card" style="display:flex;gap:1px;background:#D4CEC9">
+        <div style="width:150px;height:330px;background:#005B52;display:flex;position:relative">
+          <div style="width:64px;display:flex;flex-direction:column;align-items:center;padding-top:10px">
+            <div style="width:38px;height:38px;border-radius:13px;background:#99FFAA;display:flex;align-items:center;justify-content:center"><div style="width:20px;height:27px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#005B52"></div></div>
+            <div style="height:20px"></div>
+            <div style="width:46px;height:30px;border-radius:15px;background:#99FFAA;margin:7px 0"></div>
+            <div style="width:20px;height:20px;border-radius:5px;border:1.7px solid rgba(255,255,255,.72);margin:12px 0;box-sizing:border-box"></div>
+            <div style="width:20px;height:20px;border-radius:5px;border:1.7px solid rgba(255,255,255,.72);margin:12px 0;box-sizing:border-box"></div>
+          </div>
+          <div style="flex:1;background:#FDFCFA;border-top-left-radius:24px;margin-top:0"></div>
+        </div>
+        <div style="width:170px;height:330px;background:#005B52;display:flex">
+          <div style="width:84px;display:flex;flex-direction:column;align-items:center;padding-top:14px">
+            <div style="width:42px;height:42px;border-radius:14px;background:#99FFAA;display:flex;align-items:center;justify-content:center"><div style="width:22px;height:30px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#005B52"></div></div>
+            <div style="height:22px"></div>
+            <div style="width:48px;height:30px;border-radius:15px;background:#99FFAA;margin-top:7px"></div>
+            <div style="font-size:10.5px;font-weight:500;color:#fff;margin-top:3px">Sale</div>
+            <div style="width:20px;height:20px;border-radius:5px;border:1.7px solid rgba(255,255,255,.72);margin:18px 0 3px;box-sizing:border-box"></div>
+            <div style="font-size:10.5px;font-weight:500;color:rgba(255,255,255,.72)">Products</div>
+          </div>
+          <div style="flex:1;background:#FDFCFA;border-top-left-radius:24px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dv-opt" id="1b">
+      <div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Neon cap. The mark fills the full width of the rail and runs up into the status bar, with a 24dp bottom-right corner to echo the sheet.</div>
+      <div class="dv-card" style="display:flex;gap:1px;background:#D4CEC9">
+        <div style="width:150px;height:330px;background:#005B52;display:flex">
+          <div style="width:64px;display:flex;flex-direction:column;align-items:center">
+            <div style="width:64px;height:70px;background:#99FFAA;border-bottom-right-radius:24px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:13px;box-sizing:border-box"><div style="width:22px;height:30px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#005B52"></div></div>
+            <div style="height:18px"></div>
+            <div style="width:46px;height:30px;border-radius:15px;background:#99FFAA;margin:7px 0"></div>
+            <div style="width:20px;height:20px;border-radius:5px;border:1.7px solid rgba(255,255,255,.72);margin:12px 0;box-sizing:border-box"></div>
+            <div style="width:20px;height:20px;border-radius:5px;border:1.7px solid rgba(255,255,255,.72);margin:12px 0;box-sizing:border-box"></div>
+          </div>
+          <div style="flex:1;background:#FDFCFA;border-top-left-radius:24px"></div>
+        </div>
+        <div style="width:170px;height:330px;background:#005B52;display:flex">
+          <div style="width:84px;display:flex;flex-direction:column;align-items:center">
+            <div style="width:84px;height:80px;background:#99FFAA;border-bottom-right-radius:24px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:15px;box-sizing:border-box"><div style="width:25px;height:34px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#005B52"></div></div>
+            <div style="height:16px"></div>
+            <div style="width:48px;height:30px;border-radius:15px;background:#99FFAA;margin-top:7px"></div>
+            <div style="font-size:10.5px;font-weight:500;color:#fff;margin-top:3px">Sale</div>
+            <div style="width:20px;height:20px;border-radius:5px;border:1.7px solid rgba(255,255,255,.72);margin:18px 0 3px;box-sizing:border-box"></div>
+            <div style="font-size:10.5px;font-weight:500;color:rgba(255,255,255,.72)">Products</div>
+          </div>
+          <div style="flex:1;background:#FDFCFA;border-top-left-radius:24px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dv-opt" id="1c">
+      <div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>Neon circle. Easier to tell apart from the rounded nav pill below it, so the two Neon shapes don't read as the same element.</div>
+      <div class="dv-card" style="display:flex;gap:1px;background:#D4CEC9">
+        <div style="width:150px;height:330px;background:#005B52;display:flex">
+          <div style="width:64px;display:flex;flex-direction:column;align-items:center;padding-top:10px">
+            <div style="width:40px;height:40px;border-radius:20px;background:#99FFAA;display:flex;align-items:center;justify-content:center"><div style="width:19px;height:26px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#005B52"></div></div>
+            <div style="height:18px"></div>
+            <div style="width:46px;height:30px;border-radius:15px;background:#99FFAA;margin:7px 0"></div>
+            <div style="width:20px;height:20px;border-radius:5px;border:1.7px solid rgba(255,255,255,.72);margin:12px 0;box-sizing:border-box"></div>
+            <div style="width:20px;height:20px;border-radius:5px;border:1.7px solid rgba(255,255,255,.72);margin:12px 0;box-sizing:border-box"></div>
+          </div>
+          <div style="flex:1;background:#FDFCFA;border-top-left-radius:24px"></div>
+        </div>
+        <div style="width:170px;height:330px;background:#005B52;display:flex">
+          <div style="width:84px;display:flex;flex-direction:column;align-items:center;padding-top:14px">
+            <div style="width:46px;height:46px;border-radius:23px;background:#99FFAA;display:flex;align-items:center;justify-content:center"><div style="width:22px;height:30px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#005B52"></div></div>
+            <div style="height:18px"></div>
+            <div style="width:48px;height:30px;border-radius:15px;background:#99FFAA;margin-top:7px"></div>
+            <div style="font-size:10.5px;font-weight:500;color:#fff;margin-top:3px">Sale</div>
+            <div style="width:20px;height:20px;border-radius:5px;border:1.7px solid rgba(255,255,255,.72);margin:18px 0 3px;box-sizing:border-box"></div>
+            <div style="font-size:10.5px;font-weight:500;color:rgba(255,255,255,.72)">Products</div>
+          </div>
+          <div style="flex:1;background:#FDFCFA;border-top-left-radius:24px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grp"><span style="font-size:10.5px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:#8A8175">App icon</span><span style="font-size:12px;color:#6B6459">Adaptive icon at 192, launcher at 56 and 40</span></div>
+
+    <div class="dv-opt" id="1d">
+      <div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>Trade Green ground, Neon M. Uses the same colours as the app frame, so the launcher icon matches the first screen.</div>
+      <div class="dv-card" style="padding:28px;display:flex;align-items:flex-end;gap:22px;background:#FDFCFA">
+        <div style="width:192px;height:192px;border-radius:44px;background:#005B52;display:flex;align-items:center;justify-content:center"><div style="width:82px;height:110px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#99FFAA"></div></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:56px;height:56px;border-radius:28px;background:#005B52;display:flex;align-items:center;justify-content:center"><div style="width:24px;height:32px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#99FFAA"></div></div><div style="font-size:11px;color:#1A1A1A">ShopMate</div></div>
+        <div style="width:40px;height:40px;border-radius:12px;background:#005B52;display:flex;align-items:center;justify-content:center;margin-bottom:22px"><div style="width:17px;height:23px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#99FFAA"></div></div>
+      </div>
+    </div>
+
+    <div class="dv-opt" id="1e">
+      <div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>Neon ground, Trade Green M. This is the sidebar tile enlarged. It stands out most on a busy home screen.</div>
+      <div class="dv-card" style="padding:28px;display:flex;align-items:flex-end;gap:22px;background:#FDFCFA">
+        <div style="width:192px;height:192px;border-radius:44px;background:#99FFAA;display:flex;align-items:center;justify-content:center"><div style="width:82px;height:110px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#005B52"></div></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:56px;height:56px;border-radius:28px;background:#99FFAA;display:flex;align-items:center;justify-content:center"><div style="width:24px;height:32px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#005B52"></div></div><div style="font-size:11px;color:#1A1A1A">ShopMate</div></div>
+        <div style="width:40px;height:40px;border-radius:12px;background:#99FFAA;display:flex;align-items:center;justify-content:center;margin-bottom:22px"><div style="width:17px;height:23px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#005B52"></div></div>
+      </div>
+    </div>
+
+    <div class="dv-opt" id="1f">
+      <div class="dv-olabel"><a class="dv-oid" href="#1f">1f</a>Receipt Beige ground, Trade Green M, enlarged so it runs off the bottom edge. Quieter, and closer to the "receipt" side of the brand.</div>
+      <div class="dv-card" style="padding:28px;display:flex;align-items:flex-end;gap:22px;background:#FDFCFA">
+        <div style="width:192px;height:192px;border-radius:44px;background:#D4CEC9;overflow:hidden;position:relative"><div style="position:absolute;left:44px;top:34px;width:120px;height:160px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#005B52"></div></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:56px;height:56px;border-radius:28px;background:#D4CEC9;overflow:hidden;position:relative"><div style="position:absolute;left:13px;top:10px;width:35px;height:47px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#005B52"></div></div><div style="font-size:11px;color:#1A1A1A">ShopMate</div></div>
+        <div style="width:40px;height:40px;border-radius:12px;background:#D4CEC9;overflow:hidden;position:relative;margin-bottom:22px"><div style="position:absolute;left:9px;top:7px;width:25px;height:34px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#005B52"></div></div>
+      </div>
+    </div>
+
+    <div class="grp"><span style="font-size:10.5px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:#8A8175">Splash</span><span style="font-size:12px;color:#6B6459">Shown while Room opens. No spinner; it's local and takes under a second.</span></div>
+
+    <div class="dv-opt" id="1g">
+      <div class="dv-olabel"><a class="dv-oid" href="#1g">1g</a>Phone. The mark alone in the centre, with the full lockup and tagline at the bottom.</div>
+      <div style="width:410px;height:864px;background:#1A1A1A;border-radius:48px;padding:10px;box-sizing:border-box">
+        <div style="width:390px;height:844px;border-radius:38px;overflow:hidden;background:#005B52;display:flex;flex-direction:column;align-items:center">
+          <div style="flex:1;display:flex;align-items:center;justify-content:center"><div style="width:96px;height:128px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#99FFAA"></div></div>
+          <div style="padding-bottom:64px;display:flex;flex-direction:column;align-items:flex-end">
+            <div style="width:180px;height:53px;position:relative">
+              <div style="position:absolute;left:0;top:0;width:40px;height:53px;-webkit-mask:url(assets/wordmark.png) 0 0/180px 53px no-repeat;mask:url(assets/wordmark.png) 0 0/180px 53px no-repeat;background:#99FFAA"></div>
+              <div style="position:absolute;left:40px;top:0;width:140px;height:53px;-webkit-mask:url(assets/wordmark.png) -40px 0/180px 53px no-repeat;mask:url(assets/wordmark.png) -40px 0/180px 53px no-repeat;background:#FDFCFA"></div>
+            </div>
+            <div style="font-family:'EB Garamond',Garamond,serif;font-style:italic;font-size:16px;color:#99FFAA;margin-top:-8px;padding-right:8px">uncompromising control</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dv-opt" id="1h">
+      <div class="dv-olabel"><a class="dv-oid" href="#1h">1h</a>Phone. The mark is enlarged until it runs off the screen, in a darker green. The lockup sits bottom-left where the eye lands.</div>
+      <div style="width:410px;height:864px;background:#1A1A1A;border-radius:48px;padding:10px;box-sizing:border-box">
+        <div style="width:390px;height:844px;border-radius:38px;overflow:hidden;background:#005B52;position:relative">
+          <div style="position:absolute;left:-120px;top:-40px;width:560px;height:748px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#014A43"></div>
+          <div style="position:absolute;left:32px;bottom:72px;display:flex;flex-direction:column;align-items:flex-end">
+            <div style="width:240px;height:70px;position:relative">
+              <div style="position:absolute;left:0;top:0;width:53px;height:70px;-webkit-mask:url(assets/wordmark.png) 0 0/240px 70px no-repeat;mask:url(assets/wordmark.png) 0 0/240px 70px no-repeat;background:#99FFAA"></div>
+              <div style="position:absolute;left:53px;top:0;width:187px;height:70px;-webkit-mask:url(assets/wordmark.png) -53px 0/240px 70px no-repeat;mask:url(assets/wordmark.png) -53px 0/240px 70px no-repeat;background:#FDFCFA"></div>
+            </div>
+            <div style="font-family:'EB Garamond',Garamond,serif;font-style:italic;font-size:20px;color:#99FFAA;margin-top:-10px;padding-right:10px">uncompromising control</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dv-opt" id="1i">
+      <div class="dv-olabel"><a class="dv-oid" href="#1i">1i</a>Tablet. The lockup is centred, with the version and store at the foot.</div>
+      <div style="width:1204px;height:844px;background:#1A1A1A;border-radius:26px;padding:12px;box-sizing:border-box">
+        <div style="width:1180px;height:820px;border-radius:16px;overflow:hidden;background:#005B52;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative">
+          <div style="display:flex;flex-direction:column;align-items:flex-end">
+            <div style="width:460px;height:135px;position:relative">
+              <div style="position:absolute;left:0;top:0;width:101px;height:135px;-webkit-mask:url(assets/wordmark.png) 0 0/460px 135px no-repeat;mask:url(assets/wordmark.png) 0 0/460px 135px no-repeat;background:#99FFAA"></div>
+              <div style="position:absolute;left:101px;top:0;width:359px;height:135px;-webkit-mask:url(assets/wordmark.png) -101px 0/460px 135px no-repeat;mask:url(assets/wordmark.png) -101px 0/460px 135px no-repeat;background:#FDFCFA"></div>
+            </div>
+            <div style="font-family:'EB Garamond',Garamond,serif;font-style:italic;font-size:34px;color:#99FFAA;margin-top:-18px;padding-right:20px">uncompromising control</div>
+          </div>
+          <div class="tnum" style="position:absolute;bottom:36px;font-size:12px;color:rgba(253,252,250,.6)">Mbare Market Stop · Till 1 · v3.1</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grp"><span style="font-size:10.5px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:#8A8175">Sign in</span><span style="font-size:12px;color:#6B6459">The keypad works. Any 4 digits open the till. Speculative until auth is scheduled.</span></div>
+
+    <div class="dv-opt" id="1j">
+      <div class="dv-olabel"><a class="dv-oid" href="#1j">1j</a>Phone. The green frame and lockup sit above, with the PIN on the white sheet. The sheet uses the same 24dp top-start corner as every screen.</div>
+      <div style="width:410px;height:864px;background:#1A1A1A;border-radius:48px;padding:10px;box-sizing:border-box">
+        <div style="width:390px;height:844px;border-radius:38px;overflow:hidden;background:#005B52;display:flex;flex-direction:column">
+          <div style="height:44px;flex:none;display:flex;align-items:center;padding:0 28px"><span class="tnum" style="font-size:14px;font-weight:500;color:#FDFCFA">08:31</span></div>
+          <div style="height:180px;flex:none;display:flex;flex-direction:column;justify-content:center;padding:0 28px">
+            <div style="display:flex;flex-direction:column;align-items:flex-end;align-self:flex-start">
+              <div style="width:200px;height:59px;position:relative">
+                <div style="position:absolute;left:0;top:0;width:44px;height:59px;-webkit-mask:url(assets/wordmark.png) 0 0/200px 59px no-repeat;mask:url(assets/wordmark.png) 0 0/200px 59px no-repeat;background:#99FFAA"></div>
+                <div style="position:absolute;left:44px;top:0;width:156px;height:59px;-webkit-mask:url(assets/wordmark.png) -44px 0/200px 59px no-repeat;mask:url(assets/wordmark.png) -44px 0/200px 59px no-repeat;background:#FDFCFA"></div>
+              </div>
+              <div style="font-family:'EB Garamond',Garamond,serif;font-style:italic;font-size:17px;color:#99FFAA;margin-top:-9px;padding-right:8px">uncompromising control</div>
+            </div>
+          </div>
+          <div style="flex:1;background:#FDFCFA;border-top-left-radius:24px;padding:32px 24px 0">
+            <div style="font-size:22px;font-weight:600;letter-spacing:-0.02em">Open the till</div>
+            <div style="font-size:14px;color:#6B6459;margin-top:6px">Mbare Market Stop · Till 2</div>
+            <div style="display:flex;gap:10px;margin-top:28px">
+              <sc-for list="{{ pinDots }}" as="p" hint-placeholder-count="4">
+                <div style="flex:1;height:52px;border-radius:12px;background:#F0EDE7;display:flex;align-items:center;justify-content:center"><div style="width:11px;height:11px;border-radius:6px;background:{{ p.c }}"></div></div>
+              </sc-for>
+            </div>
+            <div style="font-size:12px;margin-top:10px;color:{{ pinMsgColor }}">{{ pinMsg }}</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:22px">
+              <sc-for list="{{ pinKeys }}" as="k" hint-placeholder-count="12">
+                <div onClick="{{ k.onPress }}" class="tnum" style="height:52px;border-radius:12px;background:{{ k.bg }};display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;color:{{ k.fg }};cursor:pointer;user-select:none" style-active="background:#F0EDE7">{{ k.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dv-opt" id="1k">
+      <div class="dv-olabel"><a class="dv-oid" href="#1k">1k</a>Tablet. Green on the left with the lockup, PIN sheet on the right. The sheet is 480dp wide so the keypad keeps the same key size as the phone.</div>
+      <div style="width:1204px;height:844px;background:#1A1A1A;border-radius:26px;padding:12px;box-sizing:border-box">
+        <div style="width:1180px;height:820px;border-radius:16px;overflow:hidden;background:#005B52;display:flex">
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:56px">
+            <div style="display:flex;flex-direction:column;align-items:flex-end;align-self:flex-start">
+              <div style="width:340px;height:100px;position:relative">
+                <div style="position:absolute;left:0;top:0;width:75px;height:100px;-webkit-mask:url(assets/wordmark.png) 0 0/340px 100px no-repeat;mask:url(assets/wordmark.png) 0 0/340px 100px no-repeat;background:#99FFAA"></div>
+                <div style="position:absolute;left:75px;top:0;width:265px;height:100px;-webkit-mask:url(assets/wordmark.png) -75px 0/340px 100px no-repeat;mask:url(assets/wordmark.png) -75px 0/340px 100px no-repeat;background:#FDFCFA"></div>
+              </div>
+              <div style="font-family:'EB Garamond',Garamond,serif;font-style:italic;font-size:26px;color:#99FFAA;margin-top:-14px;padding-right:14px">uncompromising control</div>
+            </div>
+            <div class="tnum" style="font-size:13px;color:rgba(253,252,250,.72);display:flex;align-items:center;gap:7px"><div style="width:6px;height:6px;border-radius:3px;background:#E07B39"></div>2 sales held on this device from yesterday</div>
+          </div>
+          <div style="width:480px;flex:none;background:#FDFCFA;border-top-left-radius:24px;padding:72px 48px 0;box-sizing:border-box">
+            <div style="font-size:24px;font-weight:600;letter-spacing:-0.02em">Open the till</div>
+            <div style="font-size:14px;color:#6B6459;margin-top:6px">Mbare Market Stop · Till 1</div>
+            <div style="display:flex;gap:10px;margin-top:32px">
+              <sc-for list="{{ pinDots }}" as="p" hint-placeholder-count="4">
+                <div style="flex:1;height:52px;border-radius:12px;background:#F0EDE7;display:flex;align-items:center;justify-content:center"><div style="width:11px;height:11px;border-radius:6px;background:{{ p.c }}"></div></div>
+              </sc-for>
+            </div>
+            <div style="font-size:12px;margin-top:10px;color:{{ pinMsgColor }}">{{ pinMsg }}</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:26px">
+              <sc-for list="{{ pinKeys }}" as="k" hint-placeholder-count="12">
+                <div onClick="{{ k.onPress }}" class="tnum" style="height:56px;border-radius:12px;background:{{ k.bg }};display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;color:{{ k.fg }};cursor:pointer;user-select:none" style-active="background:#F0EDE7">{{ k.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grp"><span style="font-size:10.5px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:#8A8175">Receipt</span><span style="font-size:12px;color:#6B6459">The store is the headline. ShopMate signs off at the foot.</span></div>
+
+    <div class="dv-opt" id="1l">
+      <div class="dv-olabel"><a class="dv-oid" href="#1l">1l</a>58mm thermal print. Black only, with a small M beside the receipt number and a "Kept by ShopMate" line at the foot.</div>
+      <div style="padding:28px 40px;background:#D4CEC9;border-radius:8px">
+        <div class="tnum" style="width:232px;background:#FDFCFA;padding:22px 16px 26px;box-sizing:border-box;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;line-height:1.5;color:#1A1A1A;box-shadow:0 1px 2px rgba(0,0,0,.08)">
+          <div style="text-align:center;font-family:Inter,sans-serif;font-size:15px;font-weight:600">Mbare Market Stop</div>
+          <div style="text-align:center;color:#4A4A4A">Stand 14, Mbare · Till 1</div>
+          <div style="border-top:1px dashed #1A1A1A;margin:12px 0 8px"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between"><span>#0418-0212</span><div style="width:9px;height:12px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#1A1A1A"></div></div>
+          <div>7 Sep 2026 · 08:42</div>
+          <div style="border-top:1px dashed #1A1A1A;margin:8px 0"></div>
+          <sc-for list="{{ receiptLines }}" as="l" hint-placeholder-count="4">
+            <div style="display:flex;justify-content:space-between;gap:8px"><span>{{ l.name }}</span><span>{{ l.total }}</span></div>
+            <div style="color:#4A4A4A;margin-bottom:3px">  {{ l.qty }}</div>
+          </sc-for>
+          <div style="border-top:1px dashed #1A1A1A;margin:8px 0"></div>
+          <div style="display:flex;justify-content:space-between;font-weight:600;font-size:13px"><span>Total</span><span>$8.70</span></div>
+          <div style="display:flex;justify-content:space-between"><span>Cash</span><span>$10.00</span></div>
+          <div style="display:flex;justify-content:space-between"><span>Change</span><span>$1.30</span></div>
+          <div style="border-top:1px dashed #1A1A1A;margin:12px 0 14px"></div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:6px;font-family:Inter,sans-serif;font-size:10.5px;color:#4A4A4A"><div style="width:10px;height:14px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#1A1A1A"></div>Kept by ShopMate</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dv-opt" id="1m">
+      <div class="dv-olabel"><a class="dv-oid" href="#1m">1m</a>Shared receipt, sent as an image over WhatsApp. Trade Green header with a Neon M, white body, and the same lines as the print.</div>
+      <div style="padding:28px 40px;background:#D4CEC9;border-radius:8px">
+        <div class="tnum" style="width:320px;border-radius:18px;overflow:hidden;background:#FDFCFA;box-shadow:0 1px 3px rgba(0,0,0,.1)">
+          <div style="background:#005B52;padding:20px 20px 18px;display:flex;align-items:flex-start;gap:14px">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:#99FFAA">Receipt</div>
+              <div style="font-size:18px;font-weight:600;color:#FDFCFA;margin-top:6px;letter-spacing:-0.01em">Mbare Market Stop</div>
+              <div style="font-size:12px;color:rgba(253,252,250,.72);margin-top:2px">#0418-0212 · 7 Sep, 08:42</div>
+            </div>
+            <div style="width:24px;height:32px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#99FFAA;flex:none"></div>
+          </div>
+          <div style="padding:14px 20px 6px">
+            <sc-for list="{{ receiptLines }}" as="l" hint-placeholder-count="4">
+              <div style="display:flex;align-items:baseline;gap:10px;padding:7px 0;border-bottom:1px solid #D4CEC9">
+                <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:500">{{ l.name }}</div><div style="font-size:11.5px;color:#8A8175">{{ l.qty }}</div></div>
+                <div style="font-size:13.5px;font-weight:500">{{ l.total }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="padding:10px 20px 20px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:14px;color:#6B6459">Total</span><span style="font-size:24px;font-weight:600;letter-spacing:-0.02em">$8.70</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:12.5px;color:#6B6459;margin-top:4px"><span>Cash $10.00</span><span>Change $1.30</span></div>
+          </div>
+          <div style="border-top:1px solid #D4CEC9;padding:11px 20px;display:flex;align-items:center;gap:7px;font-size:11px;color:#8A8175"><div style="width:9px;height:12px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#005B52"></div>Kept by ShopMate</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grp"><span style="font-size:10.5px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:#8A8175">Owner digest</span><span style="font-size:12px;color:#6B6459">Ships beside the till app, so it has no rail. The mark in the header is what tells the owner which app this is.</span></div>
+
+    <div class="dv-opt" id="1n">
+      <div class="dv-olabel"><a class="dv-oid" href="#1n">1n</a>Phone. Trade Green M in the header, the hero card, then "Worth knowing". Content comes from the handoff.</div>
+      <div style="width:410px;height:864px;background:#1A1A1A;border-radius:48px;padding:10px;box-sizing:border-box">
+        <div style="width:390px;height:844px;border-radius:38px;overflow:hidden;background:#FDFCFA;display:flex;flex-direction:column">
+          <div style="height:44px;flex:none;display:flex;align-items:center;padding:0 28px"><span class="tnum" style="font-size:14px;font-weight:500">07:15</span></div>
+          <div style="height:60px;flex:none;display:flex;align-items:center;gap:12px;padding:0 20px;border-bottom:1px solid #D4CEC9">
+            <div style="width:20px;height:27px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#005B52;flex:none"></div>
+            <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600;letter-spacing:-0.01em">Mbare Market Stop</div><div style="font-size:11.5px;color:#6B6459">Tuesday, 8 September</div></div>
+          </div>
+          <div style="flex:1;overflow:auto;padding:16px 16px 40px">
+            <div style="border-radius:16px;background:#005B52;padding:18px;color:#FDFCFA">
+              <div style="font-size:11px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:#99FFAA">Yesterday</div>
+              <div class="tnum" style="font-size:34px;font-weight:600;letter-spacing:-0.02em;margin-top:8px">$412.60</div>
+              <div class="tnum" style="font-size:13px;color:rgba(253,252,250,.72);margin-top:3px">168 sales · closed 18:04</div>
+            </div>
+            <div style="font-size:10.5px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:#8A8175;margin:22px 0 8px">Worth knowing</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{ digestRows }}" as="d" hint-placeholder-count="3">
+                <div style="border-radius:14px;padding:13px;background:{{ d.bg }};border:1px solid {{ d.border }}">
+                  <div style="font-size:14px;font-weight:500;text-wrap:pretty">{{ d.title }}</div>
+                  <div style="font-size:12.5px;color:#6B6459;margin-top:3px;text-wrap:pretty">{{ d.body }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dv-opt" id="1o">
+      <div class="dv-olabel"><a class="dv-oid" href="#1o">1o</a>Tablet. A green header band with the Neon M. The hero and tills are on the left, "Worth knowing" on the right.</div>
+      <div style="width:1204px;height:844px;background:#1A1A1A;border-radius:26px;padding:12px;box-sizing:border-box">
+        <div style="width:1180px;height:820px;border-radius:16px;overflow:hidden;background:#005B52;display:flex;flex-direction:column">
+          <div style="height:76px;flex:none;display:flex;align-items:center;gap:14px;padding:0 32px">
+            <div style="width:24px;height:32px;-webkit-mask:url(assets/mark.png) center/contain no-repeat;mask:url(assets/mark.png) center/contain no-repeat;background:#99FFAA"></div>
+            <div style="flex:1"><div style="font-size:17px;font-weight:600;color:#FDFCFA;letter-spacing:-0.01em">Mbare Market Stop</div><div style="font-size:12px;color:rgba(253,252,250,.72)">Tuesday, 8 September</div></div>
+          </div>
+          <div style="flex:1;background:#FDFCFA;border-top-left-radius:24px;padding:28px 32px;display:grid;grid-template-columns:400px minmax(0,1fr);gap:32px;align-content:start">
+            <div style="display:flex;flex-direction:column;gap:22px">
+              <div style="border-radius:16px;background:#005B52;padding:22px;color:#FDFCFA">
+                <div style="font-size:11px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:#99FFAA">Yesterday</div>
+                <div class="tnum" style="font-size:44px;font-weight:600;letter-spacing:-0.02em;margin-top:10px">$412.60</div>
+                <div class="tnum" style="font-size:13px;color:rgba(253,252,250,.72);margin-top:3px">168 sales · closed 18:04</div>
+              </div>
+              <div>
+                <div style="font-size:10.5px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:#8A8175;margin-bottom:8px">Tills</div>
+                <div style="display:flex;flex-direction:column;gap:1px">
+                  <sc-for list="{{ tills }}" as="t" hint-placeholder-count="2">
+                    <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:#F0EDE7">
+                      <div style="width:7px;height:7px;border-radius:4px;background:{{ t.dot }}"></div>
+                      <div style="flex:1;font-size:14px;font-weight:500">{{ t.name }}</div>
+                      <div class="tnum" style="font-size:12.5px;color:#6B6459">{{ t.meta }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:10.5px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:#8A8175;margin-bottom:8px">Worth knowing</div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <sc-for list="{{ digestRows }}" as="d" hint-placeholder-count="3">
+                  <div style="border-radius:14px;padding:16px 18px;background:{{ d.bg }};border:1px solid {{ d.border }}">
+                    <div style="font-size:15px;font-weight:500;text-wrap:pretty">{{ d.title }}</div>
+                    <div style="font-size:13px;color:#6B6459;margin-top:4px;text-wrap:pretty">{{ d.body }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <p class="dv-next">Try next: "go with <a class="dv-oid" href="#1c">1c</a> on the rail and update the POS file" · "<a class="dv-oid" href="#1e">1e</a> as the icon, export at all launcher sizes" · "combine <a class="dv-oid" href="#1h">1h</a>'s scale with <a class="dv-oid" href="#1k">1k</a>"</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { pin: "", open: false };
+  press(k) {
+    if (this.state.open) return;
+    if (k === "del") return this.setState(s => ({ pin: s.pin.slice(0, -1) }));
+    if (this.state.pin.length >= 4) return;
+    const pin = this.state.pin + k;
+    this.setState({ pin });
+    if (pin.length === 4) {
+      setTimeout(() => this.setState({ open: true }), 250);
+      setTimeout(() => this.setState({ pin: "", open: false }), 1800);
+    }
+  }
+  renderVals() {
+    const { pin, open } = this.state;
+    const keys = ["1","2","3","4","5","6","7","8","9","","0","del"];
+    const ORANGE_SUB = "#FBF0E7";
+    return {
+      pinDots: [0,1,2,3].map(i => ({ c: i < pin.length ? (open ? "#005B52" : "#1A1A1A") : "#D4CEC9" })),
+      pinMsg: open ? "Opening the till" : "Enter your 4-digit till code",
+      pinMsgColor: open ? "#005B52" : "#8A8175",
+      pinKeys: keys.map(k => ({
+        label: k === "del" ? "⌫" : k,
+        bg: k === "" ? "transparent" : "#FDFCFA",
+        fg: k === "del" ? "#A89F94" : "#1A1A1A",
+        onPress: k === "" ? undefined : () => this.press(k),
+      })).map(k => ({ ...k, bg: k.label === "" ? "transparent" : "#FFFFFF" })),
+      receiptLines: [
+        { name: "Coke 500ml", qty: "2 × $1.10", total: "$2.20" },
+        { name: "Sugar 2kg", qty: "1 × $3.40", total: "$3.40" },
+        { name: "Bread loaf", qty: "1 × $1.50", total: "$1.50" },
+        { name: "Matches", qty: "4 × $0.40", total: "$1.60" },
+      ],
+      digestRows: [
+        { title: "Sugar 2kg has been empty since Tuesday", body: "About $18 of sales missed. It was your fourth-best seller last month.", bg: ORANGE_SUB, border: "#F2E0CF" },
+        { title: "Cooking oil cost rose 9% on 28 August", body: "Margin fell from 19% to 12%. Price hasn't moved since June.", bg: ORANGE_SUB, border: "#F2E0CF" },
+        { title: "Three short counts on the morning shift", body: "6 Sep, 2 Sep and 28 Aug. All on the same shift, $6.20 short yesterday.", bg: "#FBF9F6", border: "#D4CEC9" },
+      ],
+      tills: [
+        { name: "Till 1", meta: "closed 18:04 · synced", dot: "#005B52" },
+        { name: "Till 2", meta: "closed 17:52 · 2 sales held", dot: "#E07B39" },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

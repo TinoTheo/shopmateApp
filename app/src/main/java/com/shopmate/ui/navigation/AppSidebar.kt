@@ -14,11 +14,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,9 +40,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import com.shopmate.R
+import com.shopmate.ui.components.ShopMateMark
 import com.shopmate.ui.theme.CheckoutNeon
 import com.shopmate.ui.theme.ShopBlack
 import com.shopmate.ui.theme.ShopWhite
+import com.shopmate.ui.theme.TradeGreen
 import com.shopmate.ui.util.DeviceLayout
 
 /**
@@ -79,25 +81,29 @@ fun AppSidebar(
     Column(
         modifier = modifier
             .width(sidebarWidth(deviceLayout))
-            .padding(vertical = 14.dp),
+            .padding(top = if (compact) 10.dp else 14.dp, bottom = 14.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        // Brand mark (handoff 1c): a Neon circle, deliberately not the pill shape, so it can't be
+        // read as a selected destination. Not interactive — no ripple.
         Box(
             modifier = Modifier
-                .size(if (compact) 38.dp else 42.dp)
-                .clip(RoundedCornerShape(if (compact) 13.dp else 14.dp))
+                .size(if (compact) 40.dp else 46.dp)
+                .clip(CircleShape)
                 .background(CheckoutNeon),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(
-                Icons.Outlined.Storefront,
-                contentDescription = null,
-                tint = ShopBlack,
-                modifier = Modifier.size(if (compact) 22.dp else 24.dp),
+            ShopMateMark(
+                color = TradeGreen,
+                contentDescription = stringResource(R.string.app_name),
+                modifier = Modifier.size(
+                    width = if (compact) 19.dp else 22.dp,
+                    height = if (compact) 26.dp else 30.dp,
+                ),
             )
         }
 
-        Spacer(Modifier.height(if (compact) 20.dp else 22.dp))
+        Spacer(Modifier.height(18.dp))
 
         // Scrollable so all destinations stay reachable on short (landscape) screens;
         // Settings stays pinned below.

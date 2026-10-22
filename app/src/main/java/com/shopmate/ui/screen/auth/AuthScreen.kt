@@ -1,5 +1,6 @@
 package com.shopmate.ui.screen.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,13 +12,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Storefront
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -43,12 +44,12 @@ import com.shopmate.ui.components.FormMaxWidth
 import com.shopmate.ui.components.ShopMatePrimaryButton
 import com.shopmate.ui.components.ShopMateTextButton
 import com.shopmate.ui.components.ShopMateTextField
-import com.shopmate.ui.theme.CheckoutNeon
 import com.shopmate.ui.theme.ErrorRed
 import com.shopmate.ui.theme.Ink
 import com.shopmate.ui.theme.InkSecondary
 import com.shopmate.ui.theme.Spacing
 import com.shopmate.ui.theme.StockGreen
+import com.shopmate.ui.theme.TradeGreen
 
 @Composable
 fun AuthScreen(viewModel: AuthViewModel = hiltViewModel()) {
@@ -102,20 +103,21 @@ fun AuthScreen(viewModel: AuthViewModel = hiltViewModel()) {
     }
 }
 
+/** The stacked logo on Trade Green — the launcher icon's pairing, so sign-in reads as the same app. */
 @Composable
 private fun BrandMark() {
     Box(
         modifier = Modifier
-            .size(64.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(CheckoutNeon),
+            .size(88.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(TradeGreen),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            Icons.Outlined.Storefront,
-            contentDescription = null,
-            tint = Ink,
-            modifier = Modifier.size(34.dp),
+        Image(
+            painter = painterResource(R.drawable.ic_shopmate_stacked),
+            contentDescription = stringResource(R.string.app_name),
+            contentScale = ContentScale.Fit,
+            modifier = Modifier.width(60.dp),
         )
     }
 }
