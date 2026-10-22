@@ -56,6 +56,9 @@ data class RevenueTrend(
     val previousPeriodTotal: BigDecimal,
     val percentageChange: Float,      // +12.5 or -8.3
     val direction: TrendDirection,
-)
+) {
+    /** False when the comparison span sold nothing: "Nothing to compare with yet", never "+100%". */
+    val comparable: Boolean get() = previousPeriodTotal.signum() > 0
+}
 
 enum class TrendDirection { UP, DOWN, FLAT }

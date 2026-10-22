@@ -16,4 +16,9 @@ data class SaleEntity(
     @ColumnInfo(name = "cashier_name") val cashierName: String,
     @ColumnInfo(name = "created_at") val createdAt: Instant,
     @ColumnInfo(name = "synced_at") val syncedAt: Instant?,
+    /**
+     * The number the customer's paper receipt shows, when the sale was later renumbered because
+     * another till had already used it. Null for a sale that kept its first number.
+     */
+    @ColumnInfo(name = "original_receipt_number") val originalReceiptNumber: String? = null,
 )

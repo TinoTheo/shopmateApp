@@ -12,4 +12,6 @@ data class Sale(
     val items: List<SaleItem>,
     val createdAt: Instant,
     val syncedAt: Instant?,
+    /** Set only when the sale was renumbered: the number on the customer's paper receipt. */
+    val originalReceiptNumber: String? = null,
 )

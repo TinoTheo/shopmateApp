@@ -7,6 +7,8 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Box
@@ -33,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -48,6 +51,7 @@ import com.shopmate.ui.theme.ShopBlack
 import com.shopmate.ui.theme.ShopBlackSecondary
 import com.shopmate.ui.theme.ShopBlackTertiary
 import com.shopmate.ui.theme.NumberSmall
+import com.shopmate.ui.theme.NumberStyle
 import com.shopmate.ui.theme.ShopOffWhite
 import com.shopmate.ui.theme.ShopWhite
 import com.shopmate.ui.theme.StockOrange
@@ -77,6 +81,8 @@ fun PosTabletLayout(
     onCharge: () -> Unit,
     onApplyQuantity: () -> Unit,
     onSelectMethod: (PaymentMethod) -> Unit,
+    onDenomination: (BigDecimal) -> Unit,
+    onExact: () -> Unit,
     onNavigateToProducts: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -102,6 +108,8 @@ fun PosTabletLayout(
             onCharge = onCharge,
             onApplyQuantity = onApplyQuantity,
             onSelectMethod = onSelectMethod,
+            onDenomination = onDenomination,
+            onExact = onExact,
         )
     }
 }
@@ -210,6 +218,8 @@ private fun TicketPanel(
     onCharge: () -> Unit,
     onApplyQuantity: () -> Unit,
     onSelectMethod: (PaymentMethod) -> Unit,
+    onDenomination: (BigDecimal) -> Unit,
+    onExact: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -233,7 +243,7 @@ private fun TicketPanel(
             )
             Spacer(Modifier.weight(1f))
             Text(
-                text = stringResource(R.string.pos_items_n, state.cartItemCount),
+                text = pluralStringResource(R.plurals.pos_items, state.cartItemCount, state.cartItemCount),
                 fontSize = 12.sp,
                 color = ShopBlackTertiary,
             )
@@ -285,6 +295,8 @@ private fun TicketPanel(
             state = state,
             onApplyQuantity = onApplyQuantity,
             onSelectMethod = onSelectMethod,
+            onDenomination = onDenomination,
+            onExact = onExact,
         )
 
         // Number pad — always visible: quantity, manual price, cash change. Loose goods
@@ -326,10 +338,12 @@ private fun TicketPanel(
                 total = state.cartTotal,
                 enabled = state.canCharge,
                 onClick = onCharge,
-                label = if (state.phase == TicketPhase.DONE) {
-                    stringResource(R.string.pos_next_sale)
-                } else {
-                    null
+                label = when {
+                    state.phase == TicketPhase.DONE -> stringResource(R.string.pos_next_sale)
+                    // Disabled for want of cash: say what's missing, as the phone till does.
+                    state.phase == TicketPhase.TENDER && !state.canConfirmSale ->
+                        stringResource(R.string.checkout_confirm_need_cash)
+                    else -> null
                 },
             )
         }
@@ -345,6 +359,8 @@ private fun TicketPhaseBand(
     state: PosUiState,
     onApplyQuantity: () -> Unit,
     onSelectMethod: (PaymentMethod) -> Unit,
+    onDenomination: (BigDecimal) -> Unit,
+    onExact: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -358,7 +374,12 @@ private fun TicketPhaseBand(
                 pendingQuantity = state.pendingQuantity,
                 onApplyQuantity = onApplyQuantity,
             )
-            TicketPhase.TENDER -> TenderBlock(state = state, onSelectMethod = onSelectMethod)
+            TicketPhase.TENDER -> TenderBlock(
+                state = state,
+                onSelectMethod = onSelectMethod,
+                onDenomination = onDenomination,
+                onExact = onExact,
+            )
         }
     }
 }
@@ -405,13 +426,16 @@ private fun QuantityHintRow(
 }
 
 /**
- * TENDER: payment method, then the cash/change pair. Card and mobile-money **skip the cash
- * pair entirely** — there is no change to give, and a zeroed calculator would imply otherwise.
+ * TENDER: payment method, then the quick-cash notes and the cash/change pair. Card and
+ * mobile-money **skip the cash entirely** — there is no change to give, and a zeroed calculator
+ * would imply otherwise.
  */
 @Composable
 private fun TenderBlock(
     state: PosUiState,
     onSelectMethod: (PaymentMethod) -> Unit,
+    onDenomination: (BigDecimal) -> Unit,
+    onExact: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -427,10 +451,24 @@ private fun TenderBlock(
             }
         }
         if (state.showsCashPair) {
+            // The same notes as the phone till, in one line that scrolls rather than wraps,
+            // so the band keeps its height.
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                DenominationChip(label = stringResource(R.string.checkout_exact), onClick = onExact)
+                denominations.forEach { note ->
+                    DenominationChip(
+                        label = "${CurrencyFormatter.symbol}$note",
+                        onClick = { onDenomination(BigDecimal(note)) },
+                    )
+                }
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 TenderFigure(
                     label = stringResource(R.string.pos_cash_in),
-                    value = state.cashBuffer.ifEmpty { "—" },
+                    value = state.cashReceived?.let { CurrencyFormatter.format(it) } ?: "—",
                     modifier = Modifier.weight(1f),
                 )
                 TenderFigure(
@@ -467,19 +505,21 @@ private fun TenderFigure(
             )
             .padding(horizontal = 10.dp, vertical = 6.dp),
     ) {
-        Text(text = label, fontSize = 10.5.sp, color = ShopBlackTertiary)
+        Text(text = label, fontSize = 10.5.sp, color = ShopBlackTertiary, maxLines = 1)
         Text(
             text = value,
-            fontSize = 17.sp,
-            fontWeight = FontWeight.SemiBold,
-            fontFamily = null,
+            style = NumberStyle(16.sp, FontWeight.SemiBold),
             color = if (warning) StockOrange else ShopBlack,
+            maxLines = 1,
         )
     }
 }
 
 private val TICKET_PANEL_WIDTH = 240.dp
 
-/** Fixed so the pad below it never moves when the phase changes. */
-private val PHASE_BAND_HEIGHT = 84.dp
+/**
+ * Fixed so the pad below it never moves when the phase changes. Sized for the tallest phase,
+ * TENDER with cash: methods (38dp), notes (~44dp) and the cash/change pair (~56dp).
+ */
+private val PHASE_BAND_HEIGHT = 184.dp
 

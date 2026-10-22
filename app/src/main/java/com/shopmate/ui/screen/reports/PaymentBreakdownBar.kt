@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.shopmate.R
 import com.shopmate.domain.model.PaymentMethod
 import com.shopmate.ui.util.CurrencyFormatter
 import java.math.BigDecimal
@@ -42,7 +43,7 @@ fun PaymentBreakdownBar(
 
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            text = "Payments",
+            text = stringResource(R.string.reports_section_payments),
             style = MaterialTheme.typography.titleMedium,
         )
 
@@ -88,13 +89,13 @@ private fun PaymentLegendRow(method: PaymentMethod, amount: BigDecimal, percent:
             modifier = Modifier
                 .size(28.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(paymentColor(method).copy(alpha = 0.15f)),
+                .background(paymentColor(method).copy(alpha = 0.3f)),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = paymentIcon(method),
                 contentDescription = null,
-                tint = paymentColor(method),
+                tint = paymentIconTint(method),
                 modifier = Modifier.size(18.dp),
             )
         }

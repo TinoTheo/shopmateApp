@@ -22,6 +22,11 @@ data class ProductInsight(
      * hollow and the row reads "not enough history yet".
      */
     val confident: Boolean,
+    /**
+     * When it runs out, in Stock's words. The **only** run-out value the UI reads — list, detail,
+     * strip and caption all take it as-is, so they can never disagree.
+     */
+    val runOut: RunOut,
 ) {
     /** Not sold in 14+ days — visible, never urgent (CLAUDE.md § Severity). */
     val dormant: Boolean get() = (daysSinceLastSale ?: Int.MAX_VALUE) >= DORMANT_DAYS

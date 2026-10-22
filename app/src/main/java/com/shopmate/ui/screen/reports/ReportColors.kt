@@ -10,15 +10,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.shopmate.R
 import com.shopmate.domain.model.PaymentMethod
+import com.shopmate.ui.theme.ReceiptBeige
+import com.shopmate.ui.theme.ShopBlackTertiary
+import com.shopmate.ui.theme.TradeGreen
 
-// Payment method colours — functional per-method mapping for the breakdown bar (v2 allows these
-// as non-brand functional colours). Not used anywhere else.
+// Payment colours for the breakdown bar. Two-colour discipline, no new hues: cash is Trade
+// Green, mobile money Trade Green at 55%, card and bank Receipt Beige.
 internal fun paymentColor(method: PaymentMethod): Color = when (method) {
-    PaymentMethod.CASH -> Color(0xFF005B52)
-    PaymentMethod.ECOCASH -> Color(0xFF4CAF50)
-    PaymentMethod.MOBILE_MONEY -> Color(0xFF2196F3)
-    PaymentMethod.CARD -> Color(0xFF9C27B0)
-    PaymentMethod.BANK_TRANSFER -> Color(0xFFFF9800)
+    PaymentMethod.CASH -> TradeGreen
+    PaymentMethod.ECOCASH, PaymentMethod.MOBILE_MONEY -> TradeGreen.copy(alpha = 0.55f)
+    PaymentMethod.CARD, PaymentMethod.BANK_TRANSFER -> ReceiptBeige
+}
+
+/** The legend icon's tint. Receipt Beige is a fill, too light to draw an icon in. */
+internal fun paymentIconTint(method: PaymentMethod): Color = when (method) {
+    PaymentMethod.CARD, PaymentMethod.BANK_TRANSFER -> ShopBlackTertiary
+    else -> TradeGreen
 }
 
 internal fun paymentIcon(method: PaymentMethod): ImageVector = when (method) {

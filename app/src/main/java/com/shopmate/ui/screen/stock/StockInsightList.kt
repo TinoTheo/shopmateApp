@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.shopmate.R
@@ -29,7 +30,6 @@ import com.shopmate.ui.components.Severity
 import com.shopmate.ui.components.ShopMateSearchBar
 import com.shopmate.ui.components.StoppedChip
 import com.shopmate.ui.util.DeviceLayout
-import kotlin.math.roundToInt
 
 /**
  * The Stock list: the week-ahead strip, then four sections of [InsightRow]s carrying a
@@ -85,14 +85,14 @@ fun StockInsightList(
             item {
                 WeekAheadStrip(
                     countsByDay = state.weekAhead,
-                    summary = state.weekAheadSummary,
+                    summary = weekCaption(state.weekAhead, state.outOfStockCount),
                     deviceLayout = deviceLayout,
                     modifier = Modifier.padding(vertical = 12.dp),
                 )
             }
             state.sections.forEach { (section, rows) ->
                 item(key = "header-${section.name}") {
-                    SectionHeader(label = section.label(), count = rows.size)
+                    SectionHeader(label = section.label(rows.size))
                 }
                 items(rows, key = { it.insight.product.id }) { row ->
                     StockInsightRow(row = row, onClick = { onProductClick(row.insight.product) })
@@ -107,7 +107,7 @@ private fun StockInsightRow(row: StockRow, onClick: () -> Unit) {
     val insight = row.insight
     InsightRow(
         name = insight.product.name,
-        meta = insight.runwayText(),
+        meta = insight.runOut.label(),
         severity = when (row.section) {
             StockSection.RunsOutThisWeek -> Severity.Warning
             StockSection.Stopped -> Severity.Stopped
@@ -132,27 +132,30 @@ private fun StockInsightRow(row: StockRow, onClick: () -> Unit) {
     )
 }
 
+@Composable
+private fun StockSection.label(count: Int): String = stringResource(
+    when (this) {
+        StockSection.RunsOutThisWeek -> R.string.stock_section_week
+        StockSection.Stopped -> R.string.stock_section_out
+        StockSection.Healthy -> R.string.stock_section_in
+        StockSection.NotMoving -> R.string.stock_section_not_moving
+    },
+    count,
+)
+
 /**
- * The meta line. Never projects a run-out day from thin data — an item we cannot measure says
- * so plainly rather than borrowing a number it has not earned.
+ * "4 items run out in the next 7 days, the first tomorrow. 1 is already out." Names the first
+ * day only; the strip above shows the rest.
  */
 @Composable
-private fun ProductInsight.runwayText(): String = when {
-    outOfStock -> stringResource(R.string.stock_meta_out)
-    !confident -> stringResource(R.string.stock_meta_thin_history)
-    dormant -> stringResource(R.string.stock_meta_dormant, daysSinceLastSale ?: 0)
-    else -> {
-        val days = daysOfCover?.roundToInt() ?: 0
-        stringResource(R.string.stock_meta_days_left, days)
+private fun weekCaption(countsByDay: List<Int>, outCount: Int): String {
+    val total = countsByDay.sum()
+    val head = if (total == 0) {
+        stringResource(R.string.stock_week_caption_none)
+    } else {
+        val first = countsByDay.indexOfFirst { it > 0 }
+        pluralStringResource(R.plurals.stock_week_caption_first, total, total, stripWhen(first))
     }
+    val tail = if (outCount > 0) " " + pluralStringResource(R.plurals.stock_week_caption_out, outCount, outCount) else ""
+    return head + tail
 }
-
-@Composable
-private fun StockSection.label(): String = stringResource(
-    when (this) {
-        StockSection.RunsOutThisWeek -> R.string.stock_section_runs_out
-        StockSection.Stopped -> R.string.stock_section_stopped
-        StockSection.Healthy -> R.string.stock_section_healthy
-        StockSection.NotMoving -> R.string.stock_section_not_moving
-    }
-)

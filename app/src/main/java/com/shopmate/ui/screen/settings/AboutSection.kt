@@ -7,6 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.shopmate.BuildConfig
 import com.shopmate.R
 import com.shopmate.ui.theme.ShopBlackSecondary
 import com.shopmate.ui.theme.ShopBlackTertiary
@@ -22,6 +23,13 @@ fun AboutSection(appVersion: String) {
         )
         Text(
             stringResource(R.string.settings_version, appVersion),
+            style = MaterialTheme.typography.bodySmall,
+            color = ShopBlackTertiary,
+            modifier = androidx.compose.ui.Modifier.padding(top = 2.dp),
+        )
+        // Where uploads go. A system detail for the owner or support — it lives here, not on Sync.
+        Text(
+            stringResource(R.string.sync_connected_to, BuildConfig.SUPABASE_URL),
             style = MaterialTheme.typography.bodySmall,
             color = ShopBlackTertiary,
             modifier = androidx.compose.ui.Modifier.padding(top = 2.dp),

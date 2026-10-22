@@ -18,10 +18,14 @@ data class ProductVelocityRow(
     @ColumnInfo(name = "last_sale_at") val lastSaleAt: Long,
 )
 
-/** Last sale per product across all history — drives "not moving" independently of the window. */
+/**
+ * Last sale and units sold per product across all history — drives "not moving" and "sold since
+ * it was added" independently of the velocity window.
+ */
 data class ProductLastSaleRow(
     @ColumnInfo(name = "product_id") val productId: String,
     @ColumnInfo(name = "last_sale_at") val lastSaleAt: Long,
+    @ColumnInfo(name = "units_sold") val unitsSold: Double,
 )
 
 /**
@@ -50,7 +54,8 @@ interface StockInsightDao {
     @Query(
         """
         SELECT si.product_id AS product_id,
-               MAX(s.created_at) AS last_sale_at
+               MAX(s.created_at) AS last_sale_at,
+               SUM(si.quantity) AS units_sold
         FROM sale_items si
         INNER JOIN sales s ON si.sale_id = s.id
         GROUP BY si.product_id

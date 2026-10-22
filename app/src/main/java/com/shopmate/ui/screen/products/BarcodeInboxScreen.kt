@@ -17,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -95,11 +96,8 @@ private fun UnknownBarcodeCard(unknown: UnknownBarcode, onNameIt: () -> Unit) {
 @Composable
 private fun UnknownBarcode.metaLine(): String {
     val firstSeen = DATE.format(firstSeenAt.atZone(ZoneId.systemDefault()))
-    return if (lastTill != null) {
-        stringResource(R.string.barcode_inbox_meta_till, hits, firstSeen, lastTill)
-    } else {
-        stringResource(R.string.barcode_inbox_meta, hits, firstSeen)
-    }
+    val scanned = pluralStringResource(R.plurals.barcode_scanned, hits, hits, firstSeen)
+    return if (lastTill != null) stringResource(R.string.header_status_join, scanned, lastTill) else scanned
 }
 
 private val DATE: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM")

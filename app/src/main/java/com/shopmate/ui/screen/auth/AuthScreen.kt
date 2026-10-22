@@ -39,11 +39,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.collectAsState
 import com.shopmate.R
 import com.shopmate.data.auth.AuthMode
+import com.shopmate.ui.components.BrandBand
 import com.shopmate.ui.components.ConstrainedContent
 import com.shopmate.ui.components.FormMaxWidth
 import com.shopmate.ui.components.ShopMatePrimaryButton
 import com.shopmate.ui.components.ShopMateTextButton
 import com.shopmate.ui.components.ShopMateTextField
+import com.shopmate.ui.components.SignInBandHeight
 import com.shopmate.ui.theme.ErrorRed
 import com.shopmate.ui.theme.Ink
 import com.shopmate.ui.theme.InkSecondary
@@ -55,34 +57,33 @@ import com.shopmate.ui.theme.TradeGreen
 fun AuthScreen(viewModel: AuthViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsState()
 
-    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    // The band carries the logo, so the old tile is gone; the status bar sits on green.
+    BrandBand(bandHeight = SignInBandHeight) {
         ConstrainedContent(maxWidth = FormMaxWidth) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .imePadding()
-                    .padding(horizontal = 24.dp),
+                    .imePadding(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Spacer(Modifier.height(64.dp))
-                BrandMark()
-                Spacer(Modifier.height(24.dp))
                 Text(
-                    text = stringResource(R.string.auth_welcome),
+                    text = stringResource(if (state.isSignUp) R.string.auth_welcome else R.string.signin_title),
                     style = MaterialTheme.typography.displaySmall,
                     color = Ink,
                     textAlign = TextAlign.Center,
                 )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    text = stringResource(
-                        if (state.isSignUp) R.string.auth_subtitle_sign_up else R.string.auth_subtitle_sign_in,
-                    ),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = InkSecondary,
-                    textAlign = TextAlign.Center,
-                )
+                // "{store} · Till {n}" needs a store, which isn't known before sign-in, so signing
+                // in shows the title alone. Creating an account keeps its own line.
+                if (state.isSignUp) {
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = stringResource(R.string.auth_subtitle_sign_up),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = InkSecondary,
+                        textAlign = TextAlign.Center,
+                    )
+                }
                 Spacer(Modifier.height(28.dp))
 
                 when (state.mode) {
@@ -100,25 +101,6 @@ fun AuthScreen(viewModel: AuthViewModel = hiltViewModel()) {
                 Spacer(Modifier.height(32.dp))
             }
         }
-    }
-}
-
-/** The stacked logo on Trade Green — the launcher icon's pairing, so sign-in reads as the same app. */
-@Composable
-private fun BrandMark() {
-    Box(
-        modifier = Modifier
-            .size(88.dp)
-            .clip(RoundedCornerShape(24.dp))
-            .background(TradeGreen),
-        contentAlignment = Alignment.Center,
-    ) {
-        Image(
-            painter = painterResource(R.drawable.ic_shopmate_stacked),
-            contentDescription = stringResource(R.string.app_name),
-            contentScale = ContentScale.Fit,
-            modifier = Modifier.width(60.dp),
-        )
     }
 }
 

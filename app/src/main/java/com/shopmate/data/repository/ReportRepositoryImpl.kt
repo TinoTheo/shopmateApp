@@ -8,6 +8,7 @@ import com.shopmate.domain.model.DailyRevenue
 import com.shopmate.domain.model.HourlyRevenue
 import com.shopmate.domain.model.PaymentMethod
 import com.shopmate.domain.model.PeriodSummary
+import com.shopmate.domain.model.ReportWindow
 import com.shopmate.domain.model.RevenueTrend
 import com.shopmate.domain.model.TopProduct
 import com.shopmate.domain.model.TrendDirection
@@ -43,17 +44,16 @@ class ReportRepositoryImpl @Inject constructor(
         } ?: BigDecimal.ZERO
 
     override fun getPeriodSummary(
-        periodLabel: String,
-        startDate: LocalDate,
-        endDate: LocalDate,
-        comparisonStart: LocalDate,
-        comparisonEnd: LocalDate,
+        window: ReportWindow,
         topProductLimit: Int,
     ): Flow<PeriodSummary> {
+        val startDate = window.start
+        val endDate = window.end
         val startMs = startDate.startMillis()
         val endMs = endDate.endMillisExclusive()
-        val prevStartMs = comparisonStart.startMillis()
-        val prevEndMs = comparisonEnd.endMillisExclusive()
+        // Exact instants, not whole days: an open period stops at the same time of day.
+        val prevStartMs = window.comparisonStart.toEpochMilli()
+        val prevEndMs = window.comparisonEnd.toEpochMilli()
 
         val dailyFlow = reportDao.getDailyRevenues(startMs, endMs).map { rows ->
             rows.map { DailyRevenue(LocalDate.parse(it.saleDate), parseDecimal(it.totalRevenue)) }
@@ -80,7 +80,7 @@ class ReportRepositoryImpl @Inject constructor(
             val (previousTotal, colourByCategory) = comparison
 
             PeriodSummary(
-                periodLabel = periodLabel,
+                periodLabel = window.period.name,
                 startDate = startDate,
                 endDate = endDate,
                 totalRevenue = totalRevenue,

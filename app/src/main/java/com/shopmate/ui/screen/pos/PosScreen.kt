@@ -1,5 +1,6 @@
 package com.shopmate.ui.screen.pos
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -65,6 +66,11 @@ fun PosScreen(
             delay(700)
             if (highlightedProductId == productId) highlightedProductId = null
         }
+    }
+
+    // Back out of taking payment without losing the ticket: TENDER returns to SALE.
+    BackHandler(enabled = deviceLayout == DeviceLayout.EXPANDED && state.phase == TicketPhase.TENDER) {
+        viewModel.cancelTender()
     }
 
     LaunchedEffect(state.error) {
@@ -185,6 +191,8 @@ fun PosContent(
                         onCharge = onCharge,
                         onApplyQuantity = onApplyQuantity,
                         onSelectMethod = onSelectMethod,
+                        onDenomination = onDenomination,
+                        onExact = onExact,
                         onNavigateToProducts = onNavigateToProducts,
                     )
                 }

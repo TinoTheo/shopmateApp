@@ -1,10 +1,12 @@
 package com.shopmate.ui.util
 
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-/** Formats [LocalDate]/hour values for the Reports screen. */
+/** Formats dates, times and hours for Reports and Sync. */
 object DateFormatter {
 
     private val shortDate = DateTimeFormatter.ofPattern("d MMM", Locale.getDefault())
@@ -17,6 +19,15 @@ object DateFormatter {
     fun formatDayOfWeek(date: LocalDate): String = dayOfWeek.format(date)        // "Mon"
     fun formatMonthYear(date: LocalDate): String = monthYear.format(date)        // "June 2026"
     fun formatDayNumber(date: LocalDate): String = date.dayOfMonth.toString()    // "29"
+
+    private val clock = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
+    private val dayMonthClock = DateTimeFormatter.ofPattern("d MMM, HH:mm", Locale.getDefault())
+
+    /** "15:21" in this till's time zone. */
+    fun formatClock(at: Instant): String = clock.format(at.atZone(ZoneId.systemDefault()))
+
+    /** "22 Oct, 15:21". */
+    fun formatDayClock(at: Instant): String = dayMonthClock.format(at.atZone(ZoneId.systemDefault()))
 
     /** "9am", "12pm", "3pm". */
     fun formatHour(hour: Int): String {

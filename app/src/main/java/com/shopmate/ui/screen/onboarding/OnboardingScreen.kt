@@ -26,7 +26,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.shopmate.R
+import com.shopmate.ui.components.BrandBand
 import com.shopmate.ui.components.ConstrainedContent
+import com.shopmate.ui.components.OnboardingBandHeight
 import com.shopmate.ui.components.FormMaxWidth
 import com.shopmate.ui.components.ShopMatePrimaryButton
 import com.shopmate.ui.components.ShopMateTextField
@@ -43,24 +45,22 @@ fun OnboardingScreen(viewModel: OnboardingViewModel = hiltViewModel()) {
     var storeName by rememberSaveable { mutableStateOf("") }
     var currency by rememberSaveable { mutableStateOf("$") }
 
-    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    BrandBand(bandHeight = OnboardingBandHeight) {
         ConstrainedContent(maxWidth = FormMaxWidth) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .imePadding()
-                    .padding(horizontal = 24.dp),
+                    .imePadding(),
             ) {
-                Spacer(Modifier.height(64.dp))
                 Text(
-                    text = stringResource(R.string.onboarding_title),
+                    text = stringResource(R.string.onboard_title),
                     style = MaterialTheme.typography.displaySmall,
                     color = Ink,
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    text = stringResource(R.string.onboarding_subtitle),
+                    text = stringResource(R.string.onboard_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = InkSecondary,
                 )
@@ -75,7 +75,7 @@ fun OnboardingScreen(viewModel: OnboardingViewModel = hiltViewModel()) {
                     ShopMateTextField(
                         value = storeName,
                         onValueChange = { storeName = it },
-                        label = stringResource(R.string.onboarding_store_name),
+                        label = stringResource(R.string.onboard_shop_name),
                     )
                 }
 
@@ -90,7 +90,7 @@ fun OnboardingScreen(viewModel: OnboardingViewModel = hiltViewModel()) {
 
                 Spacer(Modifier.height(28.dp))
                 ShopMatePrimaryButton(
-                    text = stringResource(R.string.onboarding_create),
+                    text = stringResource(R.string.onboard_create),
                     onClick = { viewModel.createShop(orgName, storeName, currency) },
                     isLoading = state.isSubmitting,
                 )

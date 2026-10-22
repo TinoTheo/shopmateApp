@@ -8,7 +8,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -21,29 +20,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.shopmate.R
 import com.shopmate.domain.model.TopProduct
 import java.math.BigDecimal
 
 @Composable
 fun TopProductsList(
     products: List<TopProduct>,
-    periodLabel: String,
+    emptyText: String,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(text = "Best Sellers", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            Text(
-                text = periodLabel,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 2.dp),
-            )
-        }
+        Text(
+            text = stringResource(R.string.reports_section_best),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+        )
 
         if (products.isEmpty()) {
-            EmptyTopProducts()
+            EmptyTopProducts(emptyText)
             return@Column
         }
 
@@ -73,7 +70,7 @@ private fun StaggeredItem(index: Int, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun EmptyTopProducts() {
+private fun EmptyTopProducts(text: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -87,7 +84,7 @@ private fun EmptyTopProducts() {
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
-            text = "No sales in this period",
+            text = text,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

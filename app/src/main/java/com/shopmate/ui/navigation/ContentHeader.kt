@@ -26,6 +26,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.shopmate.ui.theme.NumberStyle
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.border
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -58,6 +62,8 @@ fun ContentHeader(
     showClock: Boolean = false,
     pendingSyncCount: Int? = null,
     failedSyncCount: Int = 0,
+    syncOnline: Boolean = true,
+    syncPaused: Boolean = false,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     Box(
@@ -89,7 +95,12 @@ fun ContentHeader(
             )
             Spacer(Modifier.weight(1f))
             if (pendingSyncCount != null) {
-                SyncStatusIndicator(pendingCount = pendingSyncCount, failedCount = failedSyncCount)
+                SyncStatusIndicator(
+                    pendingCount = pendingSyncCount,
+                    failedCount = failedSyncCount,
+                    online = syncOnline,
+                    paused = syncPaused,
+                )
                 Spacer(Modifier.width(6.dp))
             }
             actions()
@@ -136,31 +147,73 @@ private fun HeaderClock(modifier: Modifier = Modifier) {
 }
 
 /**
- * 6dp status dot + label, in order of what the cashier most needs to know:
- * - **N not sent** — the server refused uploads. A failure, so [ErrorRed] (§ Severity). Shown
- *   even while other uploads are waiting: a refused sale must never hide behind a queue.
- * - **N waiting** — held on this device until the next upload. Calm, tertiary.
- * - **Up to date** — nothing waiting and nothing refused. Trade Green dot.
+ * The header's sync status, built from segments (copy-pass handoff § 2):
+ * - **Offline** / **Paused** first, when the till can't send — a state, never an error, so a
+ *   hollow grey dot and no red.
+ * - **N waiting** — held on this device until the next upload. Grey dot.
+ * - **N not sent** — the store refused uploads. A failure, so [ErrorRed] dot and text at 500: the
+ *   only red in the header, never hidden behind a queue.
+ * - **Up to date** — nothing waiting, nothing refused, and able to send. Trade Green dot.
+ * Segments with a count of 0 are dropped.
  */
 @Composable
-private fun SyncStatusIndicator(pendingCount: Int, failedCount: Int, modifier: Modifier = Modifier) {
-    val (dot, label, labelColor) = when {
-        failedCount > 0 -> Triple(ErrorRed, stringResource(R.string.sync_header_failed, failedCount), ErrorRed)
-        pendingCount > 0 -> Triple(ShopBlackTertiary, stringResource(R.string.sync_pending, pendingCount), ShopBlackTertiary)
-        else -> Triple(TradeGreen, stringResource(R.string.sales_synced), ShopBlackTertiary)
+private fun SyncStatusIndicator(
+    pendingCount: Int,
+    failedCount: Int,
+    online: Boolean,
+    paused: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val lead = buildList {
+        when {
+            paused -> add(stringResource(R.string.header_status_paused))
+            !online -> add(stringResource(R.string.header_status_offline))
+        }
+        if (pendingCount > 0) add(pluralStringResource(R.plurals.header_status_waiting, pendingCount, pendingCount))
+    }.joinSegments()
+    val notSent = if (failedCount > 0) {
+        pluralStringResource(R.plurals.header_status_not_sent, failedCount, failedCount)
+    } else {
+        null
     }
+    val canSend = online && !paused
+
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            modifier = Modifier
-                .size(6.dp)
-                .clip(CircleShape)
-                .background(dot),
-        )
-        Spacer(Modifier.width(5.dp))
-        Text(
-            text = label,
-            fontSize = 11.sp,
-            color = labelColor,
-        )
+        when {
+            lead != null -> {
+                StatusDot(ShopBlackTertiary, hollow = !canSend)
+                Spacer(Modifier.width(5.dp))
+                Text(text = lead, style = NumberStyle(11.sp), color = ShopBlackTertiary)
+            }
+            notSent == null -> {
+                StatusDot(TradeGreen)
+                Spacer(Modifier.width(5.dp))
+                Text(text = stringResource(R.string.header_status_up_to_date), fontSize = 11.sp, color = ShopBlackTertiary)
+            }
+        }
+        if (notSent != null) {
+            if (lead != null) Text(text = " · ", fontSize = 11.sp, color = ShopBlackTertiary)
+            StatusDot(ErrorRed)
+            Spacer(Modifier.width(5.dp))
+            Text(text = notSent, style = NumberStyle(11.sp, FontWeight.Medium), color = ErrorRed)
+        }
     }
+}
+
+/** "Offline · 3 waiting" — or the single segment, or null when there is none. */
+@Composable
+private fun List<String>.joinSegments(): String? = when (size) {
+    0 -> null
+    1 -> first()
+    else -> stringResource(R.string.header_status_join, this[0], this[1])
+}
+
+@Composable
+private fun StatusDot(color: Color, hollow: Boolean = false) {
+    Box(
+        modifier = Modifier
+            .size(6.dp)
+            .clip(CircleShape)
+            .then(if (hollow) Modifier.border(1.dp, color, CircleShape) else Modifier.background(color)),
+    )
 }

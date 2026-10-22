@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -88,7 +89,7 @@ private fun BarcodeInboxCard(count: Int, onClick: () -> Unit) {
             .padding(14.dp),
     ) {
         Text(
-            text = stringResource(R.string.products_unknown_codes_title, count),
+            text = pluralStringResource(R.plurals.products_unnamed_codes, count, count),
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
             color = ShopBlack,
@@ -154,7 +155,7 @@ private fun ProductInsight.marginMeta(): String {
             R.string.products_meta_below_cost,
             CurrencyFormatter.format(product.costPrice),
         )
-        dormant -> stringResource(R.string.stock_meta_dormant, daysSinceLastSale ?: 0)
+        dormant -> pluralStringResource(R.plurals.runout_dormant, daysSinceLastSale ?: 0, daysSinceLastSale ?: 0)
         else -> stringResource(
             R.string.products_meta_cost,
             CurrencyFormatter.format(product.costPrice),

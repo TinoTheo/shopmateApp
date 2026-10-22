@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -66,7 +67,7 @@ private val PadMaxWidth = 320.dp
 
 
 /** The notes a Zimbabwean till actually sees. "Exact" is handled separately. */
-private val denominations = listOf(5, 10, 20, 50, 100)
+internal val denominations = listOf(5, 10, 20, 50, 100)
 
 /**
  * The payment moment, laid out the way a real till does it: choose the method, key the cash,
@@ -212,11 +213,7 @@ private fun CheckoutHeader(itemCount: Int, onDismiss: () -> Unit) {
                 color = Ink,
             )
             Text(
-                text = if (itemCount == 1) {
-                    stringResource(R.string.checkout_one_item)
-                } else {
-                    stringResource(R.string.checkout_items, itemCount)
-                },
+                text = pluralStringResource(R.plurals.pos_items, itemCount, itemCount),
                 style = MaterialTheme.typography.bodyMedium,
                 color = InkSecondary,
             )
@@ -387,8 +384,9 @@ private fun DenominationRow(
     }
 }
 
+/** One quick-cash button. Shared with the tablet ticket, so both tills offer the same notes. */
 @Composable
-private fun DenominationChip(label: String, onClick: () -> Unit) {
+internal fun DenominationChip(label: String, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(10.dp),

@@ -84,6 +84,8 @@ fun AppNavGraph(
     val storeName by appBarViewModel.storeName.collectAsState()
     val pendingSyncCount by appBarViewModel.pendingSyncCount.collectAsState()
     val failedSyncCount by appBarViewModel.failedSyncCount.collectAsState()
+    val syncOnline by appBarViewModel.online.collectAsState()
+    val syncPaused by appBarViewModel.paused.collectAsState()
     val homeTitle = storeName.ifBlank { stringResource(R.string.app_name) }
 
     val headerTitle = when (currentRoute) {
@@ -143,6 +145,8 @@ fun AppNavGraph(
                     showClock = deviceLayout == DeviceLayout.EXPANDED,
                     pendingSyncCount = pendingSyncCount,
                     failedSyncCount = failedSyncCount,
+                    syncOnline = syncOnline,
+                    syncPaused = syncPaused,
                 ) {
                     when (currentRoute) {
                         Screen.Pos.route -> IconButton(onClick = { navController.navigate(Screen.Sales.route) }) {
@@ -184,7 +188,7 @@ fun AppNavGraph(
                         }
                         composable(Screen.Reports.route) { ReportsScreen() }
                         composable(Screen.Sync.route) {
-                            SyncScreen(onOpenSettings = { navigateTopLevel(Screen.Settings) })
+                            SyncScreen(deviceLayout = deviceLayout)
                         }
                         composable(Screen.Settings.route) { SettingsScreen() }
                         composable(Screen.Categories.route) { CategoriesScreen() }
