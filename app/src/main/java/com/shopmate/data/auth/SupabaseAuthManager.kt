@@ -1,11 +1,14 @@
 package com.shopmate.data.auth
 
+import com.shopmate.data.remote.SessionStore
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.OtpType
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.providers.builtin.OTP
 import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -15,6 +18,7 @@ import javax.inject.Singleton
 @Singleton
 class SupabaseAuthManager @Inject constructor(
     private val auth: Auth,
+    private val sessionStore: SessionStore,
 ) : AuthManager {
 
     override val currentUserId: String?
@@ -64,8 +68,17 @@ class SupabaseAuthManager @Inject constructor(
         runCatching { auth.signOut() }
     }
 
-    override suspend fun getAccessToken(): String? =
-        auth.currentSessionOrNull()?.accessToken
+    override suspend fun hasUsableSession(): Boolean {
+        auth.awaitInitialization()
+        return auth.currentSessionOrNull() != null && !sessionStore.rejected.first()
+    }
+
+    override val needsReauth: Flow<Boolean> =
+        combine(auth.sessionStatus, sessionStore.rejected) { status, rejected ->
+            status !is SessionStatus.Authenticated || rejected
+        }
+
+    override suspend fun markSessionRejected() = sessionStore.markRejected()
 
     private fun Result<*>.toAuthResult(): AuthResult = fold(
         onSuccess = { AuthResult.Success },

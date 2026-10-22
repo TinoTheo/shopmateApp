@@ -15,9 +15,6 @@ datastore = "1.1.1"
 room = "2.7.0"
 coroutines = "1.9.0"
 workManager = "2.9.1"
-retrofit = "2.11.0"
-okhttp = "4.12.0"
-moshi = "1.15.1"
 supabase = "3.0.3"
 ktor = "3.0.3"
 kotlinxSerializationJson = "1.7.3"
@@ -69,22 +66,10 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 # WorkManager
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
 
-# Retrofit + OkHttp
-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
-retrofit-converter-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
-okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
-
-# Moshi
-moshi = { group = "com.squareup.moshi", name = "moshi", version.ref = "moshi" }
-moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version.ref = "moshi" }
-moshi-kotlin-codegen = { group = "com.squareup.moshi", name = "moshi-kotlin-codegen", version.ref = "moshi" }
-
 # Supabase (auth + postgrest sync target) — BOM pinned to the Kotlin 2.0.x-compatible line
 supabase-bom = { group = "io.github.jan-tennert.supabase", name = "bom", version.ref = "supabase" }
 supabase-postgrest = { group = "io.github.jan-tennert.supabase", name = "postgrest-kt" }
 supabase-auth = { group = "io.github.jan-tennert.supabase", name = "auth-kt" }
-supabase-realtime = { group = "io.github.jan-tennert.supabase", name = "realtime-kt" }
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 

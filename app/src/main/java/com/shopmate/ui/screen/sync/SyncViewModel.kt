@@ -5,17 +5,15 @@ import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.shopmate.BuildConfig
-import com.shopmate.data.remote.AuthTokenProvider
+import com.shopmate.data.auth.AuthManager
 import com.shopmate.domain.model.SyncEvent
 import com.shopmate.domain.repository.SyncRepository
 import com.shopmate.sync.SyncScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import java.time.Instant
 import javax.inject.Inject
 
@@ -46,11 +44,9 @@ enum class EventStatus { PENDING, SYNCED, FAILED }
 class SyncViewModel @Inject constructor(
     private val syncRepository: SyncRepository,
     private val syncScheduler: SyncScheduler,
-    private val authTokenProvider: AuthTokenProvider,
+    authManager: AuthManager,
     workManager: WorkManager,
 ) : ViewModel() {
-
-    private val hasToken = MutableStateFlow(false)
 
     private val manualWorkState = workManager
         .getWorkInfosForUniqueWorkFlow(SyncScheduler.MANUAL_WORK)
@@ -59,8 +55,8 @@ class SyncViewModel @Inject constructor(
         syncRepository.getPendingCount(),
         syncRepository.getRecentEvents(50),
         manualWorkState,
-        hasToken,
-    ) { pending, events, workInfos, token ->
+        authManager.needsReauth,
+    ) { pending, events, workInfos, needsReauth ->
         val displays = events.map { it.toDisplay() }
         SyncUiState(
             pendingCount = pending,
@@ -68,22 +64,14 @@ class SyncViewModel @Inject constructor(
                 .maxByOrNull { it.createdAt }?.createdAt,
             syncStatus = workInfos.toSyncStatus(),
             recentEvents = displays,
-            hasAuthToken = token,
+            hasAuthToken = !needsReauth,
             error = workInfos.firstOrNull { it.state == WorkInfo.State.FAILED }
                 ?.let { "Sync failed" },
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SyncUiState())
 
-    init {
-        refreshToken()
-    }
-
     fun syncNow() {
         syncScheduler.syncNow()
-    }
-
-    fun refreshToken() {
-        viewModelScope.launch { hasToken.value = authTokenProvider.hasToken() }
     }
 
     private fun SyncEvent.toDisplay() = SyncEventDisplay(

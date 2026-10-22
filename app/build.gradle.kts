@@ -12,6 +12,23 @@ val localProps = Properties().apply {
     rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
 }
 
+// Supabase project config lives in local.properties (never committed). The placeholder URL keeps
+// client creation valid on machines without keys; sync no-ops when signed out. A release build
+// refuses to use it — see verifyReleaseConfig below.
+val supabaseUrl: String? = localProps.getProperty("SUPABASE_URL")?.takeIf { it.isNotBlank() }
+val supabaseAnonKey: String? = localProps.getProperty("SUPABASE_ANON_KEY")?.takeIf { it.isNotBlank() }
+
+// Release signing, also from local.properties. The keystore path is relative to the project root.
+val releaseSigning: Map<String, String?> = listOf(
+    "RELEASE_STORE_FILE", "RELEASE_STORE_PASSWORD", "RELEASE_KEY_ALIAS", "RELEASE_KEY_PASSWORD",
+).associateWith { localProps.getProperty(it)?.takeIf { value -> value.isNotBlank() } }
+val hasReleaseSigning = releaseSigning.values.all { it != null }
+
+// Versioning lives in gradle.properties so a release bump is a one-line, reviewed change.
+// CI can override either with -Pshopmate.versionCode=… / -Pshopmate.versionName=….
+val appVersionCode = providers.gradleProperty("shopmate.versionCode").get().toInt()
+val appVersionName = providers.gradleProperty("shopmate.versionName").get()
+
 android {
     namespace = "com.shopmate"
     compileSdk = 35
@@ -20,26 +37,33 @@ android {
         applicationId = "com.shopmate"
         minSdk = 28
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField(
-            "String", "BASE_URL",
-            "\"${localProps.getProperty("BASE_URL", "http://10.0.2.2:8000/api/")}\""
-        )
-        // Supabase project config lives in local.properties (never committed). The placeholder
-        // URL keeps client creation valid on machines without keys; sync no-ops when signed out.
-        val supabaseUrl = localProps.getProperty("SUPABASE_URL")
-            ?.takeIf { it.isNotBlank() } ?: "https://placeholder.supabase.co"
-        val supabaseAnonKey = localProps.getProperty("SUPABASE_ANON_KEY")
-            ?.takeIf { it.isNotBlank() } ?: ""
-        buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"$supabaseAnonKey\"")
+        buildConfigField("String", "SUPABASE_URL", "\"${supabaseUrl ?: "https://placeholder.supabase.co"}\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${supabaseAnonKey.orEmpty()}\"")
+    }
+
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = rootProject.file(releaseSigning.getValue("RELEASE_STORE_FILE")!!)
+                storePassword = releaseSigning.getValue("RELEASE_STORE_PASSWORD")
+                keyAlias = releaseSigning.getValue("RELEASE_KEY_ALIAS")
+                keyPassword = releaseSigning.getValue("RELEASE_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+            if (hasReleaseSigning) signingConfig = signingConfigs.getByName("release")
         }
     }
 
@@ -88,7 +112,7 @@ dependencies {
     implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.compiler)
 
-    // DataStore (auth token + store id)
+    // DataStore (settings, Supabase session, active store)
     implementation(libs.androidx.datastore.preferences)
 
     // Room
@@ -102,22 +126,10 @@ dependencies {
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)
 
-    // Retrofit + OkHttp
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.converter.moshi)
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.logging.interceptor)
-
-    // Moshi
-    implementation(libs.moshi)
-    implementation(libs.moshi.kotlin)
-    ksp(libs.moshi.kotlin.codegen)
-
-    // Supabase (auth provider + postgrest sync target)
+    // Supabase (Auth + PostgREST; Ktor's OkHttp engine is its HTTP client)
     implementation(platform(libs.supabase.bom))
     implementation(libs.supabase.postgrest)
     implementation(libs.supabase.auth)
-    implementation(libs.supabase.realtime)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.kotlinx.serialization.json)
 
@@ -129,3 +141,22 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
+
+// A release that ships the placeholder Supabase project or no signature is broken in a way a
+// cashier finds out about, not the build. Fail it here instead — only when a release is built,
+// so debug builds on machines without keys keep working.
+val releaseConfigProblems: List<String> = buildList {
+    if (supabaseUrl == null) add("SUPABASE_URL is missing from local.properties")
+    if (supabaseAnonKey == null) add("SUPABASE_ANON_KEY is missing from local.properties")
+    releaseSigning.filterValues { it == null }.keys.forEach { add("$it is missing from local.properties") }
+}
+val verifyReleaseConfig by tasks.registering {
+    val problems = releaseConfigProblems
+    doLast {
+        if (problems.isNotEmpty()) {
+            val list = problems.joinToString(separator = "\n") { "  - $it" }
+            throw GradleException("Release build is not configured:\n$list")
+        }
+    }
+}
+tasks.matching { it.name == "preReleaseBuild" }.configureEach { dependsOn(verifyReleaseConfig) }

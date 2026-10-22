@@ -6,19 +6,16 @@ import android.net.NetworkCapabilities
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.shopmate.data.auth.AuthManager
 import com.shopmate.data.auth.StoreContext
 import com.shopmate.data.local.dao.CategoryDao
 import com.shopmate.data.local.dao.ProductDao
 import com.shopmate.data.local.dao.SaleDao
 import com.shopmate.data.local.dao.StockDeltaDao
 import com.shopmate.data.mapper.toDomain
-import com.shopmate.data.remote.AuthTokenProvider
+import com.shopmate.data.remote.ShopMateRemote
 import com.shopmate.data.remote.dto.SnapshotPayload
 import com.shopmate.data.remote.dto.StoreSnapshotRowDto
-import com.shopmate.data.remote.dto.SupabaseProductDto
-import com.shopmate.data.remote.mapper.toRow
-import com.shopmate.data.remote.mapper.toSaleItemRows
-import com.shopmate.data.remote.mapper.toSaleRow
 import com.shopmate.data.remote.mapper.toServerProductDto
 import com.shopmate.data.remote.mapper.toSnapshotSbDto
 import com.shopmate.domain.model.EventType
@@ -26,36 +23,33 @@ import com.shopmate.domain.repository.SyncRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.github.jan.supabase.exceptions.RestException
-import io.github.jan.supabase.postgrest.Postgrest
-import io.github.jan.supabase.postgrest.from
-import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.coroutines.flow.first
 import java.time.Instant
 
 /**
  * Periodic background sync (every 15 min via WorkManager, its periodic minimum). Pushes pending
- * sales, unsynced stock deltas, and a store snapshot to Supabase postgrest, then pulls server
+ * sales, unsynced stock deltas, and a store snapshot through [ShopMateRemote], then pulls server
  * product metadata. Signed out (or no active cloud store) → no-op success, offline-friendly.
  *
- * Uploads use upsert-with-ignoreDuplicates: still INSERT-only against RLS (ON CONFLICT DO
- * NOTHING — never update/delete), but safe to retry after a half-finished run.
+ * A `401` at any step stops the drain: nothing is marked failed, the session is flagged for
+ * re-authentication, and everything stays held on the device until the cashier signs in again.
  */
 @HiltWorker
 class SyncWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParams: WorkerParameters,
-    private val postgrest: Postgrest,
+    private val remote: ShopMateRemote,
     private val syncRepository: SyncRepository,
     private val saleDao: SaleDao,
     private val productDao: ProductDao,
     private val categoryDao: CategoryDao,
     private val stockDeltaDao: StockDeltaDao,
     private val storeContext: StoreContext,
-    private val authTokenProvider: AuthTokenProvider,
+    private val authManager: AuthManager,
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
-        if (!authTokenProvider.hasToken()) return Result.success()
+        if (!authManager.hasUsableSession()) return Result.success()
         val storeId = storeContext.getActiveStoreId() ?: return Result.success()
         if (!isNetworkAvailable()) return Result.retry()
 
@@ -65,6 +59,9 @@ class SyncWorker @AssistedInject constructor(
             syncSnapshot(storeId)
             pullServerUpdates(storeId)
             Result.success()
+        } catch (e: SessionRejected) {
+            authManager.markSessionRejected()
+            Result.success() // retrying with the same session would only be refused again
         } catch (e: Exception) {
             if (runAttemptCount < 3) Result.retry() else Result.failure()
         }
@@ -86,13 +83,9 @@ class SyncWorker @AssistedInject constructor(
         }
 
         try {
-            postgrest.from("sales").upsert(sales.map { it.toSaleRow(storeId) }) {
-                ignoreDuplicates = true
-            }
-            postgrest.from("sale_items").upsert(sales.flatMap { it.toSaleItemRows() }) {
-                ignoreDuplicates = true
-            }
+            remote.upsertSales(sales, storeId)
         } catch (e: RestException) {
+            if (e.statusCode == 401) throw SessionRejected()
             if (e.statusCode in 400..499) {
                 pendingSaleEvents.forEach {
                     syncRepository.markFailed(it.id, "Supabase ${e.statusCode}: ${e.error}")
@@ -114,10 +107,9 @@ class SyncWorker @AssistedInject constructor(
         if (unsynced.isEmpty()) return
 
         try {
-            postgrest.from("stock_deltas").upsert(unsynced.map { it.toRow(storeId) }) {
-                ignoreDuplicates = true
-            }
+            remote.upsertStockDeltas(unsynced, storeId)
         } catch (e: RestException) {
+            if (e.statusCode == 401) throw SessionRejected()
             if (e.statusCode in 400..499) return // schema/RLS rejection — leave flagged locally
             throw e
         }
@@ -146,8 +138,9 @@ class SyncWorker @AssistedInject constructor(
         )
 
         try {
-            postgrest.from("store_snapshots").insert(row)
+            remote.insertSnapshot(row)
         } catch (e: RestException) {
+            if (e.statusCode == 401) throw SessionRejected()
             if (e.statusCode in 400..499) {
                 coveredEvents.forEach {
                     syncRepository.markFailed(it.id, "Supabase ${e.statusCode}: ${e.error}")
@@ -160,19 +153,12 @@ class SyncWorker @AssistedInject constructor(
     }
 
     private suspend fun pullServerUpdates(storeId: String) {
-        // Numeric columns cast to text server-side so BigDecimal strings survive the round trip.
         val rows = try {
-            postgrest.from("products")
-                .select(
-                    Columns.raw("id,name,selling_price::text,cost_price::text,stock_quantity,updated_at")
-                ) {
-                    filter { eq("store_id", storeId) }
-                }
-                .decodeList<SupabaseProductDto>()
+            remote.fetchProducts(storeId)
         } catch (e: RestException) {
             return // pull is best-effort; push already succeeded
         }
-        rows.forEach { ConflictResolver.resolveProduct(it.toServerProductDto(), productDao) }
+        rows.forEach { ConflictResolver.resolveProduct(it.toServerProductDto(), storeId, productDao) }
     }
 
     private fun isNetworkAvailable(): Boolean {
@@ -181,4 +167,7 @@ class SyncWorker @AssistedInject constructor(
         val capabilities = cm.getNetworkCapabilities(network) ?: return false
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
+
+    /** The server refused the session (`401`). Unwinds the whole drain, not just one step. */
+    private class SessionRejected : Exception()
 }
