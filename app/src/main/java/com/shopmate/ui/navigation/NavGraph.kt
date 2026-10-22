@@ -83,6 +83,7 @@ fun AppNavGraph(
     // keep their own specific titles (they have a back arrow).
     val storeName by appBarViewModel.storeName.collectAsState()
     val pendingSyncCount by appBarViewModel.pendingSyncCount.collectAsState()
+    val failedSyncCount by appBarViewModel.failedSyncCount.collectAsState()
     val homeTitle = storeName.ifBlank { stringResource(R.string.app_name) }
 
     val headerTitle = when (currentRoute) {
@@ -141,6 +142,7 @@ fun AppNavGraph(
                     onBack = { navController.navigateUp() },
                     showClock = deviceLayout == DeviceLayout.EXPANDED,
                     pendingSyncCount = pendingSyncCount,
+                    failedSyncCount = failedSyncCount,
                 ) {
                     when (currentRoute) {
                         Screen.Pos.route -> IconButton(onClick = { navController.navigate(Screen.Sales.route) }) {

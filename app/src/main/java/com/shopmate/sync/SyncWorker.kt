@@ -21,6 +21,9 @@ import com.shopmate.data.remote.mapper.toServerProductDto
 import com.shopmate.data.remote.mapper.toSnapshotSbDto
 import com.shopmate.domain.model.DeltaReason
 import com.shopmate.domain.model.EventType
+import com.shopmate.domain.model.Sale
+import com.shopmate.domain.model.SyncEvent
+import com.shopmate.domain.repository.SaleRepository
 import com.shopmate.domain.repository.SyncRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -42,6 +45,7 @@ class SyncWorker @AssistedInject constructor(
     @Assisted workerParams: WorkerParameters,
     private val remote: ShopMateRemote,
     private val syncRepository: SyncRepository,
+    private val saleRepository: SaleRepository,
     private val saleDao: SaleDao,
     private val productDao: ProductDao,
     private val categoryDao: CategoryDao,
@@ -86,23 +90,58 @@ class SyncWorker @AssistedInject constructor(
 
         try {
             remote.upsertSales(sales, storeId)
+            val now = Instant.now().toEpochMilli()
+            saleByEvent.forEach { (event, sale) ->
+                syncRepository.markSynced(event.id)
+                sale?.let { saleDao.markSynced(it.id, now) }
+            }
+            return
         } catch (e: RestException) {
             if (e.statusCode == 401) throw SessionRejected()
-            if (e.statusCode in 400..499) {
-                pendingSaleEvents.forEach {
-                    syncRepository.markFailed(it.id, "Supabase ${e.statusCode}: ${e.error}")
-                }
-                return
-            }
-            throw e
+            if (e.statusCode !in 400..499) throw e
         }
 
-        val now = Instant.now().toEpochMilli()
+        // The batch was refused, and one INSERT is all-or-nothing: send each sale on its own so
+        // the one the server objects to can't hold back the rest.
         saleByEvent.forEach { (event, sale) ->
-            syncRepository.markSynced(event.id)
-            sale?.let { saleDao.markSynced(it.id, now) }
+            if (sale == null) syncRepository.markSynced(event.id) else uploadSale(event, sale, storeId)
         }
     }
+
+    /**
+     * One sale, alone. A sale refused because its receipt number is already taken in the store
+     * (issued before numbers carried a till code, e.g. by a reinstalled till) is renumbered from
+     * this till and sent once more. Any other refusal marks it failed, which the header and the
+     * Sync screen both show.
+     */
+    private suspend fun uploadSale(event: SyncEvent, sale: Sale, storeId: String) {
+        var current = sale
+        var renumbered = false
+        while (true) {
+            try {
+                remote.upsertSales(listOf(current), storeId)
+                syncRepository.markSynced(event.id)
+                saleDao.markSynced(current.id, Instant.now().toEpochMilli())
+                return
+            } catch (e: RestException) {
+                if (e.statusCode == 401) throw SessionRejected()
+                if (e.statusCode !in 400..499) throw e
+                if (!renumbered && e.isDuplicateReceiptNumber()) {
+                    current = saleRepository.renumber(current.id) ?: run {
+                        syncRepository.markSynced(event.id) // the sale is gone; nothing to send
+                        return
+                    }
+                    renumbered = true
+                } else {
+                    syncRepository.markFailed(event.id, "Supabase ${e.statusCode}: ${e.error}")
+                    return
+                }
+            }
+        }
+    }
+
+    private fun RestException.isDuplicateReceiptNumber(): Boolean =
+        statusCode == 409 && "receipt_number" in "$error $description $message"
 
     /**
      * Sale movements and every other movement go up as separate requests. RLS lets any member

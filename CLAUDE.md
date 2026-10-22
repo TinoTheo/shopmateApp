@@ -472,7 +472,7 @@ data class CartItem(
 
 data class Sale(
     val id: String,
-    val receiptNumber: String,
+    val receiptNumber: String,       // SM-YYYYMMDD-TTT-XXXX: day, till code, daily sequence
     val totalAmount: BigDecimal,
     val paymentMethod: PaymentMethod,
     val cashierName: String,
@@ -770,6 +770,17 @@ com.shopmate/
   is enqueued on every one of these, so a cashier never needs "Sync now": checkout
   (`SalesSyncWorker`), the network returning (`NetworkMonitor`), and the till becoming able
   to upload again — sign-in, re-sign-in, store picked (`SessionSyncTrigger`).
+- **Receipt numbers are unique per store on the server** (`sales_store_id_receipt_number_key`),
+  and each till counts its own receipts from 0001 every day. So every number carries the
+  till's code — `SM-20261022-K7Q-0001` — generated once per install by `TillCode` (three
+  characters, no 0/O or 1/I). A reinstall gets a new code, so its fresh 0001 can't collide.
+- **A refused sale batch is retried one sale at a time**, so one bad sale can't hold back the
+  rest. A sale refused because its number is already taken (issued before numbers carried a
+  till code) is renumbered from this till by `SaleRepository.renumber()` — same date, ledger
+  notes follow — and sent once more. Anything else refused is marked failed.
+- **A refused upload is never hidden.** The header shows "N not sent" in `ErrorRed` ahead of
+  "N waiting", and the Sync screen says what happened and offers "Send again". "Up to date"
+  means nothing is waiting **and** nothing was refused.
 - **Stock movements upload as two requests**: SALE movements, then everything else. RLS
   lets any member insert SALE movements but only owners and managers insert the rest, and
   one INSERT is all-or-nothing — a single batch would let one cashier restock hold back

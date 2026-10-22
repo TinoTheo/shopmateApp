@@ -19,6 +19,10 @@ interface SyncEventDao {
     @Query("SELECT COUNT(*) FROM sync_events WHERE synced = 0 AND failed = 0")
     fun getPendingCount(): Flow<Int>
 
+    /** Uploads the server refused. Never zero just because nothing is waiting. */
+    @Query("SELECT COUNT(*) FROM sync_events WHERE failed = 1")
+    fun getFailedCount(): Flow<Int>
+
     @Query("UPDATE sync_events SET synced = 1 WHERE id = :id")
     suspend fun markSynced(id: String)
 

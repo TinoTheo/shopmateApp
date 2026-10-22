@@ -49,4 +49,7 @@ interface SaleDao {
 
     @Query("UPDATE sales SET synced_at = :syncedAt WHERE id = :id")
     suspend fun markSynced(id: String, syncedAt: Long)
+
+    @Query("UPDATE sales SET receipt_number = :receiptNumber WHERE id = :id")
+    suspend fun updateReceiptNumber(id: String, receiptNumber: String)
 }

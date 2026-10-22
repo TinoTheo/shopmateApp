@@ -38,6 +38,8 @@ import java.time.Instant
 @Composable
 fun SyncStatusCard(
     pendingCount: Int,
+    /** Uploads the server refused. Takes precedence: it is the one state that needs a person. */
+    failedCount: Int,
     lastSyncedAt: Instant?,
     isError: Boolean,
     errorMessage: String?,
@@ -50,6 +52,15 @@ fun SyncStatusCard(
     data class State(val bg: Color, val icon: ImageVector, val iconTint: Color, val title: String, val titleColor: Color, val subtitle: String)
 
     val state = when {
+        failedCount > 0 -> State(
+            bg = Color(0xFFFFEBEE),
+            icon = Icons.Outlined.CloudOff,
+            iconTint = ErrorRed,
+            title = if (failedCount == 1) stringResource(R.string.sync_failed_one)
+            else stringResource(R.string.sync_failed_many, failedCount),
+            titleColor = ErrorRed,
+            subtitle = stringResource(R.string.sync_failed_hint),
+        )
         isError -> State(
             bg = Color(0xFFFFEBEE),
             icon = Icons.Outlined.CloudOff,

@@ -21,6 +21,12 @@ class SyncRepositoryImpl @Inject constructor(
     override fun getPendingCount(): Flow<Int> =
         syncEventDao.getPendingCount()
 
+    override fun getFailedCount(): Flow<Int> =
+        syncEventDao.getFailedCount()
+
+    override suspend fun retryFailed() =
+        syncEventDao.retryFailed()
+
     override fun getPendingEvents(): Flow<List<SyncEvent>> =
         syncEventDao.getPending().map { list -> list.map { it.toDomain() } }
 
