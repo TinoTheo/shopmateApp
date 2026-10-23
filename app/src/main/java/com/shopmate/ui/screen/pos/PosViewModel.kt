@@ -11,6 +11,8 @@ import com.shopmate.domain.model.SaleItem
 import com.shopmate.domain.repository.BarcodeRepository
 import com.shopmate.domain.repository.CategoryRepository
 import com.shopmate.domain.repository.ProductRepository
+import com.shopmate.domain.model.LicenceState
+import com.shopmate.domain.repository.LicenceRepository
 import com.shopmate.domain.repository.SaleRepository
 import com.shopmate.domain.util.ReceiptNumberGenerator
 import com.shopmate.scan.ScanSource
@@ -23,6 +25,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
@@ -117,7 +120,23 @@ class PosViewModel @Inject constructor(
     private val receiptNumberGenerator: ReceiptNumberGenerator,
     private val barcodeRepository: BarcodeRepository,
     private val scanSource: ScanSource,
+    licences: LicenceRepository,
 ) : ViewModel() {
+
+    /**
+     * Where the plan stands for this till (CLAUDE.md § Licensing). The POS shows it only in grace
+     * and after; the owner hears about an ending plan in Settings, not the cashier at the till.
+     * Null until the licence has been read once — and an unread licence never blocks a sale.
+     */
+    val licenceState: StateFlow<LicenceState?> = licences.licence
+        .map { it?.state() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    private fun salesBlocked(): Boolean {
+        if (licenceState.value?.blocksNewSales != true) return false
+        _error.value = LICENCE_ENDED_MESSAGE
+        return true
+    }
 
     /** Number pad state lives together so mode transitions are atomic. */
     private data class PadState(
@@ -325,6 +344,7 @@ class PosViewModel @Inject constructor(
 
     fun openCheckout() {
         if (_cartItems.value.isEmpty()) return
+        if (salesBlocked()) return
         commitNumberPad()
         _padState.value = PadState()
         _checkout.value = CheckoutState()   // every sale starts at Cash, nothing tendered
@@ -400,6 +420,7 @@ class PosViewModel @Inject constructor(
         when (_phase.value) {
             TicketPhase.SALE -> {
                 if (_cartItems.value.isEmpty()) return
+                if (salesBlocked()) return
                 _padState.value = PadState()          // the pad's destination becomes cash
                 _checkout.value = CheckoutState()      // every sale starts at Cash, nothing tendered
                 _phase.value = TicketPhase.TENDER
@@ -558,6 +579,7 @@ class PosViewModel @Inject constructor(
 
     fun completeSale(paymentMethod: PaymentMethod) {
         if (_isProcessingSale.value) return
+        if (salesBlocked()) return
         val cart = _cartItems.value
         if (cart.isEmpty()) return
 
@@ -628,6 +650,10 @@ class PosViewModel @Inject constructor(
         private const val UNKNOWN_CODE_MESSAGE =
             "The sale continues. The code is saved to unknown codes -- name it when you have a minute."
         private const val SUCCESS_FLASH_MS = 3_000L
+
+        /** Says what stopped and what still happens: sales already taken keep sending. */
+        private const val LICENCE_ENDED_MESSAGE =
+            "Your plan has ended, so this till can't take new sales. Sales already taken still send."
         private const val MAX_QTY_DIGITS = 4
         private const val MAX_MONEY_DIGITS = 9
     }

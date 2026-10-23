@@ -111,7 +111,7 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private fun refreshStores() {
+    fun refreshStores() {
         viewModelScope.launch {
             userEmail.value = authManager.currentUserEmail
             runCatching { storeRepository.accessibleStores() }

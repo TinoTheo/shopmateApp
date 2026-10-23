@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.shopmate.data.auth.AuthManager
 import com.shopmate.data.auth.StoreContext
 import com.shopmate.domain.repository.SettingsRepository
+import com.shopmate.domain.repository.StoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -25,6 +26,7 @@ enum class SessionState { LOADING, SIGNED_OUT, NEEDS_ONBOARDING, READY }
 class RootViewModel @Inject constructor(
     private val authManager: AuthManager,
     private val storeContext: StoreContext,
+    private val storeRepository: StoreRepository,
     settings: SettingsRepository,
 ) : ViewModel() {
 
@@ -45,16 +47,15 @@ class RootViewModel @Inject constructor(
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SessionState.LOADING)
 
     /**
-     * On sign-in with no active store yet, adopt the first accessible store (RLS-scoped) before
-     * deciding between onboarding and the main app. A brand-new owner has none → onboarding.
+     * On sign-in with no active store yet, go back to the store this till's data belongs to, or
+     * the member's first store (RLS-scoped), before deciding between onboarding and the main app.
+     * A brand-new owner has none → onboarding. So does a member whose stores don't include this
+     * till's while it still holds unsent sales: those are never moved to another store.
      */
     private fun resolveStoreThenObserve(): Flow<SessionState> = flow {
         emit(SessionState.LOADING)
         if (storeContext.getActiveStoreId() == null) {
-            runCatching { storeContext.fetchAccessibleStores() }
-                .getOrDefault(emptyList())
-                .firstOrNull()
-                ?.let { storeContext.setActiveStoreId(it.id) }
+            storeRepository.resolveOnSignIn()
         }
         emitAll(
             storeContext.activeStoreIdFlow.map { activeId ->

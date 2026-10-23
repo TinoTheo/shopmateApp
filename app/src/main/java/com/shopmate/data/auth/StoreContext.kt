@@ -37,15 +37,35 @@ class StoreContext @Inject constructor(
     suspend fun getActiveStoreId(): String? =
         dataStore.data.first()[ACTIVE_STORE_ID_KEY]
 
+    /**
+     * Also records [storeId] as the store this till's local data belongs to. Callers make that
+     * true first — see StoreRepositoryImpl.moveTill, which clears the till before a real move.
+     */
     suspend fun setActiveStoreId(storeId: String) {
-        dataStore.edit { it[ACTIVE_STORE_ID_KEY] = storeId }
+        dataStore.edit {
+            it[ACTIVE_STORE_ID_KEY] = storeId
+            it[LOCAL_DATA_STORE_ID_KEY] = storeId
+        }
+    }
+
+    /**
+     * The store this till's Room data belongs to. Kept through sign-out, so the next sign-in can
+     * go back to it rather than upload one store's sales as another's. Tills from before this
+     * key existed fall back to the active store.
+     */
+    suspend fun localDataStoreId(): String? {
+        val prefs = dataStore.data.first()
+        return prefs[LOCAL_DATA_STORE_ID_KEY] ?: prefs[ACTIVE_STORE_ID_KEY]
     }
 
     suspend fun clearActiveStore() {
         dataStore.edit { it.remove(ACTIVE_STORE_ID_KEY) }
     }
 
-    /** First-time owner setup — server-side RPC creates org + store atomically. */
+    /**
+     * First-time owner setup — server-side RPC creates org + store (and its trial licence)
+     * atomically. Returns the store id; StoreRepository moves the till to it.
+     */
     suspend fun createOrganizationWithStore(
         orgName: String,
         storeName: String,
@@ -59,11 +79,11 @@ class StoreContext @Inject constructor(
                 put("currency", currency)
             },
         ).decodeAs<String>()
-        setActiveStoreId(storeId)
         return storeId
     }
 
     companion object {
         val ACTIVE_STORE_ID_KEY = stringPreferencesKey("active_store_id")
+        private val LOCAL_DATA_STORE_ID_KEY = stringPreferencesKey("local_data_store_id")
     }
 }

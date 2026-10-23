@@ -80,14 +80,6 @@ fun CloudSyncSection(
         SectionHeader(stringResource(R.string.settings_active_store))
         StoreRow(state = state, onSwitchStore = onSwitchStore)
         SwitchOutcomeText(state)
-
-        SectionHeader(stringResource(R.string.settings_section_staff))
-        Text(
-            text = stringResource(R.string.settings_staff_coming),
-            style = MaterialTheme.typography.bodyMedium,
-            color = ShopBlackTertiary,
-            modifier = Modifier.padding(top = 2.dp),
-        )
     }
 }
 

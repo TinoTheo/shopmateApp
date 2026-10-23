@@ -36,7 +36,9 @@ import com.shopmate.R
 import com.shopmate.domain.model.CartItem
 import com.shopmate.domain.model.Category
 import com.shopmate.domain.model.PaymentMethod
+import com.shopmate.domain.model.LicenceState
 import com.shopmate.domain.model.Product
+import com.shopmate.ui.components.LicenceBanner
 import com.shopmate.ui.navigation.Screen
 import com.shopmate.ui.theme.ShopMateTheme
 import com.shopmate.ui.theme.TradeGreen
@@ -54,6 +56,7 @@ fun PosScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val categories by viewModel.categories.collectAsState()
+    val licenceState by viewModel.licenceState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val haptics = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
@@ -127,6 +130,7 @@ fun PosScreen(
             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
         },
         onNavigateToProducts = { navController.navigate(Screen.Products.route) },
+        licenceState = licenceState,
     )
 }
 
@@ -159,6 +163,7 @@ fun PosContent(
     onExact: () -> Unit,
     onConfirmSale: () -> Unit,
     onNavigateToProducts: () -> Unit,
+    licenceState: LicenceState? = null,
 ) {
     val categoryColours = remember(categories) {
         categories.associate { it.id to it.colour }
@@ -178,6 +183,7 @@ fun PosContent(
                     // sale ticket with the always-visible number pad.
                     PosTabletLayout(
                         state = state,
+                        licenceState = licenceState,
                         categories = categories,
                         categoryColours = categoryColours,
                         onSearchChange = onSearchChange,
@@ -200,6 +206,7 @@ fun PosContent(
                     // Phone: the proven stacked POS — grid on top, cart docked below.
                     // No permanent number pad (no room); quantity edits use the stepper.
                     Column(Modifier.fillMaxSize()) {
+                        LicenceBanner(licenceState)
                         SaleSuccessBanner(receipt = state.lastSaleReceipt, total = state.lastSaleTotal)
                         CatalogPane(
                             state = state,

@@ -12,6 +12,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,8 +29,17 @@ import com.shopmate.ui.theme.ErrorRed
 import com.shopmate.ui.theme.ReceiptBeige
 
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsScreen(
+    viewModel: SettingsViewModel = hiltViewModel(),
+    teamViewModel: TeamViewModel = hiltViewModel(),
+) {
     val state by viewModel.uiState.collectAsState()
+    val team by teamViewModel.uiState.collectAsState()
+
+    // A store just added appears in the store picker straight away.
+    LaunchedEffect(team.notice) {
+        if (team.notice is TeamNotice.StoreAdded) viewModel.refreshStores()
+    }
     var showReset by remember { mutableStateOf(false) }
     var showSignOut by remember { mutableStateOf(false) }
 
@@ -41,6 +51,17 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         onSwitchStore = viewModel::requestSwitch,
         onRetryFailed = viewModel::retryFailedSyncs,
         onResetRequest = { showReset = true },
+        team = {
+            TeamSection(
+                state = team,
+                onInvite = teamViewModel::invite,
+                onDismissInvite = teamViewModel::dismissInvite,
+                onChangeRole = teamViewModel::changeRole,
+                onSetStockRights = teamViewModel::setStockRights,
+                onRemove = teamViewModel::remove,
+                onAddStore = teamViewModel::addStore,
+            )
+        },
     )
 
     if (showReset) {
@@ -100,6 +121,7 @@ private fun SettingsContent(
     onSwitchStore: (String) -> Unit,
     onRetryFailed: () -> Unit,
     onResetRequest: () -> Unit,
+    team: @Composable () -> Unit,
 ) {
     ConstrainedContent(maxWidth = FormMaxWidth) {
         Column(
@@ -120,6 +142,7 @@ private fun SettingsContent(
                 onSignOut = onSignOut,
                 onSwitchStore = onSwitchStore,
             )
+            team()
             HorizontalDivider(color = ReceiptBeige, modifier = Modifier.padding(top = 20.dp))
             DataManagementSection(
                 onRetryFailed = onRetryFailed,

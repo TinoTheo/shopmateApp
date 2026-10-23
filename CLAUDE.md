@@ -405,6 +405,7 @@ one-off buttons, cards, chips, badges, or empty states.**
 | `SuccessBanner` | Checkout-Neon success feedback | built |
 | `ConstrainedContent` | Max-width wrapper for wide screens | built |
 | `ShopMateMark` / `ShopMateWordmark` | The looped M and the two-colour wordmark (§ Brand) | built |
+| `LicenceBanner` | The plan's grace / expired line on the POS (§ Licensing) | built |
 | `RunwayGauge` | Seven-day stock runway (§ Gauges) | **to build — spec below** |
 | `MarginGauge` | Cost-to-price track with target notch (§ Gauges) | **to build — spec below** |
 | `InsightRow` | Leading slot · name + meta · gauge · trailing value + sub | **to build — spec below** |
@@ -884,6 +885,13 @@ stops the drain and flags re-authentication. Retrofit, Moshi, OkHttp interceptor
 cart, search, checkout, receipt numbering · Stock levels, filters, adjustment sheet,
 movement history · Reports (Vico) · Sync engine · Settings. Beyond plan: sidebar app frame,
 adaptive DeviceLayout, tablet POS, Sales History, shared component library, Inter bundled.
+
+**Tenancy, staff and licensing (2026-10-23):** app side built — store switching with its
+guard, `CatalogueLoader`, join-a-shop onboarding, Settings › Plan / Add a store / Staff with
+invite codes, licence states with the POS banner and the expired-plan block. Server side is
+`supabase/migrations/20261023090000_tenancy_staff_licensing.sql`; until it is applied the staff
+list and plan don't load and nothing is blocked. No payment integration: licences are set from
+the dashboard.
 
 **Not built yet**, in dependency order:
 - `MIGRATION_3_4` and everything downstream (§ Schema debt) — **blocks the three below**

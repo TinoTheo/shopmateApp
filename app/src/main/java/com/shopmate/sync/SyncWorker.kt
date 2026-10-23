@@ -23,6 +23,7 @@ import com.shopmate.domain.model.DeltaReason
 import com.shopmate.domain.model.EventType
 import com.shopmate.domain.model.Sale
 import com.shopmate.domain.model.SyncEvent
+import com.shopmate.domain.repository.LicenceRepository
 import com.shopmate.domain.repository.SaleRepository
 import com.shopmate.domain.repository.SyncRepository
 import dagger.assisted.Assisted
@@ -53,6 +54,7 @@ class SyncWorker @AssistedInject constructor(
     private val storeContext: StoreContext,
     private val authManager: AuthManager,
     private val catalogueLoader: CatalogueLoader,
+    private val licences: LicenceRepository,
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
@@ -68,6 +70,7 @@ class SyncWorker @AssistedInject constructor(
             syncStockDeltas(storeId)
             syncSnapshot(storeId)
             pullServerUpdates(storeId)
+            licences.refresh() // so an offline till's grace countdown starts from fresh facts
             Result.success()
         } catch (e: SessionRejected) {
             authManager.markSessionRejected()
