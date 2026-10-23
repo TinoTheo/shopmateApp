@@ -38,7 +38,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         onStoreNameChange = viewModel::updateStoreName,
         onCurrencyChange = viewModel::updateCurrencySymbol,
         onSignOut = { showSignOut = true },
-        onSwitchStore = viewModel::switchStore,
+        onSwitchStore = viewModel::requestSwitch,
         onRetryFailed = viewModel::retryFailedSyncs,
         onResetRequest = { showReset = true },
     )
@@ -49,6 +49,24 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
             onConfirmed = {
                 viewModel.resetAllData()
                 showReset = false
+            },
+        )
+    }
+
+    state.pendingSwitch?.let { store ->
+        AlertDialog(
+            onDismissRequest = viewModel::cancelSwitch,
+            title = { Text(stringResource(R.string.settings_switch_title, store.name)) },
+            text = { Text(stringResource(R.string.settings_switch_body, store.name)) },
+            confirmButton = {
+                TextButton(onClick = viewModel::confirmSwitch) {
+                    Text(stringResource(R.string.settings_switch_confirm, store.name))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::cancelSwitch) {
+                    Text(stringResource(R.string.action_cancel))
+                }
             },
         )
     }

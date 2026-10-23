@@ -824,6 +824,55 @@ com.shopmate/
 
 ---
 
+## Tenancy, staff and licensing
+
+Decided 2026-10-23. Built in the order below; each step ships on its own.
+
+### One store per device
+
+The organisation is the tenant: `orgs` → `memberships` (role) → `stores`. **A till serves one store
+at a time.** Room has no `store_id` column and never gets one — every local row belongs to the
+active store.
+
+- **Switching store** sends everything first. It is refused while anything is waiting or not
+  sent (the till says so and offers Sync), and offline. Then it clears the local database, sets
+  the new active store, and loads that store's catalogue. Nothing local is ever discarded
+  unsent.
+- **A fresh till loads its store's catalogue** (`CatalogueLoader`): every server product for the
+  active store that the till doesn't have is inserted, its server stock recorded as an
+  "Opening stock" movement marked already synced — the server holds that stock, so it never
+  uploads again. This is what lets a new staff phone sell on day one.
+- **Owners and managers add stores** (`create_store` RPC, checked against the licence's store
+  limit). Owners see every store in the org; others see the stores in their `store_access`.
+
+### Add staff — invite codes
+
+- Owners (and managers, for cashiers only) create an **invite**: role + store → a 6-character
+  code (no 0/O, 1/I), valid 7 days, single use. Shared however they like (WhatsApp).
+- Staff create an account, choose **Join a shop** at onboarding, and enter the code.
+  `redeem_invite(code)` creates the membership and `store_access` row in one transaction and
+  returns the store id, which becomes the active store.
+- The staff list shows each member, their role and stores. Owners can remove a member or change
+  a role; the stock grant (rule 12) is a switch on that member.
+- Roles: `owner`, `manager`, `cashier`. One owner per org.
+
+### Licensing — plans with limits
+
+- One **licence per organisation**: plan (`trial`, `basic`, `pro`), `expires_at`, `max_stores`,
+  `max_staff`. Set and extended by ShopMate from the Supabase dashboard; no payment integration
+  yet. A new org starts on a 30-day trial.
+- The device reads `current_licence()` at sign-in, store pick and every sync, and **keeps the
+  last answer** for offline use. It never decides from the device clock alone that a licence it
+  hasn't seen is valid.
+- **States:** active → *ending* (7 days before expiry: a calm banner on the owner's Settings and
+  Reports, never the cashier's POS) → *grace* (7 days after expiry: banner on POS too) →
+  *expired* (new sales are refused at Charge with the reason). **Sales already taken always
+  upload** — the server accepts queued sales dated before expiry plus grace. Nothing is lost.
+- Limits are enforced on the server (`create_store`, `create_invite`); the app shows the limit
+  in words before the owner hits it.
+
+---
+
 ## Build status
 
 **Supabase cutover: done (app side).** supabase-kt Auth + PostgREST only (no Realtime),

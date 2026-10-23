@@ -278,6 +278,15 @@
     <string name="settings_section_account">Account</string>
     <string name="settings_active_store">Active store</string>
     <string name="settings_switch_store">Switch store</string>
+    <string name="settings_switch_title">Move this till to %1$s?</string>
+    <string name="settings_switch_body">This till works for one store at a time. Once everything on it has been sent, it clears its products and sales and loads %1$s\'s products.</string>
+    <string name="settings_switch_confirm">Move to %1$s</string>
+    <string name="settings_switch_done">This till now works for %1$s. Its products load with the next sync.</string>
+    <string name="settings_switch_offline">Connect to the internet to switch stores, so nothing is left behind on this till.</string>
+    <plurals name="settings_switch_not_sent">
+        <item quantity="one">%d sale or change is still only on this till. Send it from Sync, then switch.</item>
+        <item quantity="other">%d sales or changes are still only on this till. Send them from Sync, then switch.</item>
+    </plurals>
     <string name="settings_no_store">No active store</string>
     <string name="settings_section_staff">Staff</string>
     <string name="settings_staff_coming">Add staff — coming with phone sign-in</string>

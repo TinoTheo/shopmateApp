@@ -9,6 +9,7 @@ import com.shopmate.data.repository.SettingsRepositoryImpl
 import com.shopmate.data.repository.StockCountRepositoryImpl
 import com.shopmate.data.repository.StockInsightRepositoryImpl
 import com.shopmate.data.repository.StorePermissionRepositoryImpl
+import com.shopmate.data.repository.StoreRepositoryImpl
 import com.shopmate.data.repository.SyncRepositoryImpl
 import com.shopmate.domain.repository.BarcodeRepository
 import com.shopmate.domain.repository.CategoryRepository
@@ -19,6 +20,7 @@ import com.shopmate.domain.repository.SettingsRepository
 import com.shopmate.domain.repository.StockCountRepository
 import com.shopmate.domain.repository.StockInsightRepository
 import com.shopmate.domain.repository.StorePermissionRepository
+import com.shopmate.domain.repository.StoreRepository
 import com.shopmate.domain.repository.SyncRepository
 import dagger.Binds
 import dagger.Module
@@ -69,4 +71,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindStorePermissionRepository(impl: StorePermissionRepositoryImpl): StorePermissionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindStoreRepository(impl: StoreRepositoryImpl): StoreRepository
 }
