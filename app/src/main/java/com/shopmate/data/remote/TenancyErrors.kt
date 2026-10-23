@@ -6,7 +6,8 @@ import io.github.jan.supabase.exceptions.RestException
 
 /**
  * The tenancy functions raise named errors (`store_limit`, `staff_limit`, …; see the
- * 20261023090000 migration). PostgREST passes the name through as the error message.
+ * 20261023090000 and 20261023150000 migrations). PostgREST passes the name through as the
+ * error message. A duplicate staff name breaks the `staff_store_name_active` index.
  */
 internal fun Throwable.tenancyRefusal(): TenancyRefusal {
     if (this is HttpRequestException) return TenancyRefusal.OFFLINE
@@ -16,7 +17,7 @@ internal fun Throwable.tenancyRefusal(): TenancyRefusal {
         "store_limit" in text -> TenancyRefusal.STORE_LIMIT
         "staff_limit" in text -> TenancyRefusal.STAFF_LIMIT
         "licence_expired" in text -> TenancyRefusal.LICENCE_EXPIRED
-        "invite_not_found" in text -> TenancyRefusal.INVITE_NOT_FOUND
+        "staff_store_name_active" in text || "23505" in text -> TenancyRefusal.NAME_TAKEN
         "not_allowed" in text || statusCode == 403 || statusCode == 401 -> TenancyRefusal.NOT_ALLOWED
         else -> TenancyRefusal.OTHER
     }

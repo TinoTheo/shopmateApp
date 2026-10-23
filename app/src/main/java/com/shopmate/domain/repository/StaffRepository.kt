@@ -1,34 +1,54 @@
 package com.shopmate.domain.repository
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+
 enum class StaffRole { OWNER, MANAGER, CASHIER }
 
-/** One member of the organisation, with the stores they can work in. */
-data class StaffMember(
-    val membershipId: String,
-    val userId: String,
-    val email: String,
+/** Someone who unlocks this till with a PIN (CLAUDE.md § Staff). */
+data class TillStaff(
+    val id: String,
+    val name: String,
     val role: StaffRole,
-    val stores: List<StaffStore>,
+    val canManageStock: Boolean,
 ) {
-    data class StaffStore(val storeId: String, val name: String, val canManageStock: Boolean)
+    /** Owners and managers always move stock; a cashier only with the owner's grant. */
+    val mayMoveStock: Boolean get() = role != StaffRole.CASHIER || canManageStock
 }
 
-/** A code that lets one person join, once, within its week. */
-data class Invite(val code: String, val role: StaffRole, val storeName: String)
-
 /**
- * Add staff by invite code (CLAUDE.md § Tenancy). Owners invite managers and cashiers; managers
- * invite cashiers. Owners change roles, grant stock rights and remove people.
+ * Staff with PINs. The list lives on the server and every till of the store keeps a copy, so the
+ * lock works offline. Adding, changing and removing people is the owner's, and needs the
+ * connection; unlocking never does.
  */
 interface StaffRepository {
-    /** Everyone in the organisation. Empty for a cashier, who can't see the list. */
-    suspend fun list(): TenancyResult<List<StaffMember>>
+    /** Active staff on this till, owner first — the "Who's selling?" list. */
+    val staff: Flow<List<TillStaff>>
 
-    suspend fun invite(storeId: String, storeName: String, role: StaffRole, canManageStock: Boolean): TenancyResult<Invite>
+    /** Who has unlocked the till. Null when locked, or on a till with no staff. */
+    val current: StateFlow<TillStaff?>
 
-    suspend fun changeRole(membershipId: String, role: StaffRole): TenancyResult<Unit>
+    /** True when this store has staff and nobody has unlocked the till yet. */
+    val locked: Flow<Boolean>
 
-    suspend fun setStockRights(membershipId: String, storeId: String, granted: Boolean): TenancyResult<Unit>
+    /** Checks the PIN on the device. True and unlocked when it matches. */
+    suspend fun unlock(staffId: String, pin: String): Boolean
 
-    suspend fun remove(membershipId: String): TenancyResult<Unit>
+    /** Back to "Who's selling?" — the next person taps their name. */
+    fun lock()
+
+    /** Replaces this till's copy with the server's list for [storeId]. Quiet when offline. */
+    suspend fun pull(storeId: String)
+
+    /** The owner's own till PIN. Set before anyone else is added, so the owner can unlock too. */
+    suspend fun setOwnerPin(ownerName: String, pin: String): TenancyResult<Unit>
+
+    suspend fun add(name: String, role: StaffRole, pin: String, canManageStock: Boolean): TenancyResult<Unit>
+
+    suspend fun update(staffId: String, role: StaffRole, canManageStock: Boolean): TenancyResult<Unit>
+
+    suspend fun changePin(staffId: String, pin: String): TenancyResult<Unit>
+
+    /** They can no longer unlock any till; their name stays on the sales they rang up. */
+    suspend fun remove(staffId: String): TenancyResult<Unit>
 }

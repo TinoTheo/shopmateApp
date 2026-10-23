@@ -35,6 +35,7 @@ fun SettingsScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val team by teamViewModel.uiState.collectAsState()
+    val ownerAtTill by viewModel.ownerAtTill.collectAsState()
 
     // A store just added appears in the store picker straight away.
     LaunchedEffect(team.notice) {
@@ -51,13 +52,14 @@ fun SettingsScreen(
         onSwitchStore = viewModel::requestSwitch,
         onRetryFailed = viewModel::retryFailedSyncs,
         onResetRequest = { showReset = true },
+        ownerAtTill = ownerAtTill,
         team = {
             TeamSection(
                 state = team,
-                onInvite = teamViewModel::invite,
-                onDismissInvite = teamViewModel::dismissInvite,
-                onChangeRole = teamViewModel::changeRole,
-                onSetStockRights = teamViewModel::setStockRights,
+                onSetOwnerPin = teamViewModel::setOwnerPin,
+                onAddStaff = teamViewModel::addStaff,
+                onUpdate = teamViewModel::update,
+                onChangePin = teamViewModel::changePin,
                 onRemove = teamViewModel::remove,
                 onAddStore = teamViewModel::addStore,
             )
@@ -121,6 +123,7 @@ private fun SettingsContent(
     onSwitchStore: (String) -> Unit,
     onRetryFailed: () -> Unit,
     onResetRequest: () -> Unit,
+    ownerAtTill: Boolean,
     team: @Composable () -> Unit,
 ) {
     ConstrainedContent(maxWidth = FormMaxWidth) {
@@ -141,12 +144,14 @@ private fun SettingsContent(
                 state = state,
                 onSignOut = onSignOut,
                 onSwitchStore = onSwitchStore,
+                ownerAtTill = ownerAtTill,
             )
             team()
             HorizontalDivider(color = ReceiptBeige, modifier = Modifier.padding(top = 20.dp))
             DataManagementSection(
                 onRetryFailed = onRetryFailed,
                 onReset = onResetRequest,
+                canReset = ownerAtTill,
             )
             HorizontalDivider(color = ReceiptBeige, modifier = Modifier.padding(top = 20.dp))
             AboutSection(appVersion = state.appVersion)

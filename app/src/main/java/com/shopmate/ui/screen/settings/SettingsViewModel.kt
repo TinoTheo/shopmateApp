@@ -8,6 +8,9 @@ import com.shopmate.data.auth.StoreContext
 import com.shopmate.domain.repository.SettingsRepository
 import com.shopmate.domain.repository.StoreChoice
 import com.shopmate.domain.repository.StoreRepository
+import com.shopmate.domain.repository.StaffRepository
+import com.shopmate.domain.repository.StaffRole
+import kotlinx.coroutines.flow.map
 import com.shopmate.domain.repository.StoreSwitch
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,7 +47,16 @@ class SettingsViewModel @Inject constructor(
     private val authManager: AuthManager,
     private val storeContext: StoreContext,
     private val storeRepository: StoreRepository,
+    private val staffRepository: StaffRepository,
 ) : ViewModel() {
+
+    /**
+     * A manager at the till sees Settings but can't sign the till out or wipe it — those are the
+     * owner's (§ Staff). Null person means the owner's own session on a till with no staff.
+     */
+    val ownerAtTill: StateFlow<Boolean> = staffRepository.current
+        .map { it == null || it.role == StaffRole.OWNER }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     private val stores = MutableStateFlow<List<StoreOption>>(emptyList())
     private val userEmail = MutableStateFlow(authManager.currentUserEmail)
@@ -107,6 +119,7 @@ class SettingsViewModel @Inject constructor(
     fun signOut() {
         viewModelScope.launch {
             storeContext.clearActiveStore()
+            staffRepository.lock()
             authManager.signOut()
         }
     }

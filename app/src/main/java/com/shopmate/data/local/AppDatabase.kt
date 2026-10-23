@@ -13,6 +13,8 @@ import com.shopmate.data.local.dao.SaleDao
 import com.shopmate.data.local.dao.StockCountDao
 import com.shopmate.data.local.dao.StockDeltaDao
 import com.shopmate.data.local.dao.StockInsightDao
+import com.shopmate.data.local.dao.StaffDao
+import com.shopmate.data.local.entity.StaffEntity
 import com.shopmate.data.local.dao.SyncEventDao
 import com.shopmate.data.local.dao.UnknownBarcodeDao
 import com.shopmate.data.local.entity.CategoryEntity
@@ -38,8 +40,9 @@ import com.shopmate.data.local.entity.UnknownBarcodeEntity
         ProductBarcodeEntity::class,
         UnknownBarcodeEntity::class,
         StockCountEntity::class,
+        StaffEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)
@@ -55,4 +58,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun unknownBarcodeDao(): UnknownBarcodeDao
     abstract fun stockCountDao(): StockCountDao
     abstract fun stockInsightDao(): StockInsightDao
+    abstract fun staffDao(): StaffDao
 }

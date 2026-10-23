@@ -51,6 +51,7 @@ fun CloudSyncSection(
     state: SettingsUiState,
     onSignOut: () -> Unit,
     onSwitchStore: (String) -> Unit,
+    ownerAtTill: Boolean = true,
 ) {
     Column {
         SectionHeader(stringResource(R.string.settings_section_account))
@@ -71,11 +72,14 @@ fun CloudSyncSection(
                     .padding(start = 8.dp),
             )
         }
-        ShopMateTextButton(
-            text = stringResource(R.string.settings_sign_out),
-            onClick = onSignOut,
-            modifier = Modifier.padding(top = 4.dp),
-        )
+        // Signing the till out is the owner's: a manager at the till can't (§ Staff).
+        if (ownerAtTill) {
+            ShopMateTextButton(
+                text = stringResource(R.string.settings_sign_out),
+                onClick = onSignOut,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
 
         SectionHeader(stringResource(R.string.settings_active_store))
         StoreRow(state = state, onSwitchStore = onSwitchStore)

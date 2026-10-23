@@ -16,6 +16,7 @@ fun SaleWithItems.toDomain(): Sale = Sale(
     createdAt = sale.createdAt,
     syncedAt = sale.syncedAt,
     originalReceiptNumber = sale.originalReceiptNumber,
+    staffId = sale.staffId,
 )
 
 fun SaleItemEntity.toDomain(): SaleItem = SaleItem(
@@ -37,6 +38,7 @@ fun Sale.toEntity(): SaleEntity = SaleEntity(
     createdAt = createdAt,
     syncedAt = syncedAt,
     originalReceiptNumber = originalReceiptNumber,
+    staffId = staffId,
 )
 
 fun SaleItem.toEntity(saleId: String): SaleItemEntity = SaleItemEntity(

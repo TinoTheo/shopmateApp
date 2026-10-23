@@ -23,6 +23,7 @@ fun Sale.toSaleRow(storeId: String): SaleRowDto = SaleRowDto(
     paymentMethod = paymentMethod.name,
     cashierName = cashierName,
     createdAt = createdAt.toString(),
+    staffId = staffId,
 )
 
 fun Sale.toSaleItemRows(): List<SaleItemRowDto> = items.map { item ->

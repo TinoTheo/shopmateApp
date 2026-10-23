@@ -843,19 +843,31 @@ active store.
   active store that the till doesn't have is inserted, its server stock recorded as an
   "Opening stock" movement marked already synced — the server holds that stock, so it never
   uploads again. This is what lets a new staff phone sell on day one.
-- **Owners and managers add stores** (`create_store` RPC, checked against the licence's store
-  limit). Owners see every store in the org; others see the stores in their `store_access`.
+- **The owner adds stores** (`create_store` RPC, checked against the licence's store limit).
 
-### Add staff — invite codes
+### Staff — email for the owner, PINs for everyone else
 
-- Owners (and managers, for cashiers only) create an **invite**: role + store → a 6-character
-  code (no 0/O, 1/I), valid 7 days, single use. Shared however they like (WhatsApp).
-- Staff create an account, choose **Join a shop** at onboarding, and enter the code.
-  `redeem_invite(code)` creates the membership and `store_access` row in one transaction and
-  returns the store id, which becomes the active store.
-- The staff list shows each member, their role and stores. Owners can remove a member or change
-  a role; the stock grant (rule 12) is a switch on that member.
-- Roles: `owner`, `manager`, `cashier`. One owner per org.
+Amended 2026-10-23 (replaces invite codes, which needed staff to confirm an email address first).
+
+- **Only the owner has an email account.** The owner signs in once to set up a till; the till
+  stays signed in as the store. Managers and cashiers never create an account.
+- **The owner adds staff** in Settings: name, role (`manager` or `cashier`), a 4-digit PIN, and
+  for a cashier whether they can move stock. Staff belong to one store. Online only — the staff
+  list lives on the server (`staff` table) and every till of that store pulls it on sync.
+- **Staff unlock the till with their PIN** on the "Who's selling?" screen: tap your name, enter
+  your PIN. Works offline. The till locks when the app starts and when someone taps **Switch
+  cashier**. The owner has a PIN too ("Your till PIN"), set before adding anyone else.
+- A till with no staff on its store has no lock — a one-person shop never sees it.
+- **PINs are never stored in the clear**: PBKDF2-SHA256 with a per-PIN salt, hashed on the
+  device that sets them. A 4-digit PIN is a till lock, not a password; it guards the till, not
+  the account, and only members of the store can read the hashes.
+- **Every sale records who rang it up** (`cashier_name`, `staff_id`), and every stock movement
+  its actor. This is the attribution that waited for auth.
+- **Rights follow the person on the till.** Cashier: sell; move stock only with the grant.
+  Manager: sell and move stock, sees Settings but not Staff, Sign out or Reset. Owner: everything.
+  Uploads still go out under the owner's session — the server enforces store and plan, the till
+  enforces the person.
+- The plan's staff limit counts PIN staff (not the owner).
 
 ### Licensing — plans with limits
 

@@ -18,6 +18,8 @@ import com.shopmate.ui.theme.StockRed
 fun DataManagementSection(
     onRetryFailed: () -> Unit,
     onReset: () -> Unit,
+    /** Wiping the till is the owner's; a manager at the till doesn't see it (§ Staff). */
+    canReset: Boolean = true,
 ) {
     Column {
         SectionHeader(stringResource(R.string.settings_section_data))
@@ -31,11 +33,13 @@ fun DataManagementSection(
             description = stringResource(R.string.settings_retry_failed_desc),
             onClick = onRetryFailed,
         )
-        SettingsRow(
-            title = stringResource(R.string.settings_reset),
-            titleColor = StockRed,
-            onClick = onReset,
-        )
+        if (canReset) {
+            SettingsRow(
+                title = stringResource(R.string.settings_reset),
+                titleColor = StockRed,
+                onClick = onReset,
+            )
+        }
     }
 }
 

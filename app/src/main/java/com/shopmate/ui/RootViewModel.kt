@@ -6,6 +6,7 @@ import com.shopmate.data.auth.AuthManager
 import com.shopmate.data.auth.StoreContext
 import com.shopmate.domain.repository.SettingsRepository
 import com.shopmate.domain.repository.StoreRepository
+import com.shopmate.domain.repository.StaffRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -27,8 +28,13 @@ class RootViewModel @Inject constructor(
     private val authManager: AuthManager,
     private val storeContext: StoreContext,
     private val storeRepository: StoreRepository,
+    staffRepository: StaffRepository,
     settings: SettingsRepository,
 ) : ViewModel() {
+
+    /** The store has staff and nobody has unlocked the till yet: show "Who's selling?". */
+    val locked: StateFlow<Boolean> = staffRepository.locked
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     /** For the tablet splash footer. Empty until a store has been named. */
     val storeName: StateFlow<String> = settings.storeName

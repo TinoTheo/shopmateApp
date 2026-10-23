@@ -13,6 +13,7 @@ import com.shopmate.domain.repository.CategoryRepository
 import com.shopmate.domain.repository.ProductRepository
 import com.shopmate.domain.model.LicenceState
 import com.shopmate.domain.repository.LicenceRepository
+import com.shopmate.domain.repository.StaffRepository
 import com.shopmate.domain.repository.SaleRepository
 import com.shopmate.domain.util.ReceiptNumberGenerator
 import com.shopmate.scan.ScanSource
@@ -121,6 +122,7 @@ class PosViewModel @Inject constructor(
     private val barcodeRepository: BarcodeRepository,
     private val scanSource: ScanSource,
     licences: LicenceRepository,
+    private val staffRepository: StaffRepository,
 ) : ViewModel() {
 
     /**
@@ -614,10 +616,13 @@ class PosViewModel @Inject constructor(
                     receiptNumber = receiptNumber,
                     totalAmount = saleItems.fold(BigDecimal.ZERO) { acc, item -> acc + item.lineTotal },
                     paymentMethod = paymentMethod,
-                    cashierName = DEFAULT_CASHIER,
+                    // Whoever unlocked the till (§ Staff). A till with no staff keeps the generic
+                    // label: it has no person to name, and inventing one would be worse.
+                    cashierName = staffRepository.current.value?.name ?: DEFAULT_CASHIER,
                     items = saleItems,
                     createdAt = Instant.now(),
                     syncedAt = null,
+                    staffId = staffRepository.current.value?.id,
                 )
                 saleRepository.recordSale(sale)
                 LastSale(receiptNumber, sale.totalAmount) to skippedItem

@@ -56,6 +56,8 @@ class SaleRepositoryImpl @Inject constructor(
                     delta = -soldQty,
                     reason = DeltaReason.SALE,
                     note = sale.receiptNumber,
+                    // The person who rang it up; null on a till with no staff (§ Staff).
+                    actor = sale.staffId?.let { sale.cashierName },
                     createdAt = sale.createdAt.toEpochMilli(),
                     synced = false,
                 )

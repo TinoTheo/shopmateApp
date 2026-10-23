@@ -14,6 +14,7 @@ import com.shopmate.domain.model.Product
 import com.shopmate.domain.repository.ProductRepository
 import com.shopmate.domain.repository.StockPermissionRequired
 import com.shopmate.domain.repository.StorePermissionRepository
+import com.shopmate.domain.repository.StaffRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -29,6 +30,7 @@ class ProductRepositoryImpl @Inject constructor(
     private val stockDeltaDao: StockDeltaDao,
     private val syncEventDao: SyncEventDao,
     private val storePermissions: StorePermissionRepository,
+    private val staffRepository: StaffRepository,
 ) : ProductRepository {
 
     override fun getAll(): Flow<List<Product>> =
@@ -88,8 +90,8 @@ class ProductRepositoryImpl @Inject constructor(
                 reason = reason,
                 note = note,
                 countSessionId = countSessionId,
-                // Stays null until auth ships — never a placeholder (CLAUDE.md § Schema debt).
-                actor = null,
+                // Whoever unlocked the till; null on a till with no staff — never a placeholder.
+                actor = staffRepository.current.value?.name,
                 createdAt = Instant.now().toEpochMilli(),
                 synced = false,
             )

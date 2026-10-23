@@ -14,4 +14,6 @@ data class Sale(
     val syncedAt: Instant?,
     /** Set only when the sale was renumbered: the number on the customer's paper receipt. */
     val originalReceiptNumber: String? = null,
+    /** The staff member who rang it up (§ Staff); [cashierName] carries their name. */
+    val staffId: String? = null,
 )

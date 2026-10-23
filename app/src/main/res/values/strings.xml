@@ -316,36 +316,44 @@
     </plurals>
     <string name="licence_expired">Your plan has ended, so this till can\'t take new sales. Sales already taken still send. Contact ShopMate to renew.</string>
     <string name="team_cashier_note">The owner or a manager adds staff.</string>
-    <string name="team_me">%1$s (you)</string>
-    <string name="team_can_move_stock">can move stock</string>
-    <string name="team_invite">Invite staff</string>
-    <string name="team_invite_title">Invite to %1$s</string>
-    <string name="team_invite_create">Create code</string>
-    <string name="team_manager_note">Managers can sell, move stock, add stores and invite cashiers.</string>
     <string name="team_stock_rights">Can move stock</string>
     <string name="team_stock_rights_detail">Restock, adjust and count at this store.</string>
-    <string name="team_code_title">Invite code</string>
-    <string name="team_code_detail">Works once, for 7 days. Joins as %1$s at %2$s.</string>
-    <string name="team_code_share">Share code</string>
     <string name="team_code_done">Done</string>
-    <string name="team_invite_share_text">You\'re invited to %1$s on ShopMate as a %2$s. Install ShopMate, create an account, tap \"Joining a shop? Enter your code\" and enter %3$s. The code works once, for 7 days.</string>
     <string name="team_add_store">Add a store</string>
     <string name="team_add_store_note">The new store starts empty. To sell there, move a till to it from Active store.</string>
     <string name="team_add_store_confirm">Add store</string>
     <string name="team_store_added">%1$s added. Move a till to it from Active store to start selling there.</string>
     <string name="team_remove">Remove</string>
-    <string name="team_remove_confirm">%1$s will no longer be able to sign in to your shop. Sales they took stay in your store.</string>
-    <string name="team_removed">%1$s can no longer sign in to your shop.</string>
     <plurals name="team_refused_store_limit">
         <item quantity="one">Your plan has 1 store. Contact ShopMate to add more.</item>
         <item quantity="other">Your plan has %d stores, all in use. Contact ShopMate to add more.</item>
     </plurals>
-    <plurals name="team_refused_staff_limit">
-        <item quantity="one">Your plan has room for 1 staff member, counting open invites. Contact ShopMate to add more.</item>
-        <item quantity="other">Your plan has room for %d staff, counting open invites. Contact ShopMate to add more.</item>
+    <string name="staff_owner_pin_first">Set your own till PIN first. Once staff are added the till locks, and you\'ll unlock it with this PIN too.</string>
+    <string name="staff_set_owner_pin">Set your till PIN</string>
+    <string name="staff_owner_pin_title">Your till PIN</string>
+    <string name="staff_your_name">Your name, as staff will see it</string>
+    <string name="staff_pin">4-digit PIN</string>
+    <string name="staff_pin_hint">You\'ll type this to unlock the till. It works offline.</string>
+    <string name="staff_pin_hint_other">They type this to unlock the till. Tell them in person.</string>
+    <string name="staff_save_pin">Save PIN</string>
+    <string name="staff_add">Add staff</string>
+    <string name="staff_add_title">Add someone to %1$s</string>
+    <string name="staff_name">Name</string>
+    <string name="staff_add_confirm">Add</string>
+    <string name="staff_added">%1$s can now unlock the till with their PIN.</string>
+    <string name="staff_can_move_stock">can move stock</string>
+    <string name="staff_new_pin">New PIN (leave empty to keep it)</string>
+    <string name="staff_save">Save</string>
+    <string name="staff_pin_saved">PIN saved. It works on every till of this store after their next sync.</string>
+    <string name="staff_remove">Remove %1$s</string>
+    <string name="staff_remove_confirm">%1$s won\'t be able to unlock any till. Their name stays on the sales they rang up.</string>
+    <string name="staff_removed">%1$s can no longer unlock the till.</string>
+    <string name="staff_refused_name_taken">Someone at this store already has that name. Add a surname or an initial.</string>
+    <plurals name="staff_refused_limit">
+        <item quantity="one">Your plan has room for 1 staff member. Contact ShopMate to add more.</item>
+        <item quantity="other">Your plan has room for %d staff. Contact ShopMate to add more.</item>
     </plurals>
     <string name="team_refused_licence">Your plan has ended. Renew it to add stores or staff.</string>
-    <string name="team_refused_not_allowed">Only the owner can do that.</string>
     <string name="team_refused_offline">Connect to the internet to manage staff and stores.</string>
     <string name="team_refused_other">That didn\'t go through. Check the connection and try again.</string>
 
@@ -513,6 +521,11 @@
     <string name="signin_subtitle">%1$s · Till %2$d</string>
     <string name="signin_helper">Enter your 4-digit till code</string>
     <string name="signin_opening">Opening the till</string>
+    <string name="lock_who">Who\'s selling?</string>
+    <string name="lock_wait">Too many tries. Try again in %1$d s.</string>
+    <string name="lock_not_me">Not you? Pick your name</string>
+    <string name="lock_switch">Switch</string>
+    <string name="lock_switch_description">Switch cashier — %1$s is selling</string>
     <string name="signin_wrong">That code didn’t match. Try again.</string>
     <string name="onboard_title">Create your shop</string>
     <string name="onboard_subtitle">You can change these later in Settings.</string>
@@ -520,14 +533,6 @@
     <string name="onboard_your_name">Your name</string>
     <string name="onboard_country">Country</string>
     <string name="onboard_create">Create shop</string>
-    <string name="onboard_join_instead">Joining a shop? Enter your code</string>
-    <string name="onboard_create_instead">Starting a new shop instead</string>
-    <string name="onboard_join_title">Join a shop</string>
-    <string name="onboard_join_subtitle">Enter the 6-character code the owner or manager sent you.</string>
-    <string name="onboard_join_code">Invite code</string>
-    <string name="onboard_join">Join shop</string>
-    <string name="onboard_join_error_required">Enter the code you were sent.</string>
-    <string name="onboard_join_error_not_found">That code doesn\'t work. It may be used or more than 7 days old — ask for a new one.</string>
     <string name="onboard_error_offline">Connect to the internet to set up this till.</string>
     <string name="onboard_error_not_sent">This till still has sales from another shop to send. Sign in to that shop and send them first.</string>
 

@@ -15,7 +15,7 @@ sealed interface StoreSwitch {
 }
 
 /** Why the server refused a tenancy action, in terms the screen can word. */
-enum class TenancyRefusal { STORE_LIMIT, STAFF_LIMIT, LICENCE_EXPIRED, NOT_ALLOWED, INVITE_NOT_FOUND, OFFLINE, OTHER }
+enum class TenancyRefusal { STORE_LIMIT, STAFF_LIMIT, LICENCE_EXPIRED, NOT_ALLOWED, NAME_TAKEN, OFFLINE, OTHER }
 
 sealed interface TenancyResult<out T> {
     data class Done<T>(val value: T) : TenancyResult<T>
@@ -43,6 +43,4 @@ interface StoreRepository {
     /** Adds a store to the organisation. Does not move this till to it. */
     suspend fun createStore(name: String, currencySymbol: String): TenancyResult<StoreChoice>
 
-    /** Redeems an invite code and moves this till to the invite's store. */
-    suspend fun joinWithCode(code: String): TenancyResult<StoreSwitch>
 }

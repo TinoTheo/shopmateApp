@@ -34,7 +34,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import com.shopmate.R
+import com.shopmate.domain.repository.StaffRole
 import com.shopmate.ui.screen.categories.CategoriesScreen
 import com.shopmate.ui.screen.pos.PosScreen
 import com.shopmate.ui.screen.products.AddEditProductScreen
@@ -86,6 +92,7 @@ fun AppNavGraph(
     val failedSyncCount by appBarViewModel.failedSyncCount.collectAsState()
     val syncOnline by appBarViewModel.online.collectAsState()
     val syncPaused by appBarViewModel.paused.collectAsState()
+    val person by appBarViewModel.person.collectAsState()
     val homeTitle = storeName.ifBlank { stringResource(R.string.app_name) }
 
     val headerTitle = when (currentRoute) {
@@ -118,6 +125,8 @@ fun AppNavGraph(
         AppSidebar(
             currentDestination = currentDestination,
             onNavigate = ::navigateTopLevel,
+            // A cashier at the till has nothing to change in Settings (§ Staff).
+            showSettings = person?.role != StaffRole.CASHIER,
             deviceLayout = deviceLayout,
             modifier = Modifier
                 .fillMaxHeight()
@@ -148,6 +157,10 @@ fun AppNavGraph(
                     syncOnline = syncOnline,
                     syncPaused = syncPaused,
                 ) {
+                    // Who's selling, and the way to hand the till over.
+                    if (currentRoute == Screen.Pos.route) {
+                        person?.let { PersonSwitch(name = it.name, onSwitch = appBarViewModel::lock) }
+                    }
                     when (currentRoute) {
                         Screen.Pos.route -> IconButton(onClick = { navController.navigate(Screen.Sales.route) }) {
                             Icon(
@@ -219,5 +232,22 @@ fun AppNavGraph(
                 }
             }
         }
+    }
+}
+
+/** The person at the till and the way to hand it over (§ Staff). Tapping locks the till. */
+@Composable
+private fun PersonSwitch(name: String, onSwitch: () -> Unit) {
+    val description = stringResource(R.string.lock_switch_description, name)
+    TextButton(
+        onClick = onSwitch,
+        modifier = Modifier.semantics { contentDescription = description },
+    ) {
+        Text(text = name, style = MaterialTheme.typography.labelLarge, color = ShopBlack)
+        Text(
+            text = " · " + stringResource(R.string.lock_switch),
+            style = MaterialTheme.typography.labelLarge,
+            color = TradeGreen,
+        )
     }
 }

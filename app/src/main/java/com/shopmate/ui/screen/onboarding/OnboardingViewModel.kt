@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.shopmate.domain.repository.SettingsRepository
 import com.shopmate.domain.repository.StoreRepository
 import com.shopmate.domain.repository.StoreSwitch
-import com.shopmate.domain.repository.TenancyRefusal
 import com.shopmate.domain.repository.TenancyResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,22 +53,6 @@ class OnboardingViewModel @Inject constructor(
         }
     }
 
-    /** Join an existing shop with the code its owner or manager shared. */
-    fun joinShop(code: String) {
-        if (code.isBlank()) { _uiState.update { it.copy(error = CODE_REQUIRED) }; return }
-        viewModelScope.launch {
-            _uiState.update { it.copy(isSubmitting = true, error = null) }
-            val error = when (val result = storeRepository.joinWithCode(code)) {
-                is TenancyResult.Done -> result.value.errorMarker()
-                is TenancyResult.Refused -> when (result.reason) {
-                    TenancyRefusal.INVITE_NOT_FOUND -> CODE_NOT_FOUND
-                    TenancyRefusal.OFFLINE -> OFFLINE
-                    else -> GENERIC
-                }
-            }
-            _uiState.update { it.copy(isSubmitting = false, error = error) }
-        }
-    }
 
     /** The till couldn't move to the new store yet — something from another store is unsent. */
     private fun StoreSwitch.errorMarker(): String? = when (this) {
@@ -82,8 +65,6 @@ class OnboardingViewModel @Inject constructor(
         const val ORG_REQUIRED = "org_required"
         const val STORE_REQUIRED = "store_required"
         const val GENERIC = "generic"
-        const val CODE_REQUIRED = "code_required"
-        const val CODE_NOT_FOUND = "code_not_found"
         const val OFFLINE = "offline"
         const val NOT_SENT = "not_sent"
     }

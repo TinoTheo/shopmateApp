@@ -68,18 +68,6 @@ class StoreRepositoryImpl @Inject constructor(
             onFailure = { TenancyResult.Refused(it.tenancyRefusal()) },
         )
 
-    override suspend fun joinWithCode(code: String): TenancyResult<StoreSwitch> {
-        val storeId = runCatching {
-            postgrest.rpc(
-                function = "redeem_invite",
-                parameters = buildJsonObject { put("p_code", code) },
-            ).decodeAs<String>()
-        }.getOrElse { return TenancyResult.Refused(it.tenancyRefusal()) }
-
-        val store = runCatching { accessibleStores() }.getOrDefault(emptyList())
-            .firstOrNull { it.id == storeId } ?: StoreChoice(storeId, "")
-        return TenancyResult.Done(moveTill(store))
-    }
 
     /**
      * The one way the till changes store. Its local data belongs to [StoreContext.localDataStoreId];

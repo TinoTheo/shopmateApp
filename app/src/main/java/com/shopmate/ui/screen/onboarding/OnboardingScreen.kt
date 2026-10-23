@@ -31,7 +31,6 @@ import com.shopmate.ui.components.ConstrainedContent
 import com.shopmate.ui.components.OnboardingBandHeight
 import com.shopmate.ui.components.FormMaxWidth
 import com.shopmate.ui.components.ShopMatePrimaryButton
-import com.shopmate.ui.components.ShopMateTextButton
 import com.shopmate.ui.components.ShopMateTextField
 import com.shopmate.ui.screen.settings.CurrencyPicker
 import com.shopmate.ui.theme.ErrorRed
@@ -45,9 +44,6 @@ fun OnboardingScreen(viewModel: OnboardingViewModel = hiltViewModel()) {
     var orgName by rememberSaveable { mutableStateOf("") }
     var storeName by rememberSaveable { mutableStateOf("") }
     var currency by rememberSaveable { mutableStateOf("$") }
-    // Staff join an existing shop; owners create one. One screen, two paths.
-    var joining by rememberSaveable { mutableStateOf(false) }
-    var code by rememberSaveable { mutableStateOf("") }
 
     BrandBand(bandHeight = OnboardingBandHeight) {
         ConstrainedContent(maxWidth = FormMaxWidth) {
@@ -58,45 +54,18 @@ fun OnboardingScreen(viewModel: OnboardingViewModel = hiltViewModel()) {
                     .imePadding(),
             ) {
                 Text(
-                    text = stringResource(if (joining) R.string.onboard_join_title else R.string.onboard_title),
+                    text = stringResource(R.string.onboard_title),
                     style = MaterialTheme.typography.displaySmall,
                     color = Ink,
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    text = stringResource(if (joining) R.string.onboard_join_subtitle else R.string.onboard_subtitle),
+                    text = stringResource(R.string.onboard_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = InkSecondary,
                 )
                 Spacer(Modifier.height(28.dp))
 
-                if (joining) {
-                    ShopMateTextField(
-                        value = code,
-                        onValueChange = { code = it.uppercase().filter { c -> c.isLetterOrDigit() }.take(6) },
-                        label = stringResource(R.string.onboard_join_code),
-                    )
-                    Spacer(Modifier.height(28.dp))
-                    ShopMatePrimaryButton(
-                        text = stringResource(R.string.onboard_join),
-                        onClick = { viewModel.joinShop(code) },
-                        isLoading = state.isSubmitting,
-                    )
-                    ShopMateTextButton(
-                        text = stringResource(R.string.onboard_create_instead),
-                        onClick = { joining = false; viewModel.clearError() },
-                        modifier = Modifier.padding(top = 8.dp),
-                    )
-                    state.error?.let { marker ->
-                        Text(
-                            text = localizedError(marker),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = ErrorRed,
-                            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                        )
-                    }
-                    return@Column
-                }
 
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     ShopMateTextField(
@@ -126,11 +95,6 @@ fun OnboardingScreen(viewModel: OnboardingViewModel = hiltViewModel()) {
                     onClick = { viewModel.createShop(orgName, storeName, currency) },
                     isLoading = state.isSubmitting,
                 )
-                ShopMateTextButton(
-                    text = stringResource(R.string.onboard_join_instead),
-                    onClick = { joining = true; viewModel.clearError() },
-                    modifier = Modifier.padding(top = 8.dp),
-                )
 
                 state.error?.let { marker ->
                     Text(
@@ -151,8 +115,6 @@ private fun localizedError(marker: String): String = when (marker) {
     OnboardingViewModel.ORG_REQUIRED -> stringResource(R.string.onboarding_error_org_required)
     OnboardingViewModel.STORE_REQUIRED -> stringResource(R.string.onboarding_error_store_required)
     OnboardingViewModel.GENERIC -> stringResource(R.string.onboarding_error_generic)
-    OnboardingViewModel.CODE_REQUIRED -> stringResource(R.string.onboard_join_error_required)
-    OnboardingViewModel.CODE_NOT_FOUND -> stringResource(R.string.onboard_join_error_not_found)
     OnboardingViewModel.OFFLINE -> stringResource(R.string.onboard_error_offline)
     OnboardingViewModel.NOT_SENT -> stringResource(R.string.onboard_error_not_sent)
     else -> marker

@@ -14,6 +14,7 @@ import com.shopmate.data.local.dao.SaleDao
 import com.shopmate.data.local.dao.StockCountDao
 import com.shopmate.data.local.dao.StockDeltaDao
 import com.shopmate.data.local.dao.StockInsightDao
+import com.shopmate.data.local.dao.StaffDao
 import com.shopmate.data.local.dao.SyncEventDao
 import com.shopmate.data.local.dao.UnknownBarcodeDao
 import dagger.Module
@@ -187,11 +188,25 @@ object DatabaseModule {
         }
     }
 
+    /** Staff who unlock the till with a PIN, and who rang up each sale (§ Staff). */
+    private val MIGRATION_6_7 = object : Migration(6, 7) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `staff` (" +
+                    "`id` TEXT NOT NULL, `name` TEXT NOT NULL, `role` TEXT NOT NULL, " +
+                    "`pin_hash` TEXT NOT NULL, `pin_salt` TEXT NOT NULL, " +
+                    "`can_manage_stock` INTEGER NOT NULL, `user_id` TEXT, `active` INTEGER NOT NULL, " +
+                    "PRIMARY KEY(`id`))",
+            )
+            db.execSQL("ALTER TABLE `sales` ADD COLUMN `staff_id` TEXT")
+        }
+    }
+
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, "shopmate.db")
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
             .build()
 
     @Provides
@@ -226,4 +241,7 @@ object DatabaseModule {
 
     @Provides
     fun provideStockInsightDao(db: AppDatabase): StockInsightDao = db.stockInsightDao()
+
+    @Provides
+    fun provideStaffDao(db: AppDatabase): StaffDao = db.staffDao()
 }

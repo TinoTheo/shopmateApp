@@ -24,6 +24,7 @@ import com.shopmate.domain.model.EventType
 import com.shopmate.domain.model.Sale
 import com.shopmate.domain.model.SyncEvent
 import com.shopmate.domain.repository.LicenceRepository
+import com.shopmate.domain.repository.StaffRepository
 import com.shopmate.domain.repository.SaleRepository
 import com.shopmate.domain.repository.SyncRepository
 import dagger.assisted.Assisted
@@ -55,6 +56,7 @@ class SyncWorker @AssistedInject constructor(
     private val authManager: AuthManager,
     private val catalogueLoader: CatalogueLoader,
     private val licences: LicenceRepository,
+    private val staffRepository: StaffRepository,
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
@@ -66,6 +68,7 @@ class SyncWorker @AssistedInject constructor(
             // First, before this till's own snapshot: an empty till would otherwise upload an
             // empty catalogue as the store's latest, and the next fresh till would load nothing.
             loadCatalogue(storeId)
+            staffRepository.pull(storeId)
             syncPendingSales(storeId)
             syncStockDeltas(storeId)
             syncSnapshot(storeId)

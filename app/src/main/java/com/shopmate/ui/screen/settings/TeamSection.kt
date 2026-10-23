@@ -1,11 +1,11 @@
 package com.shopmate.ui.screen.settings
 
-import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -19,19 +19,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shopmate.R
 import com.shopmate.domain.model.Licence
 import com.shopmate.domain.model.LicencePlan
 import com.shopmate.domain.model.LicenceState
-import com.shopmate.domain.repository.StaffMember
 import com.shopmate.domain.repository.StaffRole
 import com.shopmate.domain.repository.TenancyRefusal
+import com.shopmate.domain.repository.TillStaff
+import com.shopmate.domain.util.PinHasher
 import com.shopmate.ui.components.ShopMateFilterChip
 import com.shopmate.ui.components.ShopMateTextButton
 import com.shopmate.ui.components.ShopMateTextField
@@ -46,84 +48,74 @@ import com.shopmate.ui.util.DateFormatter
 import java.time.ZoneId
 
 /**
- * Settings › Plan and Staff, plus "Add a store" (CLAUDE.md § Tenancy, staff and licensing).
- * A cashier sees the plan line and nothing to manage.
+ * Settings › Plan, Add a store and Staff (CLAUDE.md § Tenancy, § Staff, § Licensing). Only the
+ * owner at the till manages anything; everyone else sees the plan line.
  */
 @Composable
 fun TeamSection(
     state: TeamUiState,
-    onInvite: (StaffRole, Boolean) -> Unit,
-    onDismissInvite: () -> Unit,
-    onChangeRole: (StaffMember, StaffRole) -> Unit,
-    onSetStockRights: (StaffMember, Boolean) -> Unit,
-    onRemove: (StaffMember) -> Unit,
+    onSetOwnerPin: (String, String) -> Unit,
+    onAddStaff: (String, StaffRole, String, Boolean) -> Unit,
+    onUpdate: (TillStaff, StaffRole, Boolean) -> Unit,
+    onChangePin: (TillStaff, String) -> Unit,
+    onRemove: (TillStaff) -> Unit,
     onAddStore: (String) -> Unit,
 ) {
-    var showInvite by remember { mutableStateOf(false) }
+    var showOwnerPin by remember { mutableStateOf(false) }
+    var showAddStaff by remember { mutableStateOf(false) }
     var showAddStore by remember { mutableStateOf(false) }
-    var openMember by remember { mutableStateOf<StaffMember?>(null) }
+    var openMember by remember { mutableStateOf<TillStaff?>(null) }
 
     Column {
         state.licence?.let { PlanBlock(it) }
+        if (!state.ownerAtTill) return@Column
 
-        if (state.canManageTeam) {
-            ShopMateTextButton(
-                text = stringResource(R.string.team_add_store),
-                onClick = { showAddStore = true },
-            )
-        }
+        ShopMateTextButton(text = stringResource(R.string.team_add_store), onClick = { showAddStore = true })
         // Each notice sits under the action it answers.
         state.notice?.takeIf { it.isAboutStores }?.let { NoticeText(it, state.licence) }
 
         SectionHeader(stringResource(R.string.settings_section_staff))
-        if (!state.staffLoaded) {
+        if (!state.ownerHasPin) {
+            // Before anyone else can lock the till, the owner must be able to unlock it.
             Text(
-                text = stringResource(R.string.team_refused_offline),
+                text = stringResource(R.string.staff_owner_pin_first),
                 style = MaterialTheme.typography.bodyMedium,
-                color = ShopBlackTertiary,
+                color = ShopBlackSecondary,
             )
-        } else if (!state.canManageTeam) {
-            Text(
-                text = stringResource(R.string.team_cashier_note),
-                style = MaterialTheme.typography.bodyMedium,
-                color = ShopBlackTertiary,
-            )
+            ShopMateTextButton(text = stringResource(R.string.staff_set_owner_pin), onClick = { showOwnerPin = true })
         } else {
             state.staff.forEach { member ->
-                StaffRow(
-                    member = member,
-                    isMe = member.userId == state.myUserId,
-                    // Owners manage everyone but themselves; nobody manages the owner.
-                    onClick = if (state.isOwner && member.role != StaffRole.OWNER) {
-                        { openMember = member }
-                    } else {
-                        null
-                    },
-                )
+                StaffRow(member = member, onClick = { openMember = member })
             }
             ShopMateTextButton(
-                text = stringResource(R.string.team_invite),
-                onClick = { showInvite = true },
+                text = stringResource(R.string.staff_add),
+                onClick = { showAddStaff = true },
                 enabled = !state.busy,
             )
         }
-
         state.notice?.takeUnless { it.isAboutStores }?.let { NoticeText(it, state.licence) }
     }
 
-    if (showInvite) {
-        InviteDialog(
-            storeName = state.activeStoreName,
-            ownerInviting = state.isOwner,
-            onDismiss = { showInvite = false },
-            onCreate = { role, stock ->
-                showInvite = false
-                onInvite(role, stock)
+    if (showOwnerPin) {
+        PinEntryDialog(
+            title = stringResource(R.string.staff_owner_pin_title),
+            askName = true,
+            onDismiss = { showOwnerPin = false },
+            onSave = { name, pin ->
+                showOwnerPin = false
+                onSetOwnerPin(name, pin)
             },
         )
     }
-    state.newInvite?.let { invite ->
-        InviteCodeDialog(code = invite.code, role = invite.role, storeName = invite.storeName, onDismiss = onDismissInvite)
+    if (showAddStaff) {
+        AddStaffDialog(
+            storeName = state.activeStoreName,
+            onDismiss = { showAddStaff = false },
+            onAdd = { name, role, pin, stock ->
+                showAddStaff = false
+                onAddStaff(name, role, pin, stock)
+            },
+        )
     }
     if (showAddStore) {
         AddStoreDialog(
@@ -137,16 +129,15 @@ fun TeamSection(
     openMember?.let { member ->
         MemberDialog(
             member = member,
-            activeStoreId = state.activeStoreId,
             onDismiss = { openMember = null },
-            onChangeRole = { onChangeRole(member, it); openMember = null },
-            onSetStockRights = { onSetStockRights(member, it); openMember = null },
+            onUpdate = { role, stock -> onUpdate(member, role, stock); openMember = null },
+            onChangePin = { pin -> onChangePin(member, pin); openMember = null },
             onRemove = { onRemove(member); openMember = null },
         )
     }
 }
 
-/** "Trial · ends 22 Nov" and "1 of 1 stores · 2 of 3 staff", with the licence state in words. */
+/** "Free trial · ends 22 Nov" and "1 of 1 store · 2 of 3 staff", with the licence state in words. */
 @Composable
 private fun PlanBlock(licence: Licence) {
     SectionHeader(stringResource(R.string.team_section_plan))
@@ -173,7 +164,7 @@ private fun PlanBlock(licence: Licence) {
 
 /** Ending and grace are warnings (StockOrange); expired is stopped (ShopBlack) — never ErrorRed. */
 @Composable
-fun licenceStateText(state: LicenceState): Pair<String, androidx.compose.ui.graphics.Color>? = when (state) {
+fun licenceStateText(state: LicenceState): Pair<String, Color>? = when (state) {
     LicenceState.Active -> null
     is LicenceState.Ending ->
         pluralStringResource(R.plurals.licence_ending, state.daysLeft, state.daysLeft) to StockOrange
@@ -183,15 +174,12 @@ fun licenceStateText(state: LicenceState): Pair<String, androidx.compose.ui.grap
 }
 
 @Composable
-private fun StaffRow(member: StaffMember, isMe: Boolean, onClick: (() -> Unit)?) {
-    val stores = member.stores.joinToString(", ") { it.name }
-    val stock = member.role == StaffRole.CASHIER && member.stores.any { it.canManageStock }
+private fun StaffRow(member: TillStaff, onClick: () -> Unit) {
     SettingsRow(
-        title = if (isMe) stringResource(R.string.team_me, member.email) else member.email,
+        title = member.name,
         description = listOfNotNull(
             stringResource(member.role.labelRes()),
-            stores.takeIf { it.isNotBlank() },
-            stringResource(R.string.team_can_move_stock).takeIf { stock },
+            stringResource(R.string.staff_can_move_stock).takeIf { member.role == StaffRole.CASHIER && member.canManageStock },
         ).joinToString(" · "),
         onClick = onClick,
     )
@@ -205,78 +193,90 @@ private val TeamNotice.isAboutStores: Boolean
 private fun NoticeText(notice: TeamNotice, licence: Licence?) {
     val text = when (notice) {
         is TeamNotice.StoreAdded -> stringResource(R.string.team_store_added, notice.name)
-        is TeamNotice.Removed -> stringResource(R.string.team_removed, notice.email)
+        is TeamNotice.StaffAdded -> stringResource(R.string.staff_added, notice.name)
+        is TeamNotice.Removed -> stringResource(R.string.staff_removed, notice.name)
+        TeamNotice.PinChanged -> stringResource(R.string.staff_pin_saved)
         is TeamNotice.Refused -> when (notice.reason) {
             TenancyRefusal.STORE_LIMIT -> pluralStringResource(
                 R.plurals.team_refused_store_limit, licence?.maxStores ?: 1, licence?.maxStores ?: 1,
             )
             TenancyRefusal.STAFF_LIMIT -> pluralStringResource(
-                R.plurals.team_refused_staff_limit, licence?.maxStaff ?: 0, licence?.maxStaff ?: 0,
+                R.plurals.staff_refused_limit, licence?.maxStaff ?: 0, licence?.maxStaff ?: 0,
             )
+            TenancyRefusal.NAME_TAKEN -> stringResource(R.string.staff_refused_name_taken)
             TenancyRefusal.LICENCE_EXPIRED -> stringResource(R.string.team_refused_licence)
-            TenancyRefusal.NOT_ALLOWED -> stringResource(R.string.team_refused_not_allowed)
             TenancyRefusal.OFFLINE -> stringResource(R.string.team_refused_offline)
-            TenancyRefusal.INVITE_NOT_FOUND, TenancyRefusal.OTHER -> stringResource(R.string.team_refused_other)
+            TenancyRefusal.NOT_ALLOWED, TenancyRefusal.OTHER -> stringResource(R.string.team_refused_other)
         }
     }
-    val failed = notice is TeamNotice.Refused
     Text(
         text = text,
         style = MaterialTheme.typography.bodyMedium,
-        color = if (failed) ShopBlack else ShopBlackSecondary,
+        color = if (notice is TeamNotice.Refused) ShopBlack else ShopBlackSecondary,
         modifier = Modifier.padding(top = 8.dp),
     )
 }
 
+/** Four digits, masked, number keyboard. */
 @Composable
-private fun InviteDialog(
-    storeName: String,
-    ownerInviting: Boolean,
+private fun PinField(value: String, onValueChange: (String) -> Unit) {
+    ShopMateTextField(
+        value = value,
+        onValueChange = { onValueChange(it.filter(Char::isDigit).take(PinHasher.PIN_LENGTH)) },
+        label = stringResource(R.string.staff_pin),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+        visualTransformation = PasswordVisualTransformation(),
+    )
+}
+
+@Composable
+private fun PinEntryDialog(
+    title: String,
+    askName: Boolean,
     onDismiss: () -> Unit,
-    onCreate: (StaffRole, Boolean) -> Unit,
+    onSave: (name: String, pin: String) -> Unit,
 ) {
-    var role by remember { mutableStateOf(StaffRole.CASHIER) }
-    var stock by remember { mutableStateOf(false) }
+    var name by remember { mutableStateOf("") }
+    var pin by remember { mutableStateOf("") }
+    val ready = PinHasher.isValidPin(pin) && (!askName || name.isNotBlank())
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.team_invite_title, storeName)) },
+        title = { Text(title) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    ShopMateFilterChip(
-                        label = stringResource(R.string.role_cashier),
-                        selected = role == StaffRole.CASHIER,
-                        onClick = { role = StaffRole.CASHIER },
-                    )
-                    // Managers invite cashiers only.
-                    if (ownerInviting) {
-                        ShopMateFilterChip(
-                            label = stringResource(R.string.role_manager),
-                            selected = role == StaffRole.MANAGER,
-                            onClick = { role = StaffRole.MANAGER },
-                        )
-                    }
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (askName) {
+                    ShopMateTextField(value = name, onValueChange = { name = it }, label = stringResource(R.string.staff_your_name))
                 }
-                if (role == StaffRole.CASHIER) {
-                    StockRightsSwitch(checked = stock, onCheckedChange = { stock = it })
-                } else {
-                    Text(
-                        text = stringResource(R.string.team_manager_note),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = ShopBlackSecondary,
-                    )
-                }
+                PinField(value = pin, onValueChange = { pin = it })
+                Text(
+                    text = stringResource(R.string.staff_pin_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = ShopBlackSecondary,
+                )
             }
         },
         confirmButton = {
-            TextButton(onClick = { onCreate(role, role == StaffRole.CASHIER && stock) }) {
-                Text(stringResource(R.string.team_invite_create), color = TradeGreen)
+            TextButton(onClick = { onSave(name, pin) }, enabled = ready) {
+                Text(stringResource(R.string.staff_save_pin), color = if (ready) TradeGreen else ShopBlackTertiary)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel), color = ShopBlackTertiary) }
         },
     )
+}
+
+@Composable
+private fun RoleChips(role: StaffRole, onRole: (StaffRole) -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        listOf(StaffRole.CASHIER, StaffRole.MANAGER).forEach { option ->
+            ShopMateFilterChip(
+                label = stringResource(option.labelRes()),
+                selected = role == option,
+                onClick = { onRole(option) },
+            )
+        }
+    }
 }
 
 @Composable
@@ -298,40 +298,40 @@ private fun StockRightsSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Un
     }
 }
 
-/** The code, large, and a way to send it. Sharing is the owner's choice of app. */
 @Composable
-private fun InviteCodeDialog(code: String, role: StaffRole, storeName: String, onDismiss: () -> Unit) {
-    val context = LocalContext.current
-    val roleLabel = stringResource(role.labelRes())
-    val message = stringResource(R.string.team_invite_share_text, storeName, roleLabel.lowercase(), code)
+private fun AddStaffDialog(
+    storeName: String,
+    onDismiss: () -> Unit,
+    onAdd: (String, StaffRole, String, Boolean) -> Unit,
+) {
+    var name by remember { mutableStateOf("") }
+    var role by remember { mutableStateOf(StaffRole.CASHIER) }
+    var pin by remember { mutableStateOf("") }
+    var stock by remember { mutableStateOf(false) }
+    val ready = name.isNotBlank() && PinHasher.isValidPin(pin)
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.team_code_title)) },
+        title = { Text(stringResource(R.string.staff_add_title, storeName)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                ShopMateTextField(value = name, onValueChange = { name = it }, label = stringResource(R.string.staff_name))
+                RoleChips(role = role, onRole = { role = it })
+                PinField(value = pin, onValueChange = { pin = it })
                 Text(
-                    text = code.chunked(3).joinToString(" "),
-                    style = NumberStyle(34.sp, FontWeight.SemiBold),
-                    color = ShopBlack,
-                )
-                Text(
-                    text = stringResource(R.string.team_code_detail, roleLabel.lowercase(), storeName),
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = stringResource(R.string.staff_pin_hint_other),
+                    style = MaterialTheme.typography.bodySmall,
                     color = ShopBlackSecondary,
                 )
+                if (role == StaffRole.CASHIER) StockRightsSwitch(checked = stock, onCheckedChange = { stock = it })
             }
         },
         confirmButton = {
-            TextButton(onClick = {
-                val send = Intent(Intent.ACTION_SEND).apply {
-                    type = "text/plain"
-                    putExtra(Intent.EXTRA_TEXT, message)
-                }
-                context.startActivity(Intent.createChooser(send, null))
-            }) { Text(stringResource(R.string.team_code_share), color = TradeGreen) }
+            TextButton(onClick = { onAdd(name, role, pin, stock) }, enabled = ready) {
+                Text(stringResource(R.string.staff_add_confirm), color = if (ready) TradeGreen else ShopBlackTertiary)
+            }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.team_code_done), color = ShopBlackTertiary) }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel), color = ShopBlackTertiary) }
         },
     )
 }
@@ -363,59 +363,70 @@ private fun AddStoreDialog(onDismiss: () -> Unit, onAdd: (String) -> Unit) {
     )
 }
 
+/** The owner's own row only changes its PIN; a staff row changes role, stock rights and PIN. */
 @Composable
 private fun MemberDialog(
-    member: StaffMember,
-    activeStoreId: String?,
+    member: TillStaff,
     onDismiss: () -> Unit,
-    onChangeRole: (StaffRole) -> Unit,
-    onSetStockRights: (Boolean) -> Unit,
+    onUpdate: (StaffRole, Boolean) -> Unit,
+    onChangePin: (String) -> Unit,
     onRemove: () -> Unit,
 ) {
+    val isOwner = member.role == StaffRole.OWNER
+    var role by remember { mutableStateOf(member.role) }
+    var stock by remember { mutableStateOf(member.canManageStock) }
+    var pin by remember { mutableStateOf("") }
     var confirmRemove by remember { mutableStateOf(false) }
-    val stockHere = member.stores.firstOrNull { it.storeId == activeStoreId }
+    val changed = !isOwner && (role != member.role || stock != member.canManageStock)
+    val pinReady = PinHasher.isValidPin(pin)
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(member.email) },
+        title = { Text(member.name) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf(StaffRole.CASHIER, StaffRole.MANAGER).forEach { role ->
-                        ShopMateFilterChip(
-                            label = stringResource(role.labelRes()),
-                            selected = member.role == role,
-                            onClick = { if (member.role != role) onChangeRole(role) },
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (!isOwner) {
+                    RoleChips(role = role, onRole = { role = it })
+                    if (role == StaffRole.CASHIER) StockRightsSwitch(checked = stock, onCheckedChange = { stock = it })
+                }
+                Text(
+                    text = stringResource(R.string.staff_new_pin),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = ShopBlack,
+                )
+                PinField(value = pin, onValueChange = { pin = it })
+                if (!isOwner) {
+                    if (confirmRemove) {
+                        Text(
+                            text = stringResource(R.string.staff_remove_confirm, member.name),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = ShopBlack,
                         )
+                        TextButton(onClick = onRemove) { Text(stringResource(R.string.team_remove), color = ErrorRed) }
+                    } else {
+                        TextButton(onClick = { confirmRemove = true }) {
+                            Text(stringResource(R.string.staff_remove, member.name), color = ShopBlackSecondary)
+                        }
                     }
-                }
-                if (member.role == StaffRole.CASHIER && stockHere != null) {
-                    StockRightsSwitch(checked = stockHere.canManageStock, onCheckedChange = onSetStockRights)
-                }
-                if (confirmRemove) {
-                    Text(
-                        text = stringResource(R.string.team_remove_confirm, member.email),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = ShopBlack,
-                    )
                 }
             }
         },
         confirmButton = {
-            if (confirmRemove) {
-                TextButton(onClick = onRemove) { Text(stringResource(R.string.team_remove), color = ErrorRed) }
-            } else {
-                TextButton(onClick = { confirmRemove = true }) {
-                    Text(stringResource(R.string.team_remove), color = ShopBlackSecondary)
-                }
-            }
+            TextButton(
+                onClick = {
+                    if (pinReady) onChangePin(pin)
+                    if (changed) onUpdate(role, stock)
+                    if (!pinReady && !changed) onDismiss()
+                },
+            ) { Text(stringResource(R.string.staff_save), color = TradeGreen) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.team_code_done), color = TradeGreen) }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel), color = ShopBlackTertiary) }
         },
     )
 }
 
-private fun StaffRole.labelRes(): Int = when (this) {
+fun StaffRole.labelRes(): Int = when (this) {
     StaffRole.OWNER -> R.string.role_owner
     StaffRole.MANAGER -> R.string.role_manager
     StaffRole.CASHIER -> R.string.role_cashier
