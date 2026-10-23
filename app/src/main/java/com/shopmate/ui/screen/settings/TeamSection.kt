@@ -72,6 +72,8 @@ fun TeamSection(
                 onClick = { showAddStore = true },
             )
         }
+        // Each notice sits under the action it answers.
+        state.notice?.takeIf { it.isAboutStores }?.let { NoticeText(it, state.licence) }
 
         SectionHeader(stringResource(R.string.settings_section_staff))
         if (!state.staffLoaded) {
@@ -106,7 +108,7 @@ fun TeamSection(
             )
         }
 
-        state.notice?.let { NoticeText(it, state.licence) }
+        state.notice?.takeUnless { it.isAboutStores }?.let { NoticeText(it, state.licence) }
     }
 
     if (showInvite) {
@@ -194,6 +196,10 @@ private fun StaffRow(member: StaffMember, isMe: Boolean, onClick: (() -> Unit)?)
         onClick = onClick,
     )
 }
+
+private val TeamNotice.isAboutStores: Boolean
+    get() = this is TeamNotice.StoreAdded ||
+        (this is TeamNotice.Refused && reason == TenancyRefusal.STORE_LIMIT)
 
 @Composable
 private fun NoticeText(notice: TeamNotice, licence: Licence?) {

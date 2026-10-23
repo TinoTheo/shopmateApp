@@ -67,13 +67,19 @@ class TeamViewModel @Inject constructor(
 
     private val local = MutableStateFlow(TeamUiState())
 
+    /** The stores as the server names them. The till's own display name can differ. */
+    private val serverStores = MutableStateFlow<List<StoreChoice>>(emptyList())
+
     val uiState: StateFlow<TeamUiState> = combine(
         local,
         licences.licence,
         storeContext.activeStoreIdFlow,
         settings.storeName,
-    ) { state, licence, activeStoreId, storeName ->
-        state.copy(licence = licence, activeStoreId = activeStoreId, activeStoreName = storeName)
+        serverStores,
+    ) { state, licence, activeStoreId, localName, stores ->
+        // An invite joins the server's store, so it is named as the server names it.
+        val serverName = stores.firstOrNull { it.id == activeStoreId }?.name
+        state.copy(licence = licence, activeStoreId = activeStoreId, activeStoreName = serverName ?: localName)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TeamUiState())
 
     init {
@@ -83,6 +89,7 @@ class TeamViewModel @Inject constructor(
     fun refresh() {
         viewModelScope.launch {
             licences.refresh()
+            runCatching { storeRepository.accessibleStores() }.onSuccess { serverStores.value = it }
             val me = authManager.currentUserId
             when (val result = staffRepository.list()) {
                 is TenancyResult.Done -> local.update { state ->
