@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.shopmate.R
@@ -85,12 +86,14 @@ private fun WhoIsSelling(staff: List<TillStaff>, onSelect: (TillStaff) -> Unit) 
         text = stringResource(R.string.lock_who),
         style = MaterialTheme.typography.displaySmall,
         color = Ink,
+        textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth(),
     )
     Spacer(Modifier.height(20.dp))
+    // Centred, like the PIN step that follows: the till's front door reads as one screen.
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         staff.forEach { person ->
@@ -157,7 +160,7 @@ private fun EnterPin(
             color = if (state.wrong || state.waitSeconds > 0) ShopBlack else ShopBlackSecondary,
         )
         Spacer(Modifier.height(16.dp))
-        NumberPad(onDigit = onDigit, onBackspace = onBackspace)
+        NumberPad(onDigit = onDigit, onBackspace = onBackspace, decimal = false)
         if (canGoBack) {
             ShopMateTextButton(
                 text = stringResource(R.string.lock_not_me),
