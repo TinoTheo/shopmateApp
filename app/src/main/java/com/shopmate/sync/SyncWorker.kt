@@ -52,6 +52,7 @@ class SyncWorker @AssistedInject constructor(
     private val stockDeltaDao: StockDeltaDao,
     private val storeContext: StoreContext,
     private val authManager: AuthManager,
+    private val catalogueLoader: CatalogueLoader,
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
@@ -60,6 +61,9 @@ class SyncWorker @AssistedInject constructor(
         if (!isNetworkAvailable()) return Result.retry()
 
         return try {
+            // First, before this till's own snapshot: an empty till would otherwise upload an
+            // empty catalogue as the store's latest, and the next fresh till would load nothing.
+            loadCatalogue(storeId)
             syncPendingSales(storeId)
             syncStockDeltas(storeId)
             syncSnapshot(storeId)
@@ -168,6 +172,15 @@ class SyncWorker @AssistedInject constructor(
         stockDeltaDao.markSynced(batch.map { it.id })
     }
 
+    private suspend fun loadCatalogue(storeId: String) {
+        try {
+            catalogueLoader.loadIfEmpty(storeId)
+        } catch (e: RestException) {
+            if (e.statusCode == 401) throw SessionRejected()
+            // Otherwise best-effort: the till can still sell what it has and try next sync.
+        }
+    }
+
     private suspend fun syncSnapshot(storeId: String) {
         // Capture the events this snapshot covers BEFORE reading data — an adjustment made
         // during the upload queues a new event that must survive for the next run.
@@ -176,6 +189,11 @@ class SyncWorker @AssistedInject constructor(
 
         val products = productDao.getAll().first()
         val categories = categoryDao.getAll().first()
+        if (products.isEmpty()) {
+            // Nothing to describe. Uploading it would replace the store's catalogue with nothing.
+            coveredEvents.forEach { syncRepository.markSynced(it.id) }
+            return
+        }
         val categoryNames = categories.associate { it.id to it.name }
 
         val row = StoreSnapshotRowDto(

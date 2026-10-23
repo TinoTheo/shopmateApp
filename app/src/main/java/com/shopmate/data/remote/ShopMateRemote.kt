@@ -10,6 +10,7 @@ import com.shopmate.domain.model.Sale
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.postgrest.query.Order
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -47,6 +48,17 @@ class ShopMateRemote @Inject constructor(
     suspend fun insertSnapshot(row: StoreSnapshotRowDto) {
         postgrest.from("store_snapshots").insert(row)
     }
+
+    /** The store's most recent snapshot — how a fresh till gets its catalogue. Null if none. */
+    suspend fun fetchLatestSnapshot(storeId: String): StoreSnapshotRowDto? =
+        postgrest.from("store_snapshots")
+            .select(Columns.list("store_id", "taken_at", "payload")) {
+                filter { eq("store_id", storeId) }
+                order("taken_at", Order.DESCENDING)
+                limit(1)
+            }
+            .decodeList<StoreSnapshotRowDto>()
+            .firstOrNull()
 
     /**
      * Product metadata for catalogue reconciliation. Numeric columns are cast to text
