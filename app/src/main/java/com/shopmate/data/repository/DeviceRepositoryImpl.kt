@@ -93,6 +93,10 @@ class DeviceRepositoryImpl @Inject constructor(
         return TenancyResult.Done(Unit)
     }
 
+    override suspend fun askAgain() {
+        dataStore.edit { it.remove(ROLE_STORE); it.remove(ROLE) }
+    }
+
     override suspend fun heartbeat(storeId: String): Boolean {
         val prefs = dataStore.data.first()
         if (prefs[PENDING_REGISTRATION] == true) {

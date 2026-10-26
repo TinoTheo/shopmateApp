@@ -199,6 +199,7 @@ fun RemoteHomeScreen(storeName: String, viewModel: DeviceViewModel = hiltViewMod
                     ShopMateSecondaryButton(text = stringResource(R.string.remote_open_dashboard), onClick = { openWeb("/") })
                 }
                 ShopMateTextButton(text = stringResource(R.string.remote_refresh), onClick = viewModel::refreshToday, enabled = !state.busy)
+                ShopMateTextButton(text = stringResource(R.string.remote_sell_here), onClick = viewModel::sellHereInstead)
                 ShopMateTextButton(text = stringResource(R.string.settings_sign_out), onClick = viewModel::signOut)
             }
         }

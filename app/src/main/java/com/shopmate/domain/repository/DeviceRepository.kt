@@ -44,6 +44,9 @@ interface DeviceRepository {
     /** Remote management. Refused while this device holds anything not yet sent. */
     suspend fun becomeRemote(): TenancyResult<Unit>
 
+    /** A remote device asks the till-or-remote question again (it holds nothing to send). */
+    suspend fun askAgain()
+
     /**
      * A till's sync heartbeat: registers a till still pending, and learns whether it was
      * removed. False means stop — this device may no longer sync as a till.

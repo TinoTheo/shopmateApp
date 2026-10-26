@@ -50,6 +50,10 @@ class DeviceViewModel @Inject constructor(
 
     fun becomeRemote() = act { deviceRepository.becomeRemote() }
 
+    fun sellHereInstead() {
+        viewModelScope.launch { deviceRepository.askAgain() }
+    }
+
     fun refreshToday() {
         viewModelScope.launch {
             _state.update { it.copy(busy = true) }
