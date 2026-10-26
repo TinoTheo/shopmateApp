@@ -1,5 +1,7 @@
 package com.shopmate.data.remote.dto
 
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -27,6 +29,10 @@ data class SaleRowDto(
     @SerialName("payment_method") val paymentMethod: String,
     @SerialName("cashier_name") val cashierName: String?,
     @SerialName("created_at") val createdAt: String,
+    /** Left out entirely when null, so a till without staff works before the staff migration. */
+    @OptIn(ExperimentalSerializationApi::class)
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
+    @SerialName("staff_id") val staffId: String? = null,
 )
 
 // No store_id column — RLS scopes sale_items through the parent sale (sale_id).

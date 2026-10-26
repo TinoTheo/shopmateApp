@@ -23,6 +23,8 @@ import com.shopmate.domain.model.DeltaReason
 import com.shopmate.domain.model.EventType
 import com.shopmate.domain.model.Sale
 import com.shopmate.domain.model.SyncEvent
+import com.shopmate.domain.repository.LicenceRepository
+import com.shopmate.domain.repository.StaffRepository
 import com.shopmate.domain.repository.SaleRepository
 import com.shopmate.domain.repository.SyncRepository
 import dagger.assisted.Assisted
@@ -52,6 +54,9 @@ class SyncWorker @AssistedInject constructor(
     private val stockDeltaDao: StockDeltaDao,
     private val storeContext: StoreContext,
     private val authManager: AuthManager,
+    private val catalogueLoader: CatalogueLoader,
+    private val licences: LicenceRepository,
+    private val staffRepository: StaffRepository,
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
@@ -60,10 +65,15 @@ class SyncWorker @AssistedInject constructor(
         if (!isNetworkAvailable()) return Result.retry()
 
         return try {
+            // First, before this till's own snapshot: an empty till would otherwise upload an
+            // empty catalogue as the store's latest, and the next fresh till would load nothing.
+            loadCatalogue(storeId)
+            staffRepository.pull(storeId)
             syncPendingSales(storeId)
             syncStockDeltas(storeId)
             syncSnapshot(storeId)
             pullServerUpdates(storeId)
+            licences.refresh() // so an offline till's grace countdown starts from fresh facts
             Result.success()
         } catch (e: SessionRejected) {
             authManager.markSessionRejected()
@@ -168,6 +178,15 @@ class SyncWorker @AssistedInject constructor(
         stockDeltaDao.markSynced(batch.map { it.id })
     }
 
+    private suspend fun loadCatalogue(storeId: String) {
+        try {
+            catalogueLoader.loadIfEmpty(storeId)
+        } catch (e: RestException) {
+            if (e.statusCode == 401) throw SessionRejected()
+            // Otherwise best-effort: the till can still sell what it has and try next sync.
+        }
+    }
+
     private suspend fun syncSnapshot(storeId: String) {
         // Capture the events this snapshot covers BEFORE reading data — an adjustment made
         // during the upload queues a new event that must survive for the next run.
@@ -176,6 +195,11 @@ class SyncWorker @AssistedInject constructor(
 
         val products = productDao.getAll().first()
         val categories = categoryDao.getAll().first()
+        if (products.isEmpty()) {
+            // Nothing to describe. Uploading it would replace the store's catalogue with nothing.
+            coveredEvents.forEach { syncRepository.markSynced(it.id) }
+            return
+        }
         val categoryNames = categories.associate { it.id to it.name }
 
         val row = StoreSnapshotRowDto(

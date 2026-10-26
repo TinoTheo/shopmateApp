@@ -3,6 +3,7 @@ package com.shopmate.sync
 import com.shopmate.data.auth.AuthManager
 import com.shopmate.data.auth.StoreContext
 import com.shopmate.domain.repository.StorePermissionRepository
+import com.shopmate.domain.repository.LicenceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -28,6 +29,7 @@ class SessionSyncTrigger @Inject constructor(
     private val storeContext: StoreContext,
     private val syncScheduler: SyncScheduler,
     private val storePermissions: StorePermissionRepository,
+    private val licences: LicenceRepository,
 ) {
     fun start(scope: CoroutineScope) {
         combine(authManager.needsReauth, storeContext.activeStoreIdFlow) { needsReauth, storeId ->
@@ -38,6 +40,7 @@ class SessionSyncTrigger @Inject constructor(
             .onEach {
                 syncScheduler.syncNow()
                 storePermissions.refresh()
+                licences.refresh()
             }
             .launchIn(scope)
     }

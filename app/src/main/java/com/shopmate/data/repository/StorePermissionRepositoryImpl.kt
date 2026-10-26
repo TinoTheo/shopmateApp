@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.shopmate.data.auth.StoreContext
 import com.shopmate.domain.repository.StorePermissionRepository
+import com.shopmate.domain.repository.StaffRepository
 import io.github.jan.supabase.postgrest.Postgrest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -25,13 +26,19 @@ class StorePermissionRepositoryImpl @Inject constructor(
     private val postgrest: Postgrest,
     private val dataStore: DataStore<Preferences>,
     private val storeContext: StoreContext,
+    private val staffRepository: StaffRepository,
 ) : StorePermissionRepository {
 
+    /**
+     * The signed-in account's right (the server's answer) narrowed by the person at the till:
+     * a cashier who unlocked it moves stock only with the owner's grant (§ Staff).
+     */
     override val canManageStock: Flow<Boolean> =
-        combine(storeContext.activeStoreIdFlow, dataStore.data) { activeStoreId, prefs ->
+        combine(storeContext.activeStoreIdFlow, dataStore.data, staffRepository.current) { activeStoreId, prefs, person ->
             activeStoreId != null &&
                 prefs[ANSWERED_FOR_STORE_KEY] == activeStoreId &&
-                prefs[CAN_MANAGE_STOCK_KEY] == true
+                prefs[CAN_MANAGE_STOCK_KEY] == true &&
+                (person == null || person.mayMoveStock)
         }
 
     override suspend fun refresh() {

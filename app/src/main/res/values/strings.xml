@@ -278,9 +278,84 @@
     <string name="settings_section_account">Account</string>
     <string name="settings_active_store">Active store</string>
     <string name="settings_switch_store">Switch store</string>
+    <string name="settings_switch_title">Move this till to %1$s?</string>
+    <string name="settings_switch_body">This till works for one store at a time. Once everything on it has been sent, it clears its products and sales and loads %1$s\'s products.</string>
+    <string name="settings_switch_confirm">Move to %1$s</string>
+    <string name="settings_switch_done">This till now works for %1$s. Its products load with the next sync.</string>
+    <string name="settings_switch_offline">Connect to the internet to switch stores, so nothing is left behind on this till.</string>
+    <plurals name="settings_switch_not_sent">
+        <item quantity="one">%d sale or change is still only on this till. Send it from Sync, then switch.</item>
+        <item quantity="other">%d sales or changes are still only on this till. Send them from Sync, then switch.</item>
+    </plurals>
     <string name="settings_no_store">No active store</string>
     <string name="settings_section_staff">Staff</string>
-    <string name="settings_staff_coming">Add staff — coming with phone sign-in</string>
+    <string name="role_owner">Owner</string>
+    <string name="role_manager">Manager</string>
+    <string name="role_cashier">Cashier</string>
+    <string name="plan_trial">Free trial</string>
+    <string name="plan_basic">Basic plan</string>
+    <string name="plan_pro">Pro plan</string>
+    <string name="team_section_plan">Plan</string>
+    <string name="team_plan_line">%1$s · ends %2$s</string>
+    <string name="team_plan_usage">%1$s · %2$s</string>
+    <plurals name="team_stores_used">
+        <item quantity="one">%1$d of %2$d store</item>
+        <item quantity="other">%1$d of %2$d stores</item>
+    </plurals>
+    <plurals name="team_staff_used">
+        <item quantity="one">%1$d of %2$d staff</item>
+        <item quantity="other">%1$d of %2$d staff</item>
+    </plurals>
+    <plurals name="licence_ending">
+        <item quantity="one">Your plan ends tomorrow. Contact ShopMate to keep selling without a break.</item>
+        <item quantity="other">Your plan ends in %d days. Contact ShopMate to keep selling without a break.</item>
+    </plurals>
+    <plurals name="licence_grace">
+        <item quantity="one">Your plan has ended. This till takes sales for 1 more day — contact ShopMate to renew.</item>
+        <item quantity="other">Your plan has ended. This till takes sales for %d more days — contact ShopMate to renew.</item>
+    </plurals>
+    <string name="licence_expired">Your plan has ended, so this till can\'t take new sales. Sales already taken still send. Contact ShopMate to renew.</string>
+    <string name="team_cashier_note">The owner or a manager adds staff.</string>
+    <string name="team_stock_rights">Can move stock</string>
+    <string name="team_stock_rights_detail">Restock, adjust and count at this store.</string>
+    <string name="team_code_done">Done</string>
+    <string name="team_add_store">Add a store</string>
+    <string name="team_add_store_note">The new store starts empty. To sell there, move a till to it from Active store.</string>
+    <string name="team_add_store_confirm">Add store</string>
+    <string name="team_store_added">%1$s added. Move a till to it from Active store to start selling there.</string>
+    <string name="team_remove">Remove</string>
+    <plurals name="team_refused_store_limit">
+        <item quantity="one">Your plan has 1 store. Contact ShopMate to add more.</item>
+        <item quantity="other">Your plan has %d stores, all in use. Contact ShopMate to add more.</item>
+    </plurals>
+    <string name="staff_owner_pin_first">Set your own till PIN first. Once staff are added the till locks, and you\'ll unlock it with this PIN too.</string>
+    <string name="staff_set_owner_pin">Set your till PIN</string>
+    <string name="staff_owner_pin_title">Your till PIN</string>
+    <string name="staff_your_name">Your name, as staff will see it</string>
+    <string name="staff_pin">4-digit PIN</string>
+    <string name="staff_pin_hint">You\'ll type this to unlock the till. It works offline.</string>
+    <string name="staff_pin_hint_other">They type this to unlock the till. Tell them in person.</string>
+    <string name="staff_save_pin">Save PIN</string>
+    <string name="staff_add">Add staff</string>
+    <string name="staff_add_title">Add someone to %1$s</string>
+    <string name="staff_name">Name</string>
+    <string name="staff_add_confirm">Add</string>
+    <string name="staff_added">%1$s can now unlock the till with their PIN.</string>
+    <string name="staff_can_move_stock">can move stock</string>
+    <string name="staff_new_pin">New PIN (leave empty to keep it)</string>
+    <string name="staff_save">Save</string>
+    <string name="staff_pin_saved">PIN saved. It works on every till of this store after their next sync.</string>
+    <string name="staff_remove">Remove %1$s</string>
+    <string name="staff_remove_confirm">%1$s won\'t be able to unlock any till. Their name stays on the sales they rang up.</string>
+    <string name="staff_removed">%1$s can no longer unlock the till.</string>
+    <string name="staff_refused_name_taken">Someone at this store already has that name. Add a surname or an initial.</string>
+    <plurals name="staff_refused_limit">
+        <item quantity="one">Your plan has room for 1 staff member. Contact ShopMate to add more.</item>
+        <item quantity="other">Your plan has room for %d staff. Contact ShopMate to add more.</item>
+    </plurals>
+    <string name="team_refused_licence">Your plan has ended. Renew it to add stores or staff.</string>
+    <string name="team_refused_offline">Connect to the internet to manage staff and stores.</string>
+    <string name="team_refused_other">That didn\'t go through. Check the connection and try again.</string>
 
     <!-- Copy pass (design_handoff_copy_pass): final strings and plurals. -->
     <!-- 1 · Sync history -->
@@ -446,6 +521,11 @@
     <string name="signin_subtitle">%1$s · Till %2$d</string>
     <string name="signin_helper">Enter your 4-digit till code</string>
     <string name="signin_opening">Opening the till</string>
+    <string name="lock_who">Who\'s selling?</string>
+    <string name="lock_wait">Too many tries. Try again in %1$d s.</string>
+    <string name="lock_not_me">Not you? Pick your name</string>
+    <string name="lock_switch">Switch</string>
+    <string name="lock_switch_description">Switch cashier — %1$s is selling</string>
     <string name="signin_wrong">That code didn’t match. Try again.</string>
     <string name="onboard_title">Create your shop</string>
     <string name="onboard_subtitle">You can change these later in Settings.</string>
@@ -453,6 +533,8 @@
     <string name="onboard_your_name">Your name</string>
     <string name="onboard_country">Country</string>
     <string name="onboard_create">Create shop</string>
+    <string name="onboard_error_offline">Connect to the internet to set up this till.</string>
+    <string name="onboard_error_not_sent">This till still has sales from another shop to send. Sign in to that shop and send them first.</string>
 
     <!-- 5 · Reports -->
     <string name="reports_greeting_morning">Good morning</string>

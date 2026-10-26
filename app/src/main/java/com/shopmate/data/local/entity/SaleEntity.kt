@@ -21,4 +21,6 @@ data class SaleEntity(
      * another till had already used it. Null for a sale that kept its first number.
      */
     @ColumnInfo(name = "original_receipt_number") val originalReceiptNumber: String? = null,
+    /** Who rang it up; null for a till with no staff, or a sale from before staff existed. */
+    @ColumnInfo(name = "staff_id") val staffId: String? = null,
 )

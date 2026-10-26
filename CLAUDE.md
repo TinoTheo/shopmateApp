@@ -405,6 +405,7 @@ one-off buttons, cards, chips, badges, or empty states.**
 | `SuccessBanner` | Checkout-Neon success feedback | built |
 | `ConstrainedContent` | Max-width wrapper for wide screens | built |
 | `ShopMateMark` / `ShopMateWordmark` | The looped M and the two-colour wordmark (§ Brand) | built |
+| `LicenceBanner` | The plan's grace / expired line on the POS (§ Licensing) | built |
 | `RunwayGauge` | Seven-day stock runway (§ Gauges) | **to build — spec below** |
 | `MarginGauge` | Cost-to-price track with target notch (§ Gauges) | **to build — spec below** |
 | `InsightRow` | Leading slot · name + meta · gauge · trailing value + sub | **to build — spec below** |
@@ -824,6 +825,67 @@ com.shopmate/
 
 ---
 
+## Tenancy, staff and licensing
+
+Decided 2026-10-23. Built in the order below; each step ships on its own.
+
+### One store per device
+
+The organisation is the tenant: `orgs` → `memberships` (role) → `stores`. **A till serves one store
+at a time.** Room has no `store_id` column and never gets one — every local row belongs to the
+active store.
+
+- **Switching store** sends everything first. It is refused while anything is waiting or not
+  sent (the till says so and offers Sync), and offline. Then it clears the local database, sets
+  the new active store, and loads that store's catalogue. Nothing local is ever discarded
+  unsent.
+- **A fresh till loads its store's catalogue** (`CatalogueLoader`): every server product for the
+  active store that the till doesn't have is inserted, its server stock recorded as an
+  "Opening stock" movement marked already synced — the server holds that stock, so it never
+  uploads again. This is what lets a new staff phone sell on day one.
+- **The owner adds stores** (`create_store` RPC, checked against the licence's store limit).
+
+### Staff — email for the owner, PINs for everyone else
+
+Amended 2026-10-23 (replaces invite codes, which needed staff to confirm an email address first).
+
+- **Only the owner has an email account.** The owner signs in once to set up a till; the till
+  stays signed in as the store. Managers and cashiers never create an account.
+- **The owner adds staff** in Settings: name, role (`manager` or `cashier`), a 4-digit PIN, and
+  for a cashier whether they can move stock. Staff belong to one store. Online only — the staff
+  list lives on the server (`staff` table) and every till of that store pulls it on sync.
+- **Staff unlock the till with their PIN** on the "Who's selling?" screen: tap your name, enter
+  your PIN. Works offline. The till locks when the app starts and when someone taps **Switch
+  cashier**. The owner has a PIN too ("Your till PIN"), set before adding anyone else.
+- A till with no staff on its store has no lock — a one-person shop never sees it.
+- **PINs are never stored in the clear**: PBKDF2-SHA256 with a per-PIN salt, hashed on the
+  device that sets them. A 4-digit PIN is a till lock, not a password; it guards the till, not
+  the account, and only members of the store can read the hashes.
+- **Every sale records who rang it up** (`cashier_name`, `staff_id`), and every stock movement
+  its actor. This is the attribution that waited for auth.
+- **Rights follow the person on the till.** Cashier: sell; move stock only with the grant.
+  Manager: sell and move stock, sees Settings but not Staff, Sign out or Reset. Owner: everything.
+  Uploads still go out under the owner's session — the server enforces store and plan, the till
+  enforces the person.
+- The plan's staff limit counts PIN staff (not the owner).
+
+### Licensing — plans with limits
+
+- One **licence per organisation**: plan (`trial`, `basic`, `pro`), `expires_at`, `max_stores`,
+  `max_staff`. Set and extended by ShopMate from the Supabase dashboard; no payment integration
+  yet. A new org starts on a 30-day trial.
+- The device reads `current_licence()` at sign-in, store pick and every sync, and **keeps the
+  last answer** for offline use. It never decides from the device clock alone that a licence it
+  hasn't seen is valid.
+- **States:** active → *ending* (7 days before expiry: a calm banner on the owner's Settings and
+  Reports, never the cashier's POS) → *grace* (7 days after expiry: banner on POS too) →
+  *expired* (new sales are refused at Charge with the reason). **Sales already taken always
+  upload** — the server accepts queued sales dated before expiry plus grace. Nothing is lost.
+- Limits are enforced on the server (`create_store`, `create_invite`); the app shows the limit
+  in words before the owner hits it.
+
+---
+
 ## Build status
 
 **Supabase cutover: done (app side).** supabase-kt Auth + PostgREST only (no Realtime),
@@ -835,6 +897,13 @@ stops the drain and flags re-authentication. Retrofit, Moshi, OkHttp interceptor
 cart, search, checkout, receipt numbering · Stock levels, filters, adjustment sheet,
 movement history · Reports (Vico) · Sync engine · Settings. Beyond plan: sidebar app frame,
 adaptive DeviceLayout, tablet POS, Sales History, shared component library, Inter bundled.
+
+**Tenancy, staff and licensing (2026-10-23):** app side built — store switching with its
+guard, `CatalogueLoader`, join-a-shop onboarding, Settings › Plan / Add a store / Staff with
+invite codes, licence states with the POS banner and the expired-plan block. Server side is
+`supabase/migrations/20261023090000_tenancy_staff_licensing.sql`; until it is applied the staff
+list and plan don't load and nothing is blocked. No payment integration: licences are set from
+the dashboard.
 
 **Not built yet**, in dependency order:
 - `MIGRATION_3_4` and everything downstream (§ Schema debt) — **blocks the three below**

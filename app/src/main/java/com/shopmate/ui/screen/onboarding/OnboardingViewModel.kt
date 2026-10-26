@@ -2,8 +2,10 @@ package com.shopmate.ui.screen.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.shopmate.data.auth.StoreContext
 import com.shopmate.domain.repository.SettingsRepository
+import com.shopmate.domain.repository.StoreRepository
+import com.shopmate.domain.repository.StoreSwitch
+import com.shopmate.domain.repository.TenancyResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +21,7 @@ data class OnboardingUiState(
 
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
-    private val storeContext: StoreContext,
+    private val storeRepository: StoreRepository,
     private val settings: SettingsRepository,
 ) : ViewModel() {
 
@@ -39,23 +41,31 @@ class OnboardingViewModel @Inject constructor(
         }
         viewModelScope.launch {
             _uiState.update { it.copy(isSubmitting = true, error = null) }
-            val result = runCatching {
-                storeContext.createOrganizationWithStore(orgName.trim(), storeName.trim(), currency)
-            }
-            result.onSuccess {
-                // Mirror the merchant's choices into local settings so the UI is consistent offline.
-                settings.setStoreName(storeName.trim())
-                settings.setCurrencySymbol(currency)
-                _uiState.update { it.copy(isSubmitting = false) }
-            }.onFailure {
-                _uiState.update { it.copy(isSubmitting = false, error = GENERIC) }
+            when (val result = storeRepository.createOrganization(orgName, storeName, currency)) {
+                is TenancyResult.Done -> {
+                    // Mirror the merchant's choices into local settings so the UI is consistent offline.
+                    settings.setStoreName(storeName.trim())
+                    settings.setCurrencySymbol(currency)
+                    _uiState.update { it.copy(isSubmitting = false, error = result.value.errorMarker()) }
+                }
+                is TenancyResult.Refused -> _uiState.update { it.copy(isSubmitting = false, error = GENERIC) }
             }
         }
+    }
+
+
+    /** The till couldn't move to the new store yet — something from another store is unsent. */
+    private fun StoreSwitch.errorMarker(): String? = when (this) {
+        StoreSwitch.Switched -> null
+        StoreSwitch.Offline -> OFFLINE
+        is StoreSwitch.NotSentYet -> NOT_SENT
     }
 
     companion object {
         const val ORG_REQUIRED = "org_required"
         const val STORE_REQUIRED = "store_required"
         const val GENERIC = "generic"
+        const val OFFLINE = "offline"
+        const val NOT_SENT = "not_sent"
     }
 }

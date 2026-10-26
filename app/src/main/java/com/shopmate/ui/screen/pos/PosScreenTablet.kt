@@ -44,7 +44,9 @@ import com.shopmate.R
 import com.shopmate.domain.model.CartItem
 import com.shopmate.domain.model.Category
 import com.shopmate.domain.model.PaymentMethod
+import com.shopmate.domain.model.LicenceState
 import com.shopmate.domain.model.Product
+import com.shopmate.ui.components.LicenceBanner
 import com.shopmate.ui.components.ShopMateFilterChip
 import com.shopmate.ui.theme.ReceiptBeige
 import com.shopmate.ui.theme.ShopBlack
@@ -68,6 +70,7 @@ import java.math.BigDecimal
 @Composable
 fun PosTabletLayout(
     state: PosUiState,
+    licenceState: LicenceState?,
     categories: List<Category>,
     categoryColours: Map<String, String>,
     onSearchChange: (String) -> Unit,
@@ -89,6 +92,7 @@ fun PosTabletLayout(
     Row(modifier.fillMaxSize()) {
         ProductArea(
             state = state,
+            licenceState = licenceState,
             categories = categories,
             categoryColours = categoryColours,
             onSearchChange = onSearchChange,
@@ -118,6 +122,7 @@ fun PosTabletLayout(
 @Composable
 private fun ProductArea(
     state: PosUiState,
+    licenceState: LicenceState?,
     categories: List<Category>,
     categoryColours: Map<String, String>,
     onSearchChange: (String) -> Unit,
@@ -128,6 +133,7 @@ private fun ProductArea(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier.padding(top = 8.dp)) {
+        LicenceBanner(licenceState)
         SaleSuccessBanner(receipt = state.lastSaleReceipt, total = state.lastSaleTotal)
 
         ProductSearchBar(

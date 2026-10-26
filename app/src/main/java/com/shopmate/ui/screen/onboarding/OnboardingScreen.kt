@@ -66,6 +66,7 @@ fun OnboardingScreen(viewModel: OnboardingViewModel = hiltViewModel()) {
                 )
                 Spacer(Modifier.height(28.dp))
 
+
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     ShopMateTextField(
                         value = orgName,
@@ -114,5 +115,7 @@ private fun localizedError(marker: String): String = when (marker) {
     OnboardingViewModel.ORG_REQUIRED -> stringResource(R.string.onboarding_error_org_required)
     OnboardingViewModel.STORE_REQUIRED -> stringResource(R.string.onboarding_error_store_required)
     OnboardingViewModel.GENERIC -> stringResource(R.string.onboarding_error_generic)
+    OnboardingViewModel.OFFLINE -> stringResource(R.string.onboard_error_offline)
+    OnboardingViewModel.NOT_SENT -> stringResource(R.string.onboard_error_not_sent)
     else -> marker
 }

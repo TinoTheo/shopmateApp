@@ -26,13 +26,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.shopmate.R
 import com.shopmate.ui.components.ShopMateTextButton
 import com.shopmate.ui.theme.CheckoutNeonSubtle
 import com.shopmate.ui.theme.ErrorRed
+import com.shopmate.domain.repository.StoreSwitch
 import com.shopmate.ui.theme.ShopBlack
+import com.shopmate.ui.theme.ShopBlackSecondary
 import com.shopmate.ui.theme.ShopBlackSecondary
 import com.shopmate.ui.theme.ShopBlackTertiary
 import com.shopmate.ui.theme.StockGreen
@@ -48,6 +51,7 @@ fun CloudSyncSection(
     state: SettingsUiState,
     onSignOut: () -> Unit,
     onSwitchStore: (String) -> Unit,
+    ownerAtTill: Boolean = true,
 ) {
     Column {
         SectionHeader(stringResource(R.string.settings_section_account))
@@ -68,23 +72,37 @@ fun CloudSyncSection(
                     .padding(start = 8.dp),
             )
         }
-        ShopMateTextButton(
-            text = stringResource(R.string.settings_sign_out),
-            onClick = onSignOut,
-            modifier = Modifier.padding(top = 4.dp),
-        )
+        // Signing the till out is the owner's: a manager at the till can't (§ Staff).
+        if (ownerAtTill) {
+            ShopMateTextButton(
+                text = stringResource(R.string.settings_sign_out),
+                onClick = onSignOut,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
 
         SectionHeader(stringResource(R.string.settings_active_store))
         StoreRow(state = state, onSwitchStore = onSwitchStore)
-
-        SectionHeader(stringResource(R.string.settings_section_staff))
-        Text(
-            text = stringResource(R.string.settings_staff_coming),
-            style = MaterialTheme.typography.bodyMedium,
-            color = ShopBlackTertiary,
-            modifier = Modifier.padding(top = 2.dp),
-        )
+        SwitchOutcomeText(state)
     }
+}
+
+/** Why the till didn't move, or that it did — in the place the owner just tapped. */
+@Composable
+private fun SwitchOutcomeText(state: SettingsUiState) {
+    val text = when (val outcome = state.switchOutcome) {
+        null -> null
+        StoreSwitch.Switched -> state.activeStoreName?.let { stringResource(R.string.settings_switch_done, it) }
+        StoreSwitch.Offline -> stringResource(R.string.settings_switch_offline)
+        is StoreSwitch.NotSentYet ->
+            pluralStringResource(R.plurals.settings_switch_not_sent, outcome.count, outcome.count)
+    } ?: return
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyMedium,
+        color = ShopBlackSecondary,
+        modifier = Modifier.padding(top = 8.dp),
+    )
 }
 
 @Composable

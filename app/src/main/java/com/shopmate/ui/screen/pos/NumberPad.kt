@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -43,6 +44,8 @@ fun NumberPad(
     onDigit: (String) -> Unit,
     onBackspace: () -> Unit,
     modifier: Modifier = Modifier,
+    /** False for whole-number entry (a till PIN): the key's place stays, empty, so the grid holds. */
+    decimal: Boolean = true,
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -64,12 +67,16 @@ fun NumberPad(
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-            DigitKey(
-                label = ".",
-                muted = true,
-                onPress = { onDigit(".") },
-                modifier = Modifier.weight(1f),
-            )
+            if (decimal) {
+                DigitKey(
+                    label = ".",
+                    muted = true,
+                    onPress = { onDigit(".") },
+                    modifier = Modifier.weight(1f),
+                )
+            } else {
+                Spacer(Modifier.weight(1f))
+            }
             DigitKey(
                 label = "0",
                 onPress = { onDigit("0") },

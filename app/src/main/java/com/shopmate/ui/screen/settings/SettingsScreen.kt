@@ -12,6 +12,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,8 +29,18 @@ import com.shopmate.ui.theme.ErrorRed
 import com.shopmate.ui.theme.ReceiptBeige
 
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsScreen(
+    viewModel: SettingsViewModel = hiltViewModel(),
+    teamViewModel: TeamViewModel = hiltViewModel(),
+) {
     val state by viewModel.uiState.collectAsState()
+    val team by teamViewModel.uiState.collectAsState()
+    val ownerAtTill by viewModel.ownerAtTill.collectAsState()
+
+    // A store just added appears in the store picker straight away.
+    LaunchedEffect(team.notice) {
+        if (team.notice is TeamNotice.StoreAdded) viewModel.refreshStores()
+    }
     var showReset by remember { mutableStateOf(false) }
     var showSignOut by remember { mutableStateOf(false) }
 
@@ -38,9 +49,21 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         onStoreNameChange = viewModel::updateStoreName,
         onCurrencyChange = viewModel::updateCurrencySymbol,
         onSignOut = { showSignOut = true },
-        onSwitchStore = viewModel::switchStore,
+        onSwitchStore = viewModel::requestSwitch,
         onRetryFailed = viewModel::retryFailedSyncs,
         onResetRequest = { showReset = true },
+        ownerAtTill = ownerAtTill,
+        team = {
+            TeamSection(
+                state = team,
+                onSetOwnerPin = teamViewModel::setOwnerPin,
+                onAddStaff = teamViewModel::addStaff,
+                onUpdate = teamViewModel::update,
+                onChangePin = teamViewModel::changePin,
+                onRemove = teamViewModel::remove,
+                onAddStore = teamViewModel::addStore,
+            )
+        },
     )
 
     if (showReset) {
@@ -49,6 +72,24 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
             onConfirmed = {
                 viewModel.resetAllData()
                 showReset = false
+            },
+        )
+    }
+
+    state.pendingSwitch?.let { store ->
+        AlertDialog(
+            onDismissRequest = viewModel::cancelSwitch,
+            title = { Text(stringResource(R.string.settings_switch_title, store.name)) },
+            text = { Text(stringResource(R.string.settings_switch_body, store.name)) },
+            confirmButton = {
+                TextButton(onClick = viewModel::confirmSwitch) {
+                    Text(stringResource(R.string.settings_switch_confirm, store.name))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::cancelSwitch) {
+                    Text(stringResource(R.string.action_cancel))
+                }
             },
         )
     }
@@ -82,6 +123,8 @@ private fun SettingsContent(
     onSwitchStore: (String) -> Unit,
     onRetryFailed: () -> Unit,
     onResetRequest: () -> Unit,
+    ownerAtTill: Boolean,
+    team: @Composable () -> Unit,
 ) {
     ConstrainedContent(maxWidth = FormMaxWidth) {
         Column(
@@ -101,11 +144,14 @@ private fun SettingsContent(
                 state = state,
                 onSignOut = onSignOut,
                 onSwitchStore = onSwitchStore,
+                ownerAtTill = ownerAtTill,
             )
+            team()
             HorizontalDivider(color = ReceiptBeige, modifier = Modifier.padding(top = 20.dp))
             DataManagementSection(
                 onRetryFailed = onRetryFailed,
                 onReset = onResetRequest,
+                canReset = ownerAtTill,
             )
             HorizontalDivider(color = ReceiptBeige, modifier = Modifier.padding(top = 20.dp))
             AboutSection(appVersion = state.appVersion)

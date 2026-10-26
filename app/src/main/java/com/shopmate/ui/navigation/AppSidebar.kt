@@ -72,6 +72,7 @@ fun AppSidebar(
     onNavigate: (Screen) -> Unit,
     deviceLayout: DeviceLayout,
     modifier: Modifier = Modifier,
+    showSettings: Boolean = true,
 ) {
     val compact = deviceLayout == DeviceLayout.COMPACT
 
@@ -125,13 +126,15 @@ fun AppSidebar(
             }
         }
 
-        SidebarItem(
-            icon = Icons.Outlined.Settings,
-            label = stringResource(R.string.screen_settings),
-            selected = isSelected(Screen.Settings),
-            compact = compact,
-            onClick = { onNavigate(Screen.Settings) },
-        )
+        if (showSettings) {
+            SidebarItem(
+                icon = Icons.Outlined.Settings,
+                label = stringResource(R.string.screen_settings),
+                selected = isSelected(Screen.Settings),
+                compact = compact,
+                onClick = { onNavigate(Screen.Settings) },
+            )
+        }
     }
 }
 
