@@ -12,6 +12,7 @@ import com.shopmate.data.repository.StorePermissionRepositoryImpl
 import com.shopmate.data.repository.StoreRepositoryImpl
 import com.shopmate.data.repository.StaffRepositoryImpl
 import com.shopmate.data.repository.LicenceRepositoryImpl
+import com.shopmate.data.repository.DeviceRepositoryImpl
 import com.shopmate.data.repository.SyncRepositoryImpl
 import com.shopmate.domain.repository.BarcodeRepository
 import com.shopmate.domain.repository.CategoryRepository
@@ -25,6 +26,7 @@ import com.shopmate.domain.repository.StorePermissionRepository
 import com.shopmate.domain.repository.StoreRepository
 import com.shopmate.domain.repository.StaffRepository
 import com.shopmate.domain.repository.LicenceRepository
+import com.shopmate.domain.repository.DeviceRepository
 import com.shopmate.domain.repository.SyncRepository
 import dagger.Binds
 import dagger.Module
@@ -87,4 +89,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindLicenceRepository(impl: LicenceRepositoryImpl): LicenceRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindDeviceRepository(impl: DeviceRepositoryImpl): DeviceRepository
 }

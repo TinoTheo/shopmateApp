@@ -22,6 +22,8 @@ import com.shopmate.domain.model.DeltaReason
 import com.shopmate.domain.model.EventType
 import com.shopmate.domain.model.Sale
 import com.shopmate.domain.model.SyncEvent
+import com.shopmate.domain.repository.DeviceRepository
+import com.shopmate.domain.repository.DeviceRole
 import com.shopmate.domain.repository.LicenceRepository
 import com.shopmate.domain.repository.StaffRepository
 import com.shopmate.domain.repository.SaleRepository
@@ -57,12 +59,17 @@ class SyncWorker @AssistedInject constructor(
     private val ledgerSync: LedgerSync,
     private val licences: LicenceRepository,
     private val staffRepository: StaffRepository,
+    private val deviceRepository: DeviceRepository,
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
         if (!authManager.hasUsableSession()) return Result.success()
         val storeId = storeContext.getActiveStoreId() ?: return Result.success()
         if (!isNetworkAvailable()) return Result.retry()
+        // Only a till syncs (§ Devices): a remote device holds nothing to send, and a removed
+        // till stops — what it holds stays on it.
+        if (deviceRepository.role.first() != DeviceRole.TILL) return Result.success()
+        if (!deviceRepository.heartbeat(storeId)) return Result.success()
 
         return try {
             // Out first, then in (§ Multi-till): this till's sales and movements, its catalogue

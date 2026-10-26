@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.shopmate.data.auth.AuthManager
 import com.shopmate.data.auth.StoreContext
 import com.shopmate.domain.repository.SettingsRepository
+import com.shopmate.domain.repository.DeviceRepository
+import com.shopmate.domain.repository.DeviceRole
 import com.shopmate.domain.repository.StoreRepository
 import com.shopmate.domain.repository.StaffRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,8 +31,17 @@ class RootViewModel @Inject constructor(
     private val storeContext: StoreContext,
     private val storeRepository: StoreRepository,
     staffRepository: StaffRepository,
+    deviceRepository: DeviceRepository,
     settings: SettingsRepository,
 ) : ViewModel() {
+
+    /** Till or remote, asked once per store on each device (§ Devices). */
+    val deviceRole: StateFlow<DeviceRole?> = deviceRepository.role
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    /** The owner removed this till: it shows so, and stops syncing. */
+    val tillRemoved: StateFlow<Boolean> = deviceRepository.removed
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     /** The store has staff and nobody has unlocked the till yet: show "Who's selling?". */
     val locked: StateFlow<Boolean> = staffRepository.locked

@@ -914,10 +914,30 @@ Amended 2026-10-23 (replaces invite codes, which needed staff to confirm an emai
   enforces the person.
 - The plan's staff limit counts PIN staff (not the owner).
 
+### Devices — tills and remote
+
+Decided 2026-10-26. Every signed-in device is one of two things, chosen once by the owner.
+
+- **A till** sells. On first sign-in to a store the device asks **"Use this device as a till for
+  {store}?"** — *Yes, sell here* (preselected on a device that has sold before) or *No, I'm
+  managing remotely*. Yes registers it in the store's `tills` with its till code and a name;
+  the plan's `max_tills` limits how many. Each sync updates its `last_seen_at`.
+- **A remote device** never sells, holds no stock and uploads nothing: no POS, no "Who's
+  selling?", no sync work. It shows a small home — today's sales across the store's tills, each
+  till's last contact — and sends the owner to the **web dashboard** for anything detailed.
+  Reports on a remote device opens the web report. Owner screens are not added to the till app;
+  they belong in the web dashboard.
+- **Removing a till** (Settings › Tills, owner) marks it revoked on the server. At its next
+  sync the till learns it, stops syncing, and says so — keeping anything unsent on the device.
+  This is enforced by the till itself (uploads go out under the owner's session); the server
+  enforces store and plan.
+- The web dashboard (`web/`) has its own sign-in for now. Handing the app's session to the
+  browser means sign-in tokens in a link; that waits until it can be done safely.
+
 ### Licensing — plans with limits
 
 - One **licence per organisation**: plan (`trial`, `basic`, `pro`), `expires_at`, `max_stores`,
-  `max_staff`. Set and extended by ShopMate from the Supabase dashboard; no payment integration
+  `max_staff`, `max_tills`. Set and extended by ShopMate from the Supabase dashboard; no payment integration
   yet. A new org starts on a 30-day trial.
 - The device reads `current_licence()` at sign-in, store pick and every sync, and **keeps the
   last answer** for offline use. It never decides from the device clock alone that a licence it

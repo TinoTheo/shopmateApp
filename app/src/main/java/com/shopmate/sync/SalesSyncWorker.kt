@@ -11,6 +11,8 @@ import com.shopmate.data.local.dao.StockDeltaDao
 import com.shopmate.data.mapper.toDomain
 import com.shopmate.data.remote.ShopMateRemote
 import com.shopmate.domain.model.EventType
+import com.shopmate.domain.repository.DeviceRepository
+import com.shopmate.domain.repository.DeviceRole
 import com.shopmate.domain.repository.SyncRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -34,12 +36,16 @@ class SalesSyncWorker @AssistedInject constructor(
     private val syncRepository: SyncRepository,
     private val storeContext: StoreContext,
     private val authManager: AuthManager,
+    private val deviceRepository: DeviceRepository,
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
         if (!authManager.hasUsableSession()) return Result.success()
         val saleId = inputData.getString(KEY_SALE_ID) ?: return Result.failure()
         val storeId = storeContext.getActiveStoreId() ?: return Result.success()
+        if (deviceRepository.role.first() != DeviceRole.TILL || deviceRepository.removed.first()) {
+            return Result.success() // the periodic worker decides; only an active till sends
+        }
 
         return try {
             val sale = saleDao.getById(saleId)?.toDomain() ?: return Result.success()

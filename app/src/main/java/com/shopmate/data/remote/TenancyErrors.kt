@@ -16,6 +16,7 @@ internal fun Throwable.tenancyRefusal(): TenancyRefusal {
     return when {
         "store_limit" in text -> TenancyRefusal.STORE_LIMIT
         "staff_limit" in text -> TenancyRefusal.STAFF_LIMIT
+        "till_limit" in text -> TenancyRefusal.TILL_LIMIT
         "licence_expired" in text -> TenancyRefusal.LICENCE_EXPIRED
         "staff_store_name_active" in text || "23505" in text -> TenancyRefusal.NAME_TAKEN
         "not_allowed" in text || statusCode == 403 || statusCode == 401 -> TenancyRefusal.NOT_ALLOWED

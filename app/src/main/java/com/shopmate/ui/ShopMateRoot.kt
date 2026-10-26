@@ -13,7 +13,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.shopmate.domain.repository.DeviceRole
 import com.shopmate.ui.navigation.AppNavGraph
+import com.shopmate.ui.screen.device.DeviceRoleScreen
+import com.shopmate.ui.screen.device.RemoteHomeScreen
+import com.shopmate.ui.screen.device.TillRemovedScreen
 import com.shopmate.ui.screen.auth.AuthScreen
 import com.shopmate.ui.screen.lock.PinLockScreen
 import com.shopmate.ui.screen.onboarding.OnboardingScreen
@@ -35,6 +39,8 @@ fun ShopMateRoot(
     val session by viewModel.sessionState.collectAsState()
     val storeName by viewModel.storeName.collectAsState()
     val locked by viewModel.locked.collectAsState()
+    val deviceRole by viewModel.deviceRole.collectAsState()
+    val tillRemoved by viewModel.tillRemoved.collectAsState()
 
     // The lockup stays up for a set time so it can be read: a start that resolves in 50ms would
     // otherwise flash it. Saveable, so rotating the till doesn't show it again.
@@ -54,8 +60,17 @@ fun ShopMateRoot(
             SessionState.LOADING -> BrandSplash(deviceLayout = deviceLayout, storeName = storeName)
             SessionState.SIGNED_OUT -> AuthScreen()
             SessionState.NEEDS_ONBOARDING -> OnboardingScreen()
-            // A till with staff opens on "Who's selling?" until someone enters their PIN.
-            SessionState.READY -> if (locked) PinLockScreen() else AppNavGraph(deviceLayout = deviceLayout)
+            // Till or remote first (§ Devices); a till with staff then opens on "Who's selling?".
+            SessionState.READY -> when (deviceRole) {
+                null -> BrandSplash(deviceLayout = deviceLayout, storeName = storeName)
+                DeviceRole.UNDECIDED -> DeviceRoleScreen(storeName = storeName)
+                DeviceRole.REMOTE -> RemoteHomeScreen(storeName = storeName)
+                DeviceRole.TILL -> when {
+                    tillRemoved -> TillRemovedScreen(storeName = storeName)
+                    locked -> PinLockScreen()
+                    else -> AppNavGraph(deviceLayout = deviceLayout)
+                }
+            }
         }
     }
 }

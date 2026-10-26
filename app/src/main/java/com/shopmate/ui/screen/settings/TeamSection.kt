@@ -32,6 +32,7 @@ import com.shopmate.domain.model.LicencePlan
 import com.shopmate.domain.model.LicenceState
 import com.shopmate.domain.repository.StaffRole
 import com.shopmate.domain.repository.TenancyRefusal
+import com.shopmate.domain.repository.TillInfo
 import com.shopmate.domain.repository.TillStaff
 import com.shopmate.domain.util.PinHasher
 import com.shopmate.ui.components.ShopMateFilterChip
@@ -45,6 +46,8 @@ import com.shopmate.ui.theme.ShopBlackTertiary
 import com.shopmate.ui.theme.StockOrange
 import com.shopmate.ui.theme.TradeGreen
 import com.shopmate.ui.util.DateFormatter
+import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 
 /**
@@ -60,7 +63,9 @@ fun TeamSection(
     onChangePin: (TillStaff, String) -> Unit,
     onRemove: (TillStaff) -> Unit,
     onAddStore: (String) -> Unit,
+    onRemoveTill: (TillInfo) -> Unit = {},
 ) {
+    var confirmTill by remember { mutableStateOf<TillInfo?>(null) }
     var showOwnerPin by remember { mutableStateOf(false) }
     var showAddStaff by remember { mutableStateOf(false) }
     var showAddStore by remember { mutableStateOf(false) }
@@ -73,6 +78,18 @@ fun TeamSection(
         ShopMateTextButton(text = stringResource(R.string.team_add_store), onClick = { showAddStore = true })
         // Each notice sits under the action it answers.
         state.notice?.takeIf { it.isAboutStores }?.let { NoticeText(it, state.licence) }
+
+        if (state.tills.isNotEmpty()) {
+            SectionHeader(stringResource(R.string.tills_section))
+            state.tills.forEach { till ->
+                SettingsRow(
+                    title = if (till.isThisDevice) stringResource(R.string.tills_this, till.name) else till.name,
+                    description = stringResource(R.string.remote_last_contact, till.code, till.lastSeenAt.whenSaid()),
+                    // This till can't remove itself: it would cut off the owner standing at it.
+                    onClick = if (till.isThisDevice) null else { { confirmTill = till } },
+                )
+            }
+        }
 
         SectionHeader(stringResource(R.string.settings_section_staff))
         if (!state.ownerHasPin) {
@@ -94,6 +111,22 @@ fun TeamSection(
             )
         }
         state.notice?.takeUnless { it.isAboutStores }?.let { NoticeText(it, state.licence) }
+    }
+
+    confirmTill?.let { till ->
+        AlertDialog(
+            onDismissRequest = { confirmTill = null },
+            title = { Text(stringResource(R.string.tills_remove_title, till.name)) },
+            text = { Text(stringResource(R.string.tills_remove_detail)) },
+            confirmButton = {
+                TextButton(onClick = { onRemoveTill(till); confirmTill = null }) {
+                    Text(stringResource(R.string.tills_remove), color = ErrorRed)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmTill = null }) { Text(stringResource(R.string.action_cancel), color = ShopBlackTertiary) }
+            },
+        )
     }
 
     if (showOwnerPin) {
@@ -152,7 +185,11 @@ private fun PlanBlock(licence: Licence) {
             R.string.team_plan_usage,
             pluralStringResource(R.plurals.team_stores_used, licence.maxStores, licence.storesUsed, licence.maxStores),
             pluralStringResource(R.plurals.team_staff_used, licence.maxStaff, licence.staffUsed, licence.maxStaff),
-        ),
+        ) + if (licence.maxTills > 0) {
+            " · " + pluralStringResource(R.plurals.team_tills_used, licence.maxTills, licence.tillsUsed, licence.maxTills)
+        } else {
+            ""
+        },
         style = NumberStyle(13.sp),
         color = ShopBlackSecondary,
         modifier = Modifier.padding(top = 2.dp),
@@ -194,6 +231,7 @@ private fun NoticeText(notice: TeamNotice, licence: Licence?) {
     val text = when (notice) {
         is TeamNotice.StoreAdded -> stringResource(R.string.team_store_added, notice.name)
         is TeamNotice.StaffAdded -> stringResource(R.string.staff_added, notice.name)
+        is TeamNotice.TillRemoved -> stringResource(R.string.tills_removed, notice.name)
         is TeamNotice.Removed -> stringResource(R.string.staff_removed, notice.name)
         TeamNotice.PinChanged -> stringResource(R.string.staff_pin_saved)
         is TeamNotice.Refused -> when (notice.reason) {
@@ -206,6 +244,8 @@ private fun NoticeText(notice: TeamNotice, licence: Licence?) {
             TenancyRefusal.NAME_TAKEN -> stringResource(R.string.staff_refused_name_taken)
             TenancyRefusal.LICENCE_EXPIRED -> stringResource(R.string.team_refused_licence)
             TenancyRefusal.OFFLINE -> stringResource(R.string.team_refused_offline)
+            TenancyRefusal.TILL_LIMIT -> stringResource(R.string.device_refused_till_limit)
+            TenancyRefusal.NOT_SENT -> stringResource(R.string.device_refused_not_sent)
             TenancyRefusal.NOT_ALLOWED, TenancyRefusal.OTHER -> stringResource(R.string.team_refused_other)
         }
     }
@@ -437,3 +477,8 @@ private fun LicencePlan.labelRes(): Int = when (this) {
     LicencePlan.BASIC -> R.string.plan_basic
     LicencePlan.PRO -> R.string.plan_pro
 }
+
+/** "10:42" today, "25 Oct, 10:42" before. */
+private fun Instant.whenSaid(): String =
+    if (atZone(ZoneId.systemDefault()).toLocalDate() == LocalDate.now()) DateFormatter.formatClock(this)
+    else DateFormatter.formatDayClock(this)
