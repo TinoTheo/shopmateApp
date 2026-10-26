@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- System splash icon: nothing. Android 12+ always shows a system splash with an icon; this
-     leaves it plain Trade Green, so the first thing ShopMate shows is BrandSplash's lockup with
-     its tagline, rather than a small M that a moment later becomes something else. -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-    <solid android:color="@android:color/transparent" />
-</shape>

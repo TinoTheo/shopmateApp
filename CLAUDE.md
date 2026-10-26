@@ -215,12 +215,13 @@ traced by hand**.
   square PNGs per density in `mipmap-*dpi/` with the art already placed — an `<inset>` around the
   logo was scaled non-uniformly by launchers and squashed it. Play Store art is
   `app/src/main/ic_launcher-playstore.png`.
-- **Splash:** the system splash is plain `TradeGreen` with no icon (`ic_splash_blank`) — Android
-  12+ always shows one, and a small M that a moment later became something else read as a glitch.
-  `BrandSplash` then shows the lockup with its tagline (`ic_shopmate_lockup`) centred on phone and
-  tablet, store and version at the tablet's foot, for at least 2 seconds — long enough to read
-  the tagline, as WhatsApp holds its start screen — and crossfades (200ms) into the app. **No spinner, no progress bar.** `TradeGreenDeep`
-  is no longer drawn anywhere; keep it only if a splash needs it again.
+- **Splash:** Android 12+ always shows a system splash before any app code runs. Its icon is the
+  lockup with its tagline (`ic_splash_lockup`: the art placed 64% wide on a square canvas, so the
+  round mask never clips it and it can't be stretched). `BrandSplash` picks the lockup up at that
+  size and place — measured 170dp wide on Android 15 — so the handover can't be seen, grows it to
+  full width over 600ms, holds it for 2 seconds in all (as WhatsApp does), and crossfades (200ms)
+  into the app. Store and version at the tablet's foot. **No spinner, no progress bar.**
+  `TradeGreenDeep` is no longer drawn anywhere; keep it only if a splash needs it again.
 - **The tagline "uncompromising control" is serif logo art.** It ships inside the lockup vector
   (`ic_shopmate_lockup`, converted from the brand owner's ShopMate Logo-25.svg) and is never set
   as UI text (§ Typography bans serifs and downloadable fonts).
