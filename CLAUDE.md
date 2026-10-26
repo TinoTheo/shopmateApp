@@ -215,13 +215,15 @@ traced by hand**.
   square PNGs per density in `mipmap-*dpi/` with the art already placed — an `<inset>` around the
   logo was scaled non-uniformly by launchers and squashed it. Play Store art is
   `app/src/main/ic_launcher-playstore.png`.
-- **Splash (1h phone / 1i tablet):** the system splash shows the Neon M on `TradeGreen`
-  (`Theme.Shopmate.Starting`); `BrandSplash` takes over while the app is still opening — an
-  oversized M in `TradeGreenDeep` bleeding off the phone screen, or the centred lockup on tablet —
-  and crossfades (200ms) into the app. **No spinner, no progress bar.** `TradeGreenDeep` exists
-  for this splash and nothing else.
+- **Splash:** the system splash is plain `TradeGreen` with no icon (`ic_splash_blank`) — Android
+  12+ always shows one, and a small M that a moment later became something else read as a glitch.
+  `BrandSplash` then shows the lockup with its tagline (`ic_shopmate_lockup`) centred on phone and
+  tablet, store and version at the tablet's foot, for at least 700ms so a fast start never
+  flickers, and crossfades (200ms) into the app. **No spinner, no progress bar.** `TradeGreenDeep`
+  is no longer drawn anywhere; keep it only if a splash needs it again.
 - **The tagline "uncompromising control" is serif logo art.** It ships inside the lockup vector
-  or not at all; it is never set as UI text (§ Typography bans serifs and downloadable fonts).
+  (`ic_shopmate_lockup`, converted from the brand owner's ShopMate Logo-25.svg) and is never set
+  as UI text (§ Typography bans serifs and downloadable fonts).
 - **Receipts:** the store is the headline, ShopMate signs off at the foot ("Kept by ShopMate").
   `ReceiptContent` resolves the words once; `SharedReceiptImage` renders the 1m card (shared as a
   PNG through the share sheet from the receipt sheet) and `PrintedReceiptSlip` the 2b 58mm slip,

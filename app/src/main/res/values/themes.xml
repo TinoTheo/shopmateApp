@@ -6,7 +6,7 @@
          system holds it. -->
     <style name="Theme.Shopmate.Starting" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/trade_green</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_mark</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_blank</item>
         <item name="postSplashScreenTheme">@style/Theme.Shopmate</item>
     </style>
 </resources>
