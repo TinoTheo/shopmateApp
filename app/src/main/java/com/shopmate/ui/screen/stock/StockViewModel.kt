@@ -14,6 +14,7 @@ import com.shopmate.domain.repository.CategoryRepository
 import com.shopmate.domain.repository.ProductRepository
 import com.shopmate.domain.repository.StockInsightRepository
 import com.shopmate.domain.repository.StorePermissionRepository
+import com.shopmate.domain.repository.SyncRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -83,7 +84,12 @@ class StockViewModel @Inject constructor(
     private val stockInsightRepository: StockInsightRepository,
     private val stockDeltaDao: StockDeltaDao,
     storePermissions: StorePermissionRepository,
+    syncRepository: SyncRepository,
 ) : ViewModel() {
+
+    /** How fresh the other tills' part of every stock number is (§ Multi-till). */
+    val otherTillsUpTo: StateFlow<Instant?> = syncRepository.otherTillsUpTo()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Gates Count stock and Adjust; see [StorePermissionRepository.canManageStock]. */
     val canManageStock: StateFlow<Boolean> = storePermissions.canManageStock

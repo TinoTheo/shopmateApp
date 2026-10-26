@@ -29,7 +29,12 @@ import com.shopmate.ui.components.SectionHeader
 import com.shopmate.ui.components.Severity
 import com.shopmate.ui.components.ShopMateSearchBar
 import com.shopmate.ui.components.StoppedChip
+import com.shopmate.ui.theme.ShopBlackTertiary
+import com.shopmate.ui.util.DateFormatter
 import com.shopmate.ui.util.DeviceLayout
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 /**
  * The Stock list: the week-ahead strip, then four sections of [InsightRow]s carrying a
@@ -44,6 +49,7 @@ fun StockInsightList(
     onProductClick: (Product) -> Unit,
     onNavigateToProducts: () -> Unit,
     modifier: Modifier = Modifier,
+    otherTillsUpTo: Instant? = null,
 ) {
     if (state.products.isEmpty() && state.searchQuery.isBlank()) {
         EmptyState(
@@ -88,6 +94,14 @@ fun StockInsightList(
                     summary = weekCaption(state.weekAhead, state.outOfStockCount),
                     deviceLayout = deviceLayout,
                     modifier = Modifier.padding(vertical = 12.dp),
+                )
+                // Every number below includes other tills' movements only this far (§ Multi-till).
+                Text(
+                    text = otherTillsUpTo?.let { stringResource(R.string.stock_other_tills_up_to, it.whenSaid()) }
+                        ?: stringResource(R.string.stock_other_tills_not_yet),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = ShopBlackTertiary,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
                 )
             }
             state.sections.forEach { (section, rows) ->
@@ -159,3 +173,8 @@ private fun weekCaption(countsByDay: List<Int>, outCount: Int): String {
     val tail = if (outCount > 0) " " + pluralStringResource(R.plurals.stock_week_caption_out, outCount, outCount) else ""
     return head + tail
 }
+
+/** "10:42" today, "25 Oct, 10:42" before — the day only when it isn't today. */
+private fun Instant.whenSaid(): String =
+    if (atZone(ZoneId.systemDefault()).toLocalDate() == LocalDate.now()) DateFormatter.formatClock(this)
+    else DateFormatter.formatDayClock(this)

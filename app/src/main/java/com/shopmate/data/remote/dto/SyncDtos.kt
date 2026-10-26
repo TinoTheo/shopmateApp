@@ -59,6 +59,54 @@ data class StockDeltaRowDto(
     @SerialName("reason") val reason: String,
     @SerialName("note") val note: String?,
     @SerialName("created_at") val createdAt: String,
+    /** Who made it (§ Staff); left out when null. */
+    @OptIn(ExperimentalSerializationApi::class)
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
+    @SerialName("actor") val actor: String? = null,
+)
+
+// === MULTI-TILL (§ Multi-till): the store's ledger and catalogue, shared through the server ===
+
+/** Another till's movement, as the server holds it. [receivedAt] is the server's clock. */
+@Serializable
+data class LedgerRowDto(
+    @SerialName("id") val id: String,
+    @SerialName("store_id") val storeId: String,
+    @SerialName("product_id") val productId: String,
+    @SerialName("delta") val delta: Int,
+    @SerialName("reason") val reason: String,
+    @SerialName("note") val note: String? = null,
+    @SerialName("actor") val actor: String? = null,
+    @SerialName("created_at") val createdAt: String,
+    @SerialName("received_at") val receivedAt: String,
+)
+
+/** A product row both ways. Money as text (see the file header); stock is informational only. */
+@Serializable
+data class CatalogueProductDto(
+    @SerialName("id") val id: String,
+    @SerialName("store_id") val storeId: String,
+    @SerialName("category_id") val categoryId: String? = null,
+    @SerialName("name") val name: String,
+    @SerialName("sku") val sku: String? = null,
+    @SerialName("barcode") val barcode: String? = null,
+    @SerialName("selling_price") val sellingPrice: String,
+    @SerialName("cost_price") val costPrice: String? = null,
+    @SerialName("stock_quantity") val stockQuantity: Int = 0,
+    @SerialName("low_stock_threshold") val lowStockThreshold: Int,
+    @SerialName("unit") val unit: String,
+    @SerialName("created_at") val createdAt: String,
+    @SerialName("updated_at") val updatedAt: String,
+)
+
+@Serializable
+data class CatalogueCategoryDto(
+    @SerialName("id") val id: String,
+    @SerialName("store_id") val storeId: String,
+    @SerialName("name") val name: String,
+    @SerialName("colour") val colour: String? = null,
+    @SerialName("created_at") val createdAt: String,
+    @SerialName("updated_at") val updatedAt: String,
 )
 
 // === STORE SNAPSHOTS (products + categories inside one jsonb `payload` column) ===
@@ -97,28 +145,3 @@ data class CategorySnapshotSbDto(
     @SerialName("colour") val colour: String?,
 )
 
-// === SERVER PRODUCTS (pull side; numeric columns cast to text in the select) ===
-
-@Serializable
-data class SupabaseProductDto(
-    @SerialName("id") val id: String,
-    @SerialName("store_id") val storeId: String,
-    @SerialName("name") val name: String,
-    @SerialName("selling_price") val sellingPrice: String,
-    @SerialName("cost_price") val costPrice: String? = null,
-    @SerialName("stock_quantity") val stockQuantity: Int = 0,
-    @SerialName("updated_at") val updatedAt: String? = null,
-)
-
-// === CONFLICT RESOLUTION (local shape, not a wire row) ===
-
-/** A pulled product, with `updated_at` resolved to epoch millis for [com.shopmate.sync.ConflictResolver]. */
-data class ServerProductDto(
-    val id: String,
-    val storeId: String,
-    val name: String,
-    val sellingPrice: String,
-    val costPrice: String?,
-    val stockQuantity: Int,
-    val updatedAt: Long,
-)

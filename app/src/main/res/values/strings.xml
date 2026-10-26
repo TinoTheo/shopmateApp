@@ -510,6 +510,8 @@
         <item quantity="one">%d is already out.</item>
         <item quantity="other">%d are already out.</item>
     </plurals>
+    <string name="stock_other_tills_up_to">Includes other tills up to %1$s</string>
+    <string name="stock_other_tills_not_yet">Other tills\' sales arrive with the next sync</string>
     <string name="stock_week_caption_none">Nothing runs out in the next 7 days.</string>
     <string name="stock_section_week">Runs out in the next 7 days · %d</string>
     <string name="stock_section_out">Out of stock · %d</string>

@@ -1,6 +1,7 @@
 package com.shopmate.data.repository
 
 import com.shopmate.data.local.dao.SaleDao
+import com.shopmate.sync.LedgerSync
 import com.shopmate.data.local.dao.SyncEventDao
 import com.shopmate.data.local.entity.SyncEventEntity
 import com.shopmate.data.mapper.toDomain
@@ -20,7 +21,10 @@ import javax.inject.Singleton
 class SyncRepositoryImpl @Inject constructor(
     private val syncEventDao: SyncEventDao,
     private val saleDao: SaleDao,
+    private val ledgerSync: LedgerSync,
 ) : SyncRepository {
+
+    override fun otherTillsUpTo(): Flow<Instant?> = ledgerSync.othersUpTo
 
     override fun getRecentEntries(limit: Int): Flow<List<SyncEntry>> =
         syncEventDao.getRecentWithSale(limit).map { rows ->

@@ -2,6 +2,7 @@ package com.shopmate.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.shopmate.data.local.entity.StockDeltaEntity
 import kotlinx.coroutines.flow.Flow
@@ -23,6 +24,16 @@ interface StockDeltaDao {
 
     @Insert
     suspend fun insert(delta: StockDeltaEntity)
+
+    /** Other tills' movements: one this till already holds (same id) is left as it is. */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertIgnoringKnown(deltas: List<StockDeltaEntity>)
+
+    @Query("SELECT id FROM stock_deltas WHERE synced = 1")
+    suspend fun sentIds(): List<String>
+
+    @Query("DELETE FROM stock_deltas WHERE id IN (:ids)")
+    suspend fun deleteByIds(ids: List<String>)
 
     @Query("SELECT * FROM stock_deltas WHERE synced = 0 ORDER BY created_at ASC")
     suspend fun getUnsynced(): List<StockDeltaEntity>

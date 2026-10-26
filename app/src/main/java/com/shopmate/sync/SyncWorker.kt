@@ -17,7 +17,6 @@ import com.shopmate.data.mapper.toDomain
 import com.shopmate.data.remote.ShopMateRemote
 import com.shopmate.data.remote.dto.SnapshotPayload
 import com.shopmate.data.remote.dto.StoreSnapshotRowDto
-import com.shopmate.data.remote.mapper.toServerProductDto
 import com.shopmate.data.remote.mapper.toSnapshotSbDto
 import com.shopmate.domain.model.DeltaReason
 import com.shopmate.domain.model.EventType
@@ -54,7 +53,8 @@ class SyncWorker @AssistedInject constructor(
     private val stockDeltaDao: StockDeltaDao,
     private val storeContext: StoreContext,
     private val authManager: AuthManager,
-    private val catalogueLoader: CatalogueLoader,
+    private val catalogueSync: CatalogueSync,
+    private val ledgerSync: LedgerSync,
     private val licences: LicenceRepository,
     private val staffRepository: StaffRepository,
 ) : CoroutineWorker(appContext, workerParams) {
@@ -65,14 +65,15 @@ class SyncWorker @AssistedInject constructor(
         if (!isNetworkAvailable()) return Result.retry()
 
         return try {
-            // First, before this till's own snapshot: an empty till would otherwise upload an
-            // empty catalogue as the store's latest, and the next fresh till would load nothing.
-            loadCatalogue(storeId)
-            staffRepository.pull(storeId)
+            // Out first, then in (§ Multi-till): this till's sales and movements, its catalogue
+            // changes; then the store's catalogue, the store's ledger (stock is recomputed from
+            // it), and the staff list. The snapshot is a backup, sent last.
             syncPendingSales(storeId)
             syncStockDeltas(storeId)
+            shareCatalogue(storeId)
+            ledgerSync.pull(storeId)
+            staffRepository.pull(storeId)
             syncSnapshot(storeId)
-            pullServerUpdates(storeId)
             licences.refresh() // so an offline till's grace countdown starts from fresh facts
             Result.success()
         } catch (e: SessionRejected) {
@@ -178,13 +179,18 @@ class SyncWorker @AssistedInject constructor(
         stockDeltaDao.markSynced(batch.map { it.id })
     }
 
-    private suspend fun loadCatalogue(storeId: String) {
+    /**
+     * Push this till's catalogue changes, then pull the store's. A refused push (only the owner's
+     * session may write the catalogue) leaves this till's copy as it is and still pulls.
+     */
+    private suspend fun shareCatalogue(storeId: String) {
         try {
-            catalogueLoader.loadIfEmpty(storeId)
+            catalogueSync.push(storeId)
         } catch (e: RestException) {
             if (e.statusCode == 401) throw SessionRejected()
-            // Otherwise best-effort: the till can still sell what it has and try next sync.
+            if (e.statusCode !in 400..499) throw e
         }
+        catalogueSync.pull(storeId)
     }
 
     private suspend fun syncSnapshot(storeId: String) {
@@ -228,14 +234,6 @@ class SyncWorker @AssistedInject constructor(
         coveredEvents.forEach { syncRepository.markSynced(it.id) }
     }
 
-    private suspend fun pullServerUpdates(storeId: String) {
-        val rows = try {
-            remote.fetchProducts(storeId)
-        } catch (e: RestException) {
-            return // pull is best-effort; push already succeeded
-        }
-        rows.forEach { ConflictResolver.resolveProduct(it.toServerProductDto(), storeId, productDao) }
-    }
 
     private fun isNetworkAvailable(): Boolean {
         val cm = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
