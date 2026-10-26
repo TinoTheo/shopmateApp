@@ -218,8 +218,8 @@ traced by hand**.
 - **Splash:** the system splash is plain `TradeGreen` with no icon (`ic_splash_blank`) — Android
   12+ always shows one, and a small M that a moment later became something else read as a glitch.
   `BrandSplash` then shows the lockup with its tagline (`ic_shopmate_lockup`) centred on phone and
-  tablet, store and version at the tablet's foot, for at least 700ms so a fast start never
-  flickers, and crossfades (200ms) into the app. **No spinner, no progress bar.** `TradeGreenDeep`
+  tablet, store and version at the tablet's foot, for at least 2 seconds — long enough to read
+  the tagline, as WhatsApp holds its start screen — and crossfades (200ms) into the app. **No spinner, no progress bar.** `TradeGreenDeep`
   is no longer drawn anywhere; keep it only if a splash needs it again.
 - **The tagline "uncompromising control" is serif logo art.** It ships inside the lockup vector
   (`ic_shopmate_lockup`, converted from the brand owner's ShopMate Logo-25.svg) and is never set

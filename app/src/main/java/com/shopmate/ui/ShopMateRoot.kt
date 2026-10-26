@@ -36,8 +36,8 @@ fun ShopMateRoot(
     val storeName by viewModel.storeName.collectAsState()
     val locked by viewModel.locked.collectAsState()
 
-    // The lockup stays up for a short minimum: a start that resolves in 50ms would otherwise
-    // flash it. Saveable, so rotating the till doesn't show it again.
+    // The lockup stays up for a set time so it can be read: a start that resolves in 50ms would
+    // otherwise flash it. Saveable, so rotating the till doesn't show it again.
     var splashShown by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         delay(SPLASH_MINIMUM_MS)
@@ -60,4 +60,5 @@ fun ShopMateRoot(
     }
 }
 
-private const val SPLASH_MINIMUM_MS = 700L
+/** Long enough to read the tagline, as WhatsApp holds its own start screen (~2s). */
+private const val SPLASH_MINIMUM_MS = 2_000L
