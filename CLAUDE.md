@@ -931,7 +931,11 @@ Decided 2026-10-26. Every signed-in device is one of two things, chosen once by 
   sync the till learns it, stops syncing, and says so — keeping anything unsent on the device.
   This is enforced by the till itself (uploads go out under the owner's session); the server
   enforces store and plan.
-- The web dashboard (`web/`) has its own sign-in for now. Handing the app's session to the
+- **The web dashboard** (`web/`, Next.js static export, see `web/README.md`) reads Supabase from
+  the browser with the anon key and the owner's session — RLS, never a service key. Pages: Today,
+  Reports (all tills), Stock (the store's ledger), Tills. Its address goes in `local.properties`
+  as `WEB_DASHBOARD_URL`.
+- The web dashboard has its own sign-in for now. Handing the app's session to the
   browser means sign-in tokens in a link; that waits until it can be done safely.
 
 ### Licensing — plans with limits

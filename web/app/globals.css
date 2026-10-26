@@ -1,0 +1,128 @@
+/* ShopMate's two-colour discipline, on the web (CLAUDE.md § Colours). Trade Green is the frame,
+   Checkout Neon only the brand mark and the selected nav item — nothing in the content sheet. */
+:root {
+  --trade-green: #005b52;
+  --checkout-neon: #99ffaa;
+  --receipt-beige: #ece7e0;
+  --chart-grid: #eeeae5;
+  --warm-sand: #f0ede7;
+  --shop-white: #fdfcfa;
+  --ink: #1a1a1a;
+  --ink-secondary: #4a4a4a;
+  --ink-tertiary: #8a8a8a;
+  --stock-orange: #e07b39;
+  --stock-orange-subtle: #fbf0e7;
+  --trend-up: #2e7d5b;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--trade-green);
+  color: var(--ink);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; }
+
+/* Every figure is tabular, so totals don't shift as they change (CLAUDE.md § Numbers). */
+.num { font-variant-numeric: tabular-nums; }
+
+.frame { display: flex; min-height: 100vh; }
+
+.rail {
+  width: 92px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+  gap: 6px;
+  color: #fff;
+}
+.rail .mark {
+  width: 46px; height: 46px; border-radius: 50%;
+  background: var(--checkout-neon); color: var(--trade-green);
+  display: grid; place-items: center; font-weight: 600; margin-bottom: 18px;
+}
+.rail a {
+  width: 72px; padding: 8px 0; border-radius: 16px; text-align: center; text-decoration: none;
+  font-size: 12px; color: rgba(255, 255, 255, 0.72);
+}
+.rail a.selected { background: var(--checkout-neon); color: #000; font-weight: 500; }
+.rail .spacer { flex: 1; }
+.rail button {
+  background: none; border: 0; color: rgba(255, 255, 255, 0.72); font: inherit; font-size: 12px; cursor: pointer;
+}
+
+.sheet {
+  flex: 1;
+  min-width: 0;
+  background: var(--shop-white);
+  border-top-left-radius: 24px;
+  margin-top: 12px;
+  padding: 20px 32px 48px;
+}
+
+.header { display: flex; align-items: center; gap: 16px; min-height: 48px; margin-bottom: 16px; }
+.header h1 { font-size: 22px; font-weight: 600; margin: 0; flex: 1; }
+.header select {
+  font: inherit; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--receipt-beige); background: #fff;
+}
+
+.eyebrow {
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.11em; text-transform: uppercase;
+  color: var(--ink-secondary); margin: 24px 0 8px;
+}
+
+.grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+.card {
+  background: #fff; border: 1px solid var(--receipt-beige); border-radius: 14px; padding: 16px 18px;
+}
+.card .label { font-size: 13px; color: var(--ink-secondary); }
+.card .value { font-size: 30px; font-weight: 600; margin-top: 4px; }
+.card .sub { font-size: 13px; color: var(--ink-tertiary); margin-top: 2px; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font-weight: 500; color: var(--ink-secondary); font-size: 12px; padding: 8px 6px; border-bottom: 1px solid var(--receipt-beige); }
+td { padding: 9px 6px; border-bottom: 1px solid var(--warm-sand); }
+td.r, th.r { text-align: right; }
+tr.warn td { background: var(--stock-orange-subtle); }
+.stopped {
+  display: inline-block; background: #000; color: #fff; border-radius: 6px; padding: 1px 7px; font-size: 12px;
+}
+.muted { color: var(--ink-tertiary); }
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chips button {
+  font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 18px; cursor: pointer;
+  border: 1px solid var(--receipt-beige); background: #fff; color: var(--ink);
+}
+.chips button.on { background: var(--trade-green); color: #fff; border-color: var(--trade-green); }
+
+.bars { display: flex; align-items: flex-end; gap: 4px; height: 180px; border-bottom: 1px solid var(--receipt-beige); padding-top: 8px; }
+.bars .bar { flex: 1; background: var(--trade-green); border-radius: 3px 3px 0 0; min-height: 1px; position: relative; }
+.bars .bar.partial { opacity: 0.38; }
+.bar-labels { display: flex; gap: 4px; font-size: 10.5px; color: var(--ink-tertiary); margin-top: 4px; }
+.bar-labels span { flex: 1; text-align: center; overflow: hidden; white-space: nowrap; }
+
+.button {
+  font: inherit; font-weight: 500; padding: 12px 20px; border-radius: 12px; border: 0; cursor: pointer;
+  background: var(--trade-green); color: #fff;
+}
+.field {
+  display: block; width: 100%; font: inherit; padding: 12px 14px; border-radius: 10px;
+  border: 1px solid var(--receipt-beige); background: #fff; margin-bottom: 12px;
+}
+.note { font-size: 14px; color: var(--ink-secondary); }
+
+@media (max-width: 720px) {
+  .frame { flex-direction: column; }
+  .rail { width: 100%; flex-direction: row; justify-content: space-around; padding: 10px 8px; }
+  .rail .mark, .rail .spacer { display: none; }
+  .rail a { width: auto; padding: 6px 10px; }
+  .sheet { border-top-left-radius: 20px; border-top-right-radius: 20px; margin-top: 0; padding: 16px 16px 40px; }
+}
