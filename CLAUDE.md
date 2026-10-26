@@ -210,8 +210,10 @@ traced by hand**.
 - **Sidebar mark (1c):** a `CheckoutNeon` circle with the M in `TradeGreen` — 40dp / 19×26dp M on
   COMPACT, 46dp / 22×30dp on EXPANDED, 18dp above the first destination. A circle, never the
   pill shape, so it can't read as a selection. Not interactive.
-- **Launcher icon (2a):** adaptive. `TradeGreen` background, the stacked logo 62dp wide centred
-  on the 108dp canvas, and a monochrome layer of the M alone for themed icons. Play Store art is
+- **Launcher icon (2a):** adaptive. `TradeGreen` background, the stacked logo 56dp wide centred
+  on the 108dp canvas, and a monochrome layer of the M alone for themed icons. Both layers are
+  square PNGs per density in `mipmap-*dpi/` with the art already placed — an `<inset>` around the
+  logo was scaled non-uniformly by launchers and squashed it. Play Store art is
   `app/src/main/ic_launcher-playstore.png`.
 - **Splash (1h phone / 1i tablet):** the system splash shows the Neon M on `TradeGreen`
   (`Theme.Shopmate.Starting`); `BrandSplash` takes over while the app is still opening — an
