@@ -831,9 +831,12 @@ Several tills can serve one store. They agree by sharing records, never by locki
   store's movements it has, plus its own not yet sent. Movements are only ever added, so two
   tills' records merge without conflict. Stock is recomputed from the ledger after a pull; it is
   never copied from another till or from the server's `products.stock_quantity`.
-- **The first full pull rebuilds the till's ledger** from the server's: movements the till holds
-  as sent but the server doesn't have (a fresh till's old snapshot-based "Opening stock") are
-  replaced by the server's real ones, so nothing is counted twice.
+- **The first full pull reconciles; it never throws a movement away.** A movement the till holds
+  as sent but the server's ledger for the store lacks is real history the server is missing (sent
+  under an older store id, or never accepted), so it is marked unsent and goes up again. The one
+  exception: a fresh till's old snapshot-based "Opening stock" for a product whose real history
+  is on the server — sending it would count the stock twice, so it alone is dropped. Raising
+  `LedgerSync.RECONCILE_VERSION` makes tills that already pulled reconcile once more.
 - **Products and categories are shared through the server** (`CatalogueSync`). Owner and
   manager tills upload what changed; every till pulls. **The newest edit wins**, judged by the
   product's `updated_at` on the server (`products_keep_newest`), so a till holding a stale

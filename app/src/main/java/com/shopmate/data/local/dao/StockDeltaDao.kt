@@ -29,8 +29,12 @@ interface StockDeltaDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertIgnoringKnown(deltas: List<StockDeltaEntity>)
 
-    @Query("SELECT id FROM stock_deltas WHERE synced = 1")
-    suspend fun sentIds(): List<String>
+    @Query("SELECT * FROM stock_deltas WHERE synced = 1")
+    suspend fun sent(): List<StockDeltaEntity>
+
+    /** Send again: the server doesn't have them, though this till once thought it did. */
+    @Query("UPDATE stock_deltas SET synced = 0 WHERE id IN (:ids)")
+    suspend fun markUnsent(ids: List<String>)
 
     @Query("DELETE FROM stock_deltas WHERE id IN (:ids)")
     suspend fun deleteByIds(ids: List<String>)

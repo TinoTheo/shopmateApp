@@ -3,6 +3,7 @@ package com.shopmate.sync
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.room.withTransaction
@@ -12,6 +13,7 @@ import com.shopmate.data.local.dao.StockDeltaDao
 import com.shopmate.data.local.entity.StockDeltaEntity
 import com.shopmate.data.remote.ShopMateRemote
 import com.shopmate.data.remote.dto.LedgerRowDto
+import com.shopmate.data.repository.ProductRepositoryImpl
 import com.shopmate.domain.model.DeltaReason
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -28,9 +30,15 @@ import javax.inject.Singleton
  * this till doesn't hold, and recomputes stock as the sum of the ledger. Movements are only ever
  * added, so two tills' records merge without conflict.
  *
- * The first full pull for a store also *rebuilds*: a movement this till holds as sent but the
- * server doesn't have (a fresh till's old snapshot-based "Opening stock") is replaced by the
- * server's real history, so nothing is counted twice. Unsent movements are never touched.
+ * The first full pull for a store also *reconciles* the movements this till holds as sent but
+ * the server's ledger for the store doesn't have:
+ *  - normally they are real history the server is missing (sent under an older store id, or
+ *    never accepted), so they are **marked unsent and go up again** — a movement is never
+ *    thrown away;
+ *  - the one exception is a fresh till's old snapshot-based "Opening stock" for a product whose
+ *    real history *is* on the server: it repeats that history, and sending it would count the
+ *    stock twice, so it alone is dropped.
+ * Unsent movements are never touched.
  */
 @Singleton
 class LedgerSync @Inject constructor(
@@ -46,7 +54,9 @@ class LedgerSync @Inject constructor(
 
     suspend fun pull(storeId: String) {
         val prefs = dataStore.data.first()
-        val cursor = prefs[CURSOR].takeIf { prefs[CURSOR_STORE] == storeId }
+        // A till that pulled before reconciliation worked as it does now reconciles once more.
+        val reconcile = prefs[CURSOR_STORE] != storeId || prefs[RECONCILED] != RECONCILE_VERSION
+        val cursor = prefs[CURSOR].takeIf { !reconcile }
         // A little overlap: a movement committed just before the last page was read but stamped
         // a moment earlier is still caught. Known ids are skipped, so overlap costs nothing.
         val since = cursor?.let { OffsetDateTime.parse(it).minus(OVERLAP).toString() }
@@ -68,10 +78,18 @@ class LedgerSync @Inject constructor(
         val waiting = rows - known.toSet()
 
         db.withTransaction {
-            if (cursor == null) {
+            if (reconcile) {
                 val onServer = rows.mapTo(HashSet()) { it.id }
-                stockDeltaDao.sentIds().filterNot { it in onServer }
-                    .chunked(500).forEach { stockDeltaDao.deleteByIds(it) }
+                val productsWithServerHistory = rows.mapTo(HashSet()) { it.productId }
+                val (snapshotOpenings, missing) = stockDeltaDao.sent()
+                    .filterNot { it.id in onServer }
+                    .partition {
+                        it.note == ProductRepositoryImpl.OPENING_STOCK_NOTE &&
+                            it.actor == null &&
+                            it.productId in productsWithServerHistory
+                    }
+                missing.map { it.id }.chunked(500).forEach { stockDeltaDao.markUnsent(it) }
+                snapshotOpenings.map { it.id }.chunked(500).forEach { stockDeltaDao.deleteByIds(it) }
             }
             stockDeltaDao.insertIgnoringKnown(known.map { it.toEntity() })
             productDao.recomputeStockFromLedger()
@@ -84,6 +102,7 @@ class LedgerSync @Inject constructor(
             it[CURSOR_STORE] = storeId
             newCursor?.let { c -> it[CURSOR] = c }
             it[PULLED_AT] = Instant.now().toEpochMilli()
+            it[RECONCILED] = RECONCILE_VERSION
         }
     }
 
@@ -93,6 +112,7 @@ class LedgerSync @Inject constructor(
             it.remove(CURSOR)
             it.remove(CURSOR_STORE)
             it.remove(PULLED_AT)
+            it.remove(RECONCILED)
         }
     }
 
@@ -114,5 +134,9 @@ class LedgerSync @Inject constructor(
         val CURSOR = stringPreferencesKey("ledger_cursor")
         val CURSOR_STORE = stringPreferencesKey("ledger_cursor_store")
         val PULLED_AT = longPreferencesKey("ledger_pulled_at")
+        val RECONCILED = intPreferencesKey("ledger_reconciled")
+
+        /** Raised when reconciliation changes, so tills that already pulled run it again. */
+        const val RECONCILE_VERSION = 2
     }
 }
