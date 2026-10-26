@@ -42,6 +42,10 @@ interface StockDeltaDao {
     @Query("SELECT * FROM stock_deltas WHERE synced = 0 ORDER BY created_at ASC")
     suspend fun getUnsynced(): List<StockDeltaEntity>
 
+    /** A sale's own movements, noted with its receipt number, not yet sent. */
+    @Query("SELECT * FROM stock_deltas WHERE synced = 0 AND reason = 'SALE' AND note = :receiptNumber")
+    suspend fun unsentForSale(receiptNumber: String): List<StockDeltaEntity>
+
     @Query("UPDATE stock_deltas SET synced = 1 WHERE id IN (:ids)")
     suspend fun markSynced(ids: List<String>)
 

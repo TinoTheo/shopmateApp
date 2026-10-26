@@ -7,6 +7,7 @@ import androidx.work.WorkerParameters
 import com.shopmate.data.auth.AuthManager
 import com.shopmate.data.auth.StoreContext
 import com.shopmate.data.local.dao.SaleDao
+import com.shopmate.data.local.dao.StockDeltaDao
 import com.shopmate.data.mapper.toDomain
 import com.shopmate.data.remote.ShopMateRemote
 import com.shopmate.domain.model.EventType
@@ -18,7 +19,8 @@ import kotlinx.coroutines.flow.first
 import java.time.Instant
 
 /**
- * Fire-and-forget upload of a single sale, enqueued immediately after checkout. Best-effort:
+ * Fire-and-forget upload of a single sale and its stock movements, enqueued immediately after
+ * checkout — so other tills see the stock change when they see the sale (§ Multi-till). Best-effort:
  * any failure is swallowed as success so WorkManager doesn't retry — the periodic [SyncWorker]
  * is the safety net that eventually flushes anything left pending.
  */
@@ -28,6 +30,7 @@ class SalesSyncWorker @AssistedInject constructor(
     @Assisted workerParams: WorkerParameters,
     private val remote: ShopMateRemote,
     private val saleDao: SaleDao,
+    private val stockDeltaDao: StockDeltaDao,
     private val syncRepository: SyncRepository,
     private val storeContext: StoreContext,
     private val authManager: AuthManager,
@@ -45,6 +48,7 @@ class SalesSyncWorker @AssistedInject constructor(
             syncRepository.getPendingEvents().first()
                 .filter { it.eventType == EventType.SALE && it.payload == saleId }
                 .forEach { syncRepository.markSynced(it.id) }
+            sendMovements(sale.receiptNumber, storeId)
             Result.success()
         } catch (e: RestException) {
             if (e.statusCode == 401) authManager.markSessionRejected()
@@ -52,6 +56,15 @@ class SalesSyncWorker @AssistedInject constructor(
         } catch (e: Exception) {
             Result.success() // one-shot: leave it for the periodic worker
         }
+    }
+
+    /** Separate from the sale: a refused movement mustn't make the sale look unsent. */
+    private suspend fun sendMovements(receiptNumber: String, storeId: String) {
+        val movements = stockDeltaDao.unsentForSale(receiptNumber)
+        if (movements.isEmpty()) return
+        runCatching { remote.upsertStockDeltas(movements, storeId) }
+            .onSuccess { stockDeltaDao.markSynced(movements.map { it.id }) }
+        // On failure they stay unsent; the periodic SyncWorker sends them.
     }
 
     companion object {

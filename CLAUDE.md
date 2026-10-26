@@ -848,6 +848,12 @@ Several tills can serve one store. They agree by sharing records, never by locki
   count movement settles it, and "why does it say N?" still has an answer.
 - **Say how fresh the number is.** Stock shows how recent the other tills' movements are
   ("Other tills up to 10:42") — the till never presents the store's count as certain.
+- **A sale's movements go up with the sale** (`SalesSyncWorker`), so other tills see the stock
+  change when they see the sale, not 15 minutes later.
+- A movement whose product isn't in the store's catalogue (made on an install deleted before it
+  shared its products) can't be placed on any till; it is skipped, never waited for.
+- **Update a till by installing over it.** Deleting the app first wipes anything not yet sent and
+  gives the device a new till code.
 - Snapshots still upload as a backup; a fresh till loads from the live catalogue and ledger.
 - Reports remain this till's sales until the owner dashboard reads the store's.
 

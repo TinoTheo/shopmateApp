@@ -72,10 +72,11 @@ class LedgerSync @Inject constructor(
             }
         }
 
-        // A movement for a product this till doesn't have yet (its product arrives with the next
-        // catalogue pull) is left for next time: the cursor stops before it.
+        // The store's catalogue was pulled just before this, so a movement whose product this
+        // till still doesn't have is for a product not in the store's catalogue at all (made on
+        // an install deleted before it shared its products). It can't be placed, and waiting
+        // won't change that: it is skipped, and the cursor moves past it.
         val known = rows.filter { productDao.getById(it.productId) != null }
-        val waiting = rows - known.toSet()
 
         db.withTransaction {
             if (reconcile) {
@@ -95,9 +96,7 @@ class LedgerSync @Inject constructor(
             productDao.recomputeStockFromLedger()
         }
 
-        val newCursor = waiting.minByOrNull { it.receivedAt }?.receivedAt
-            ?: rows.maxByOrNull { it.receivedAt }?.receivedAt
-            ?: cursor
+        val newCursor = rows.maxByOrNull { it.receivedAt }?.receivedAt ?: cursor
         dataStore.edit {
             it[CURSOR_STORE] = storeId
             newCursor?.let { c -> it[CURSOR] = c }
