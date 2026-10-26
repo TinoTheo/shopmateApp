@@ -15,7 +15,7 @@ sealed interface StoreSwitch {
 }
 
 /** Why the server refused a tenancy action, in terms the screen can word. */
-enum class TenancyRefusal { STORE_LIMIT, STAFF_LIMIT, LICENCE_EXPIRED, NOT_ALLOWED, NAME_TAKEN, OFFLINE, OTHER }
+enum class TenancyRefusal { STORE_LIMIT, STAFF_LIMIT, TILL_LIMIT, LICENCE_EXPIRED, NOT_ALLOWED, NAME_TAKEN, NOT_SENT, OFFLINE, OTHER }
 
 sealed interface TenancyResult<out T> {
     data class Done<T>(val value: T) : TenancyResult<T>

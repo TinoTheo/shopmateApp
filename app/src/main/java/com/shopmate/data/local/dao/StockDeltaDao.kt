@@ -2,6 +2,7 @@ package com.shopmate.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.shopmate.data.local.entity.StockDeltaEntity
 import kotlinx.coroutines.flow.Flow
@@ -24,8 +25,26 @@ interface StockDeltaDao {
     @Insert
     suspend fun insert(delta: StockDeltaEntity)
 
+    /** Other tills' movements: one this till already holds (same id) is left as it is. */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertIgnoringKnown(deltas: List<StockDeltaEntity>)
+
+    @Query("SELECT * FROM stock_deltas WHERE synced = 1")
+    suspend fun sent(): List<StockDeltaEntity>
+
+    /** Send again: the server doesn't have them, though this till once thought it did. */
+    @Query("UPDATE stock_deltas SET synced = 0 WHERE id IN (:ids)")
+    suspend fun markUnsent(ids: List<String>)
+
+    @Query("DELETE FROM stock_deltas WHERE id IN (:ids)")
+    suspend fun deleteByIds(ids: List<String>)
+
     @Query("SELECT * FROM stock_deltas WHERE synced = 0 ORDER BY created_at ASC")
     suspend fun getUnsynced(): List<StockDeltaEntity>
+
+    /** A sale's own movements, noted with its receipt number, not yet sent. */
+    @Query("SELECT * FROM stock_deltas WHERE synced = 0 AND reason = 'SALE' AND note = :receiptNumber")
+    suspend fun unsentForSale(receiptNumber: String): List<StockDeltaEntity>
 
     @Query("UPDATE stock_deltas SET synced = 1 WHERE id IN (:ids)")
     suspend fun markSynced(ids: List<String>)

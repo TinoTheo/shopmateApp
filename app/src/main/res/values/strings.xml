@@ -510,6 +510,8 @@
         <item quantity="one">%d is already out.</item>
         <item quantity="other">%d are already out.</item>
     </plurals>
+    <string name="stock_other_tills_up_to">Includes other tills up to %1$s</string>
+    <string name="stock_other_tills_not_yet">Other tills\' sales arrive with the next sync</string>
     <string name="stock_week_caption_none">Nothing runs out in the next 7 days.</string>
     <string name="stock_section_week">Runs out in the next 7 days · %d</string>
     <string name="stock_section_out">Out of stock · %d</string>
@@ -521,6 +523,45 @@
     <string name="signin_subtitle">%1$s · Till %2$d</string>
     <string name="signin_helper">Enter your 4-digit till code</string>
     <string name="signin_opening">Opening the till</string>
+    <string name="tills_section">Tills</string>
+    <string name="tills_this">%1$s (this till)</string>
+    <string name="tills_remove_title">Remove %1$s?</string>
+    <string name="tills_remove_detail">It stops taking and sending sales at its next sync. Anything it hasn\'t sent stays on it until it\'s added back.</string>
+    <string name="tills_remove">Remove till</string>
+    <string name="tills_removed">%1$s is removed. It stops at its next sync.</string>
+    <plurals name="team_tills_used">
+        <item quantity="one">%1$d of %2$d till</item>
+        <item quantity="other">%1$d of %2$d tills</item>
+    </plurals>
+    <string name="device_question">Use this device as a till for %1$s?</string>
+    <string name="device_question_detail">You choose once for this device. A till sells; a remote device lets you check on the shop from anywhere.</string>
+    <string name="device_till_title">Yes, sell here</string>
+    <string name="device_till_detail">Takes sales and keeps stock, offline too. Counts as one of your plan\'s tills.</string>
+    <string name="device_remote_title">No, I\'m managing remotely</string>
+    <string name="device_remote_detail">Shows today\'s sales and how each till is doing, and opens the full reports on the web.</string>
+    <string name="device_till_name">Till name, e.g. Counter tablet</string>
+    <string name="device_continue">Continue</string>
+    <string name="device_refused_till_limit">Your plan\'s tills are all in use. Remove one in Settings on another till, or contact ShopMate for more.</string>
+    <string name="device_refused_not_sent">This device still has sales not yet sent. Use it as a till until they\'re sent, then choose remote.</string>
+    <string name="remote_subtitle">Remote · checking on the shop</string>
+    <string name="remote_today">Today so far</string>
+    <plurals name="remote_sales">
+        <item quantity="one">%d sale</item>
+        <item quantity="other">%d sales</item>
+    </plurals>
+    <string name="remote_tills">Tills</string>
+    <string name="remote_no_tills">No tills yet. Choose \"Yes, sell here\" on the device you\'ll sell on.</string>
+    <string name="remote_last_contact">%1$s · last heard from %2$s</string>
+    <string name="remote_open_reports">Open full reports</string>
+    <string name="remote_open_dashboard">Open the dashboard</string>
+    <string name="remote_web_not_ready">The web dashboard isn\'t online yet. Full reports will open from here once it is.</string>
+    <string name="remote_refresh">Refresh</string>
+    <string name="remote_sell_here">Sell on this device instead</string>
+    <string name="remote_loading">Getting today\'s sales…</string>
+    <string name="remote_offline">Connect to the internet to see today\'s sales.</string>
+    <string name="till_removed_title">This till was removed from %1$s</string>
+    <string name="till_removed_detail">It has stopped sending and taking sales. Anything it holds stays on this device. To sell here again, add it back, or sign out.</string>
+    <string name="till_removed_again">Use as a till again</string>
     <string name="lock_who">Who\'s selling?</string>
     <string name="lock_wait">Too many tries. Try again in %1$d s.</string>
     <string name="lock_not_me">Not you? Pick your name</string>

@@ -11,6 +11,8 @@ import com.shopmate.domain.repository.StoreChoice
 import com.shopmate.domain.repository.StoreRepository
 import com.shopmate.domain.repository.StoreSwitch
 import com.shopmate.domain.repository.TenancyResult
+import com.shopmate.sync.CatalogueSync
+import com.shopmate.sync.LedgerSync
 import com.shopmate.sync.NetworkMonitor
 import io.github.jan.supabase.postgrest.Postgrest
 import kotlinx.coroutines.flow.first
@@ -29,6 +31,8 @@ class StoreRepositoryImpl @Inject constructor(
     private val stockDeltaDao: StockDeltaDao,
     private val settings: SettingsRepository,
     private val networkMonitor: NetworkMonitor,
+    private val ledgerSync: LedgerSync,
+    private val catalogueSync: CatalogueSync,
 ) : StoreRepository {
 
     override suspend fun accessibleStores(): List<StoreChoice> =
@@ -84,6 +88,11 @@ class StoreRepositoryImpl @Inject constructor(
             if (notSent > 0) return StoreSwitch.NotSentYet(notSent)
             // clearAllTables() runs its own transaction — must NOT be nested in withTransaction.
             db.clearAllTables()
+        }
+        if (home != store.id) {
+            // A new store's ledger and catalogue are pulled whole, not from the old cursors.
+            ledgerSync.reset()
+            catalogueSync.reset()
         }
         if (store.name.isNotBlank() && home != store.id) settings.setStoreName(store.name)
         storeContext.setActiveStoreId(store.id)

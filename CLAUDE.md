@@ -210,16 +210,21 @@ traced by hand**.
 - **Sidebar mark (1c):** a `CheckoutNeon` circle with the M in `TradeGreen` — 40dp / 19×26dp M on
   COMPACT, 46dp / 22×30dp on EXPANDED, 18dp above the first destination. A circle, never the
   pill shape, so it can't read as a selection. Not interactive.
-- **Launcher icon (2a):** adaptive. `TradeGreen` background, the stacked logo 62dp wide centred
-  on the 108dp canvas, and a monochrome layer of the M alone for themed icons. Play Store art is
+- **Launcher icon (2a):** adaptive. `TradeGreen` background, the stacked logo 56dp wide centred
+  on the 108dp canvas, and a monochrome layer of the M alone for themed icons. Both layers are
+  square PNGs per density in `mipmap-*dpi/` with the art already placed — an `<inset>` around the
+  logo was scaled non-uniformly by launchers and squashed it. Play Store art is
   `app/src/main/ic_launcher-playstore.png`.
-- **Splash (1h phone / 1i tablet):** the system splash shows the Neon M on `TradeGreen`
-  (`Theme.Shopmate.Starting`); `BrandSplash` takes over while the app is still opening — an
-  oversized M in `TradeGreenDeep` bleeding off the phone screen, or the centred lockup on tablet —
-  and crossfades (200ms) into the app. **No spinner, no progress bar.** `TradeGreenDeep` exists
-  for this splash and nothing else.
+- **Splash:** Android 12+ always shows a system splash before any app code runs. Its icon is the
+  white M (`ic_splash_mark`, from the brand owner's ShopMate Logo Mark-35.svg), 40% of the icon's
+  height on a square canvas so it can't be stretched. `BrandSplash` follows on the same green and
+  fades in the full lockup with its tagline (400ms), holds for 2 seconds in all (as WhatsApp
+  does), then crossfades (200ms) into the app. Store and version at the tablet's foot. **No
+  spinner, no progress bar.** `TradeGreenDeep` is no longer drawn anywhere; keep it only if a
+  splash needs it again.
 - **The tagline "uncompromising control" is serif logo art.** It ships inside the lockup vector
-  or not at all; it is never set as UI text (§ Typography bans serifs and downloadable fonts).
+  (`ic_shopmate_lockup`, converted from the brand owner's ShopMate Logo-25.svg) and is never set
+  as UI text (§ Typography bans serifs and downloadable fonts).
 - **Receipts:** the store is the headline, ShopMate signs off at the foot ("Kept by ShopMate").
   `ReceiptContent` resolves the words once; `SharedReceiptImage` renders the 1m card (shared as a
   PNG through the share sheet from the receipt sheet) and `PrintedReceiptSlip` the 2b 58mm slip,
@@ -694,7 +699,8 @@ com.shopmate/
 │   │                StockInsightRepository, BarcodeRepository,
 │   │                StorePermissionRepository)
 │   └── util/ (ReceiptNumberGenerator, BarcodeNormaliser)
-├── sync/ (SalesSyncWorker, SyncScheduler, NetworkMonitor, ConflictResolver)
+├── sync/ (SyncWorker, SalesSyncWorker, SyncScheduler, NetworkMonitor, LedgerSync,
+│        CatalogueSync, SessionSyncTrigger)
 ├── print/ (EscPosRaster — 1-bit image → ESC/POS raster bytes; no transport yet)
 └── ui/
     ├── navigation/ (Screen, NavItems, NavGraph, AppSidebar,
@@ -780,12 +786,15 @@ com.shopmate/
   DataStore so a shop that opens offline stays signed in. `StoreContext` picks the active
   store from the stores the member's RLS policy returns at sign-in (an owner with none is
   sent to onboarding), never from a hand-entered or locally generated id.
-- **Room stays the source of truth.** Nothing on screen ever reads from Supabase directly;
-  sync is one-way out of the device for sales, and snapshots in for catalogue reconciliation.
+- **Each till is the source of truth for what it did; the server is where every till's record
+  meets** (amended 2026-10-26 for multi-till). Nothing on screen ever reads from Supabase
+  directly — every till works from Room, offline. A sale is recorded on its till first and
+  never waits for the server. See § Multi-till.
 - `sync/SalesSyncWorker` (WorkManager) drains the `sync_events` queue when `NetworkMonitor`
   reports connectivity, writing through `ShopMateRemote` as **idempotent upserts keyed on the
   client-generated row id** — a retried sale must not double-post. `SyncScheduler` enqueues
-  periodic + on-connect work; `ConflictResolver` handles clashes, and on a `401` the worker
+  periodic + on-connect work; `LedgerSync` and `CatalogueSync` merge the store's records
+  (§ Multi-till), and on a `401` the worker
   stops draining and surfaces re-authentication rather than marking events failed.
 - **No Realtime subscriptions.** A till on a thin connection does not hold a socket open.
 - **WorkManager's 15-minute periodic minimum** is why sync responsiveness relies on an
@@ -808,8 +817,45 @@ com.shopmate/
   lets any member insert SALE movements but only owners and managers insert the rest, and
   one INSERT is all-or-nothing — a single batch would let one cashier restock hold back
   every sale movement.
-- Only two payload types leave the device: **denormalised sale records** and **periodic
-  store snapshots**. Everything else stays local.
+- What leaves the device: **sale records**, **stock movements**, **product and category
+  changes** (owner and manager tills), **staff** (the owner's edits) and **store snapshots** (a
+  backup). Everything else stays local.
+
+### Multi-till
+
+Several tills can serve one store. They agree by sharing records, never by locking each other.
+
+- **Stock is the store's whole ledger.** Every till uploads its movements and pulls everyone
+  else's (`LedgerSync`), incrementally by the server's `received_at` — never the till's clock,
+  which an offline till can be days behind. A till's stock for a product is the sum of the
+  store's movements it has, plus its own not yet sent. Movements are only ever added, so two
+  tills' records merge without conflict. Stock is recomputed from the ledger after a pull; it is
+  never copied from another till or from the server's `products.stock_quantity`.
+- **The first full pull reconciles; it never throws a movement away.** A movement the till holds
+  as sent but the server's ledger for the store lacks is real history the server is missing (sent
+  under an older store id, or never accepted), so it is marked unsent and goes up again. The one
+  exception: a fresh till's old snapshot-based "Opening stock" for a product whose real history
+  is on the server — sending it would count the stock twice, so it alone is dropped. Raising
+  `LedgerSync.RECONCILE_VERSION` makes tills that already pulled reconcile once more.
+- **Products and categories are shared through the server** (`CatalogueSync`). Owner and
+  manager tills upload what changed; every till pulls. **The newest edit wins**, judged by the
+  product's `updated_at` on the server (`products_keep_newest`), so a till holding a stale
+  price can't overwrite a newer one. Stock is never part of a product upload's meaning.
+- **Never block a sale on a stock number.** Two offline tills each see only their own sales; the
+  customer holding the item is the truth. Selling past zero warns and goes through.
+- **Below zero after a merge is a signal, not an error**: the tills together sold more than the
+  records held (an unrecorded delivery, a miscount). It reads as Stopped and asks for a count; a
+  count movement settles it, and "why does it say N?" still has an answer.
+- **Say how fresh the number is.** Stock shows how recent the other tills' movements are
+  ("Other tills up to 10:42") — the till never presents the store's count as certain.
+- **A sale's movements go up with the sale** (`SalesSyncWorker`), so other tills see the stock
+  change when they see the sale, not 15 minutes later.
+- A movement whose product isn't in the store's catalogue (made on an install deleted before it
+  shared its products) can't be placed on any till; it is skipped, never waited for.
+- **Update a till by installing over it.** Deleting the app first wipes anything not yet sent and
+  gives the device a new till code.
+- Snapshots still upload as a backup; a fresh till loads from the live catalogue and ledger.
+- Reports remain this till's sales until the owner dashboard reads the store's.
 
 ### Release build
 
@@ -839,10 +885,9 @@ active store.
   sent (the till says so and offers Sync), and offline. Then it clears the local database, sets
   the new active store, and loads that store's catalogue. Nothing local is ever discarded
   unsent.
-- **A fresh till loads its store's catalogue** (`CatalogueLoader`): every server product for the
-  active store that the till doesn't have is inserted, its server stock recorded as an
-  "Opening stock" movement marked already synced — the server holds that stock, so it never
-  uploads again. This is what lets a new staff phone sell on day one.
+- **A fresh till loads its store's catalogue and ledger** from the server (§ Multi-till): the
+  store's products, then every movement, with stock the sum of the ledger. This is what lets a
+  new staff phone sell on day one.
 - **The owner adds stores** (`create_store` RPC, checked against the licence's store limit).
 
 ### Staff — email for the owner, PINs for everyone else
@@ -869,10 +914,34 @@ Amended 2026-10-23 (replaces invite codes, which needed staff to confirm an emai
   enforces the person.
 - The plan's staff limit counts PIN staff (not the owner).
 
+### Devices — tills and remote
+
+Decided 2026-10-26. Every signed-in device is one of two things, chosen once by the owner.
+
+- **A till** sells. On first sign-in to a store the device asks **"Use this device as a till for
+  {store}?"** — *Yes, sell here* (preselected on a device that has sold before) or *No, I'm
+  managing remotely*. Yes registers it in the store's `tills` with its till code and a name;
+  the plan's `max_tills` limits how many. Each sync updates its `last_seen_at`.
+- **A remote device** never sells, holds no stock and uploads nothing: no POS, no "Who's
+  selling?", no sync work. It shows a small home — today's sales across the store's tills, each
+  till's last contact — and sends the owner to the **web dashboard** for anything detailed.
+  Reports on a remote device opens the web report. Owner screens are not added to the till app;
+  they belong in the web dashboard.
+- **Removing a till** (Settings › Tills, owner) marks it revoked on the server. At its next
+  sync the till learns it, stops syncing, and says so — keeping anything unsent on the device.
+  This is enforced by the till itself (uploads go out under the owner's session); the server
+  enforces store and plan.
+- **The web dashboard** (`web/`, Next.js static export, see `web/README.md`) reads Supabase from
+  the browser with the anon key and the owner's session — RLS, never a service key. Pages: Today,
+  Reports (all tills), Stock (the store's ledger), Tills. Its address goes in `local.properties`
+  as `WEB_DASHBOARD_URL`.
+- The web dashboard has its own sign-in for now. Handing the app's session to the
+  browser means sign-in tokens in a link; that waits until it can be done safely.
+
 ### Licensing — plans with limits
 
 - One **licence per organisation**: plan (`trial`, `basic`, `pro`), `expires_at`, `max_stores`,
-  `max_staff`. Set and extended by ShopMate from the Supabase dashboard; no payment integration
+  `max_staff`, `max_tills`. Set and extended by ShopMate from the Supabase dashboard; no payment integration
   yet. A new org starts on a 30-day trial.
 - The device reads `current_licence()` at sign-in, store pick and every sync, and **keeps the
   last answer** for offline use. It never decides from the device clock alone that a licence it
@@ -899,7 +968,7 @@ movement history · Reports (Vico) · Sync engine · Settings. Beyond plan: side
 adaptive DeviceLayout, tablet POS, Sales History, shared component library, Inter bundled.
 
 **Tenancy, staff and licensing (2026-10-23):** app side built — store switching with its
-guard, `CatalogueLoader`, join-a-shop onboarding, Settings › Plan / Add a store / Staff with
+guard, multi-till catalogue and ledger sync, join-a-shop onboarding, Settings › Plan / Add a store / Staff with
 invite codes, licence states with the POS banner and the expired-plan block. Server side is
 `supabase/migrations/20261023090000_tenancy_staff_licensing.sql`; until it is applied the staff
 list and plan don't load and nothing is blocked. No payment integration: licences are set from
@@ -938,7 +1007,7 @@ None. Add new ones here rather than deciding them in a composable.
   to the org, so a member of a multi-store org can read every store's products. Narrowing
   RLS to one store would need the active store in the JWT (a custom access-token hook, and
   a token refresh — impossible offline — on every store switch) or per-store memberships.
-  Instead the device narrows its own reads to the active store, and `ConflictResolver`
+  Instead the device narrows its own reads to the active store, and `CatalogueSync`
   skips any pulled row whose `store_id` is not the active store, so a wrong or missing
   filter cannot reprice a till. See § Backend & sync.
 

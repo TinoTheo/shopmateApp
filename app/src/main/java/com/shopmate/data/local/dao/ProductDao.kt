@@ -14,6 +14,19 @@ interface ProductDao {
     @Query("SELECT * FROM products ORDER BY name ASC")
     fun getAll(): Flow<List<ProductEntity>>
 
+    /**
+     * Stock is the sum of the ledger (§ Multi-till): after other tills' movements arrive, every
+     * product's number is recomputed from the movements this till holds.
+     */
+    @Query(
+        "UPDATE products SET stock_quantity = " +
+            "(SELECT COALESCE(SUM(delta), 0) FROM stock_deltas WHERE stock_deltas.product_id = products.id)"
+    )
+    suspend fun recomputeStockFromLedger()
+
+    @Query("SELECT * FROM products WHERE updated_at > :since")
+    suspend fun changedSince(since: Long): List<ProductEntity>
+
     @Query("SELECT COUNT(*) FROM products")
     suspend fun count(): Int
 

@@ -14,6 +14,8 @@ data class Licence(
     val maxStaff: Int,
     val storesUsed: Int,
     val staffUsed: Int,
+    val maxTills: Int = 0,
+    val tillsUsed: Int = 0,
 ) {
     fun state(now: Instant = Instant.now()): LicenceState = when {
         now.isAfter(graceEndsAt) -> LicenceState.Expired

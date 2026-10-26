@@ -42,6 +42,8 @@ class LicenceRepositoryImpl @Inject constructor(
             maxStaff = prefs[MAX_STAFF] ?: 0,
             storesUsed = prefs[STORES_USED] ?: 0,
             staffUsed = prefs[STAFF_USED] ?: 0,
+            maxTills = prefs[MAX_TILLS] ?: 0,
+            tillsUsed = prefs[TILLS_USED] ?: 0,
         )
     }
 
@@ -63,6 +65,8 @@ class LicenceRepositoryImpl @Inject constructor(
             it[MAX_STAFF] = row.maxStaff
             it[STORES_USED] = row.storesUsed
             it[STAFF_USED] = row.staffUsed
+            it[MAX_TILLS] = row.maxTills
+            it[TILLS_USED] = row.tillsUsed
         }
     }
 
@@ -77,6 +81,8 @@ class LicenceRepositoryImpl @Inject constructor(
         @SerialName("max_staff") val maxStaff: Int,
         @SerialName("stores_used") val storesUsed: Int,
         @SerialName("staff_used") val staffUsed: Int,
+        @SerialName("max_tills") val maxTills: Int = 0,
+        @SerialName("tills_used") val tillsUsed: Int = 0,
     )
 
     private companion object {
@@ -88,5 +94,7 @@ class LicenceRepositoryImpl @Inject constructor(
         val MAX_STAFF = intPreferencesKey("licence_max_staff")
         val STORES_USED = intPreferencesKey("licence_stores_used")
         val STAFF_USED = intPreferencesKey("licence_staff_used")
+        val MAX_TILLS = intPreferencesKey("licence_max_tills")
+        val TILLS_USED = intPreferencesKey("licence_tills_used")
     }
 }

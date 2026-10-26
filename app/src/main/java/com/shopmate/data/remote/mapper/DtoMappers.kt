@@ -5,9 +5,7 @@ import com.shopmate.data.remote.dto.CategorySnapshotSbDto
 import com.shopmate.data.remote.dto.ProductSnapshotSbDto
 import com.shopmate.data.remote.dto.SaleItemRowDto
 import com.shopmate.data.remote.dto.SaleRowDto
-import com.shopmate.data.remote.dto.ServerProductDto
 import com.shopmate.data.remote.dto.StockDeltaRowDto
-import com.shopmate.data.remote.dto.SupabaseProductDto
 import com.shopmate.domain.model.Category
 import com.shopmate.domain.model.Product
 import com.shopmate.domain.model.Sale
@@ -47,6 +45,7 @@ fun StockDeltaEntity.toRow(storeId: String): StockDeltaRowDto = StockDeltaRowDto
     reason = reason.name,
     note = note,
     createdAt = Instant.ofEpochMilli(createdAt).toString(),
+    actor = actor,
 )
 
 fun Product.toSnapshotSbDto(categoryName: String?): ProductSnapshotSbDto = ProductSnapshotSbDto(
@@ -68,14 +67,3 @@ fun Category.toSnapshotSbDto(): CategorySnapshotSbDto = CategorySnapshotSbDto(
     colour = colour,
 )
 
-/** Adapts a pulled Supabase product row to the shape [com.shopmate.sync.ConflictResolver] expects. */
-fun SupabaseProductDto.toServerProductDto(): ServerProductDto = ServerProductDto(
-    id = id,
-    storeId = storeId,
-    name = name,
-    sellingPrice = sellingPrice,
-    costPrice = costPrice,
-    stockQuantity = stockQuantity,
-    updatedAt = updatedAt?.let { runCatching { Instant.parse(it).toEpochMilli() }.getOrNull() }
-        ?: Instant.now().toEpochMilli(),
-)

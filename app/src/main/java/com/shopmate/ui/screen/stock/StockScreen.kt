@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.shopmate.R
+import java.time.Instant
 import com.shopmate.domain.model.Category
 import com.shopmate.domain.model.DeltaReason
 import com.shopmate.domain.model.Product
@@ -67,9 +68,11 @@ fun StockScreen(
     }
 
     val canManageStock by viewModel.canManageStock.collectAsState()
+    val otherTillsUpTo by viewModel.otherTillsUpTo.collectAsState()
 
     StockContent(
         state = state,
+        otherTillsUpTo = otherTillsUpTo,
         canManageStock = canManageStock,
         categories = categories,
         deviceLayout = deviceLayout,
@@ -97,6 +100,7 @@ fun StockContent(
     onCountStock: () -> Unit,
     onAdjust: (String, Int, DeltaReason, String?) -> Unit,
     onCloseSheet: () -> Unit,
+    otherTillsUpTo: Instant? = null,
 ) {
     val selectedInsight = state.sections.values.flatten()
         .firstOrNull { it.insight.product.id == state.selectedProduct?.id }
@@ -129,6 +133,7 @@ fun StockContent(
                 onProductClick = onProductClick,
                 onNavigateToProducts = onNavigateToProducts,
                 modifier = Modifier.weight(1f),
+                otherTillsUpTo = otherTillsUpTo,
             )
 
             // EXPANDED pins the detail to the sheet edge; COMPACT gets the same content as a

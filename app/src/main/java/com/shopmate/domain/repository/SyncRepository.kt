@@ -23,6 +23,12 @@ interface SyncRepository {
     /** When a sale last reached the store, or null if none has. */
     fun lastSentAt(): Flow<Instant?>
 
+    /**
+     * How recent the other tills' movements on this till are — when it last pulled the store's
+     * ledger (§ Multi-till). Null until it has once.
+     */
+    fun otherTillsUpTo(): Flow<Instant?>
+
     /** Puts one refused upload back in the queue. */
     suspend fun retry(eventId: String)
     suspend fun markSynced(id: String)

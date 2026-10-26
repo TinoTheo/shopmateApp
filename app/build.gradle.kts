@@ -16,6 +16,8 @@ val localProps = Properties().apply {
 // client creation valid on machines without keys; sync no-ops when signed out. A release build
 // refuses to use it — see verifyReleaseConfig below.
 val supabaseUrl: String? = localProps.getProperty("SUPABASE_URL")?.takeIf { it.isNotBlank() }
+// The owner's web dashboard (§ Devices). Blank until it is hosted: remote devices then say so.
+val webDashboardUrl: String = localProps.getProperty("WEB_DASHBOARD_URL")?.trim().orEmpty()
 val supabaseAnonKey: String? = localProps.getProperty("SUPABASE_ANON_KEY")?.takeIf { it.isNotBlank() }
 
 // Release signing, also from local.properties. The keystore path is relative to the project root.
@@ -42,6 +44,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "SUPABASE_URL", "\"${supabaseUrl ?: "https://placeholder.supabase.co"}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${supabaseAnonKey.orEmpty()}\"")
+        buildConfigField("String", "WEB_DASHBOARD_URL", "\"$webDashboardUrl\"")
     }
 
     signingConfigs {

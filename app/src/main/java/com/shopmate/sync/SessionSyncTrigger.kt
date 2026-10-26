@@ -3,6 +3,7 @@ package com.shopmate.sync
 import com.shopmate.data.auth.AuthManager
 import com.shopmate.data.auth.StoreContext
 import com.shopmate.domain.repository.StorePermissionRepository
+import com.shopmate.domain.repository.DeviceRepository
 import com.shopmate.domain.repository.LicenceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
@@ -30,10 +31,12 @@ class SessionSyncTrigger @Inject constructor(
     private val syncScheduler: SyncScheduler,
     private val storePermissions: StorePermissionRepository,
     private val licences: LicenceRepository,
+    private val deviceRepository: DeviceRepository,
 ) {
     fun start(scope: CoroutineScope) {
-        combine(authManager.needsReauth, storeContext.activeStoreIdFlow) { needsReauth, storeId ->
-            storeId.takeUnless { needsReauth }
+        // Becoming a till is also a moment to sync: its first registration and pull start at once.
+        combine(authManager.needsReauth, storeContext.activeStoreIdFlow, deviceRepository.role) { needsReauth, storeId, role ->
+            storeId.takeUnless { needsReauth }?.let { it to role }
         }
             .distinctUntilChanged()
             .filterNotNull()

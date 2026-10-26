@@ -23,6 +23,10 @@ data class SaleWithItems(
 @Dao
 interface SaleDao {
 
+    @Query("SELECT COUNT(*) FROM sales")
+    suspend fun count(): Int
+
+
     @Transaction
     suspend fun insertSaleWithItems(sale: SaleEntity, items: List<SaleItemEntity>) {
         insertSale(sale)

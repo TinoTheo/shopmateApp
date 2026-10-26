@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shopmate.data.auth.StoreContext
 import com.shopmate.domain.model.Licence
+import com.shopmate.domain.repository.DeviceRepository
 import com.shopmate.domain.repository.LicenceRepository
+import com.shopmate.domain.repository.TillInfo
 import com.shopmate.domain.repository.SettingsRepository
 import com.shopmate.domain.repository.StaffRepository
 import com.shopmate.domain.repository.StaffRole
@@ -30,6 +32,7 @@ sealed interface TeamNotice {
     data class StaffAdded(val name: String) : TeamNotice
     data class Removed(val name: String) : TeamNotice
     data object PinChanged : TeamNotice
+    data class TillRemoved(val name: String) : TeamNotice
 }
 
 data class TeamUiState(
@@ -40,6 +43,8 @@ data class TeamUiState(
     val activeStoreName: String = "",
     val notice: TeamNotice? = null,
     val busy: Boolean = false,
+    /** The store's tills (§ Devices); empty until read, or offline. */
+    val tills: List<TillInfo> = emptyList(),
 ) {
     /**
      * The till is signed in as the owner, so the owner is at it when they unlocked it — or when
@@ -56,6 +61,7 @@ class TeamViewModel @Inject constructor(
     private val storeRepository: StoreRepository,
     private val licences: LicenceRepository,
     private val storeContext: StoreContext,
+    private val deviceRepository: DeviceRepository,
     settings: SettingsRepository,
 ) : ViewModel() {
 
@@ -84,7 +90,17 @@ class TeamViewModel @Inject constructor(
             licences.refresh()
             runCatching { storeRepository.accessibleStores() }.onSuccess { serverStores.value = it }
             storeContext.getActiveStoreId()?.let { staffRepository.pull(it) }
+            refreshTills()
         }
+    }
+
+    private suspend fun refreshTills() {
+        (deviceRepository.tills() as? TenancyResult.Done)?.let { done -> local.update { it.copy(tills = done.value) } }
+    }
+
+    /** It stops at its next sync; what it holds stays on it (§ Devices). */
+    fun removeTill(till: TillInfo) = act(TeamNotice.TillRemoved(till.name)) {
+        deviceRepository.removeTill(till.id).also { refreshTills() }
     }
 
     fun setOwnerPin(name: String, pin: String) = act(TeamNotice.PinChanged) {

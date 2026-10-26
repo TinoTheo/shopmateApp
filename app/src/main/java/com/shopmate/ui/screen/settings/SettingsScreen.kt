@@ -62,6 +62,7 @@ fun SettingsScreen(
                 onChangePin = teamViewModel::changePin,
                 onRemove = teamViewModel::remove,
                 onAddStore = teamViewModel::addStore,
+                onRemoveTill = teamViewModel::removeTill,
             )
         },
     )

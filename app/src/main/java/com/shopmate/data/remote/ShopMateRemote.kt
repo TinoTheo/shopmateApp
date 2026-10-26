@@ -1,8 +1,10 @@
 package com.shopmate.data.remote
 
 import com.shopmate.data.local.entity.StockDeltaEntity
+import com.shopmate.data.remote.dto.CatalogueCategoryDto
+import com.shopmate.data.remote.dto.CatalogueProductDto
+import com.shopmate.data.remote.dto.LedgerRowDto
 import com.shopmate.data.remote.dto.StoreSnapshotRowDto
-import com.shopmate.data.remote.dto.SupabaseProductDto
 import com.shopmate.data.remote.mapper.toRow
 import com.shopmate.data.remote.mapper.toSaleItemRows
 import com.shopmate.data.remote.mapper.toSaleRow
@@ -49,29 +51,53 @@ class ShopMateRemote @Inject constructor(
         postgrest.from("store_snapshots").insert(row)
     }
 
-    /** The store's most recent snapshot — how a fresh till gets its catalogue. Null if none. */
-    suspend fun fetchLatestSnapshot(storeId: String): StoreSnapshotRowDto? =
-        postgrest.from("store_snapshots")
-            .select(Columns.list("store_id", "taken_at", "payload")) {
-                filter { eq("store_id", storeId) }
-                order("taken_at", Order.DESCENDING)
-                limit(1)
-            }
-            .decodeList<StoreSnapshotRowDto>()
-            .firstOrNull()
-
     /**
-     * Product metadata for catalogue reconciliation. Numeric columns are cast to text
-     * server-side so BigDecimal strings survive the round trip.
-     *
-     * RLS scopes to the org; the `store_id` filter narrows to the store this till works for
-     * (CLAUDE.md § Backend & sync — narrow, never widen). `store_id` is selected too, so
-     * [com.shopmate.sync.ConflictResolver] can check every row again.
+     * The store's movements the server received at or after [since] (its own clock), oldest
+     * first, one page. Includes this till's own — the caller skips what it already holds.
      */
-    suspend fun fetchProducts(storeId: String): List<SupabaseProductDto> =
-        postgrest.from("products")
-            .select(Columns.raw("id,store_id,name,selling_price::text,cost_price::text,stock_quantity,updated_at")) {
-                filter { eq("store_id", storeId) }
+    suspend fun fetchLedgerPage(storeId: String, since: String?, from: Long, pageSize: Long): List<LedgerRowDto> =
+        postgrest.from("stock_deltas")
+            .select(Columns.list("id", "store_id", "product_id", "delta", "reason", "note", "actor", "created_at", "received_at")) {
+                filter {
+                    eq("store_id", storeId)
+                    if (since != null) gte("received_at", since)
+                }
+                order("received_at", Order.ASCENDING)
+                order("id", Order.ASCENDING)
+                range(from, from + pageSize - 1)
             }
-            .decodeList<SupabaseProductDto>()
+            .decodeList<LedgerRowDto>()
+
+    /** Every product of the store, one page, money cast to text so BigDecimal survives. */
+    suspend fun fetchCataloguePage(storeId: String, from: Long, pageSize: Long): List<CatalogueProductDto> =
+        postgrest.from("products")
+            .select(
+                Columns.raw(
+                    "id,store_id,category_id,name,sku,barcode,selling_price::text,cost_price::text," +
+                        "stock_quantity,low_stock_threshold,unit,created_at,updated_at",
+                ),
+            ) {
+                filter { eq("store_id", storeId) }
+                order("id", Order.ASCENDING)
+                range(from, from + pageSize - 1)
+            }
+            .decodeList<CatalogueProductDto>()
+
+    suspend fun fetchCategories(storeId: String): List<CatalogueCategoryDto> =
+        postgrest.from("categories")
+            .select { filter { eq("store_id", storeId) } }
+            .decodeList<CatalogueCategoryDto>()
+
+    /** Newest edit wins on the server (`products_keep_newest`), so an older upload is ignored. */
+    suspend fun upsertProducts(rows: List<CatalogueProductDto>) {
+        if (rows.isEmpty()) return
+        postgrest.from("products").upsert(rows)
+    }
+
+    suspend fun upsertCategories(rows: List<CatalogueCategoryDto>) {
+        if (rows.isEmpty()) return
+        postgrest.from("categories").upsert(rows)
+    }
+
+
 }
