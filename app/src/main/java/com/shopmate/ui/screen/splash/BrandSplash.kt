@@ -18,12 +18,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import com.shopmate.BuildConfig
@@ -34,10 +34,9 @@ import com.shopmate.ui.theme.TradeGreen
 import com.shopmate.ui.util.DeviceLayout
 
 /**
- * Brand splash. The system splash already shows the lockup — wordmark with "uncompromising
- * control" — at [SystemSplashLockupWidth]; this picks it up at that size and place, so the
- * handover can't be seen, then lets it grow to its full size. **No spinner, no progress bar.**
- * The root holds it for a set time, then crossfades into the app.
+ * Brand splash. The system splash shows the M on Trade Green; this follows on the same green and
+ * fades in the full lockup — wordmark with "uncompromising control". **No spinner, no progress
+ * bar.** The root holds it for a set time, then crossfades into the app.
  *
  * The tagline is part of the brand owner's lockup art (ic_shopmate_lockup), never set as text.
  */
@@ -52,20 +51,21 @@ fun BrandSplash(deviceLayout: DeviceLayout, storeName: String) {
             DeviceLayout.COMPACT -> min(maxWidth * 0.72f, 300.dp)
             DeviceLayout.EXPANDED -> min(maxWidth * 0.5f, 460.dp)
         }
-        // From the system splash's size to full size: the logo appears to settle, not to jump.
-        val growth = remember { Animatable(0f) }
+        // The M gives way to the lockup: a fade, so one image doesn't snap into another.
+        val appear = remember { Animatable(0f) }
         LaunchedEffect(Unit) {
-            growth.animateTo(1f, tween(durationMillis = GROW_MS, easing = FastOutSlowInEasing))
+            appear.animateTo(1f, tween(durationMillis = FADE_IN_MS, easing = FastOutSlowInEasing))
         }
         Image(
             painter = painterResource(R.drawable.ic_shopmate_lockup),
             contentDescription = stringResource(R.string.app_name),
             modifier = Modifier
                 .align(Alignment.Center)
-                .width(lerp(SystemSplashLockupWidth, fullWidth, growth.value))
+                .width(fullWidth)
                 // Height follows the width. Left to the drawable's own 280dp size, the image
                 // capped its width there however wide it was asked to be.
-                .aspectRatio(LOCKUP_ASPECT),
+                .aspectRatio(LOCKUP_ASPECT)
+                .alpha(appear.value),
         )
         if (deviceLayout == DeviceLayout.EXPANDED) {
             // 1i: store and version at the foot of the tablet splash.
@@ -88,14 +88,7 @@ fun BrandSplash(deviceLayout: DeviceLayout, storeName: String) {
     }
 }
 
-/**
- * How wide the system splash draws the lockup (`ic_splash_lockup`: 64% of the splash icon). Measured
- * on Android 15; other versions draw the splash icon a little larger or smaller, and the growth
- * hides the difference.
- */
-private val SystemSplashLockupWidth = 170.dp
-
-private const val GROW_MS = 600
+private const val FADE_IN_MS = 400
 
 /** The lockup artwork's proportions (7055 × 2002). */
 private const val LOCKUP_ASPECT = 7055f / 2002f
