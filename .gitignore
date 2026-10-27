@@ -16,3 +16,6 @@ local.properties
 .kotlin
 # Claude Code session state (worktrees, local permissions)
 .claude/
+
+# Admin queries run by hand in the Supabase SQL Editor (client emails, plans)
+supabase/admin/
