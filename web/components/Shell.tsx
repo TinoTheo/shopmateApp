@@ -2,18 +2,19 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { notConfigured, supabase } from '@/lib/supabase';
-import { stores, type Store } from '@/lib/data';
+import { ownerName, stores, type Store } from '@/lib/data';
+import { Icon } from './ui';
 
-type ShellContext = { store: Store };
+type ShellContext = { store: Store; symbol: string };
 const Ctx = createContext<ShellContext | null>(null);
 
-/** The store the owner is looking at. Only rendered once one is chosen. */
-export function useStore(): Store {
+/** The store the owner is looking at. Every screen re-fetches when it changes. */
+export function useStore(): ShellContext {
   const ctx = useContext(Ctx);
   if (!ctx) throw new Error('useStore outside Shell');
-  return ctx.store;
+  return ctx;
 }
 
 const NAV = [
@@ -23,84 +24,171 @@ const NAV = [
   { href: '/tills/', label: 'Tills' },
 ];
 
+const STORE_KEY = 'shopmate.store';
+
+function saved(): string | null {
+  try { return window.localStorage.getItem(STORE_KEY); } catch { return null; }
+}
+
 /**
- * The dashboard's frame: the till app's Trade Green rail and white sheet. Signs the owner in
- * first (the dashboard has its own sign-in; see CLAUDE.md § Devices) and picks the store.
+ * The frame (handoff § Global frame). Desktop: a 224px Trade Green sidebar and a sheet with a
+ * 24px top-left corner. Phone: a green top bar, and a full-height green menu in place of the
+ * sheet. Never a bottom tab bar.
  */
-export function Shell({ title, children }: { title: string; children: React.ReactNode }) {
+export function Shell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [state, setState] = useState<'loading' | 'signedOut' | 'ready' | 'noStores'>('loading');
+  const [state, setState] = useState<'loading' | 'ready' | 'noStores' | 'failed'>('loading');
   const [all, setAll] = useState<Store[]>([]);
   const [storeId, setStoreId] = useState<string | null>(null);
+  const [owner, setOwner] = useState<string | null>(null);
+  const [email, setEmail] = useState<string>('');
+  const [menu, setMenu] = useState(false);
+  const [picker, setPicker] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (notConfigured) return;
     supabase.auth.getSession().then(async ({ data }) => {
       if (!data.session) {
-        setState('signedOut');
         router.replace('/login/');
         return;
       }
-      const list = await stores();
-      setAll(list);
-      const saved = typeof window !== 'undefined' ? window.localStorage.getItem('shopmate.store') : null;
-      const chosen = list.find((s) => s.id === saved) ?? list[0];
-      setStoreId(chosen?.id ?? null);
-      setState(chosen ? 'ready' : 'noStores');
+      setEmail(data.session.user.email ?? '');
+      try {
+        const list = await stores();
+        setAll(list);
+        const chosen = list.find((s) => s.id === saved()) ?? list[0];
+        setStoreId(chosen?.id ?? null);
+        setState(chosen ? 'ready' : 'noStores');
+      } catch {
+        setState('failed');
+      }
     });
   }, [router]);
 
-  if (notConfigured) {
-    return <Centered>This dashboard was built without its Supabase settings. See web/.env.example.</Centered>;
-  }
-  if (state === 'loading' || state === 'signedOut') return <Centered>Opening your shop…</Centered>;
-  if (state === 'noStores') return <Centered>This account has no shop yet. Create one in the ShopMate app first.</Centered>;
+  useEffect(() => {
+    if (!storeId) return;
+    ownerName(storeId).then(setOwner).catch(() => setOwner(null));
+  }, [storeId]);
+
+  useEffect(() => setMenu(false), [pathname]);
+
+  useEffect(() => {
+    if (!picker) return;
+    const away = (e: MouseEvent) => {
+      if (!pickerRef.current?.contains(e.target as Node)) setPicker(false);
+    };
+    document.addEventListener('mousedown', away);
+    return () => document.removeEventListener('mousedown', away);
+  }, [picker]);
+
+  if (notConfigured) return <Centered>This dashboard was built without its Supabase settings. See web/.env.example.</Centered>;
+  if (state === 'noStores') return <Centered>This account has no shop yet. Set one up in the ShopMate app first.</Centered>;
+  if (state === 'failed') return <Centered>ShopMate didn’t answer in time. Reload the page to try again.</Centered>;
+  if (state === 'loading' || !storeId) return <div style={{ minHeight: '100vh' }} />;
 
   const store = all.find((s) => s.id === storeId)!;
+  const choose = (id: string) => {
+    try { window.localStorage.setItem(STORE_KEY, id); } catch { /* remembered for this visit only */ }
+    setStoreId(id);
+    setPicker(false);
+    setMenu(false);
+  };
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    router.replace('/login/');
+  };
+  const who = owner ?? email;
+  const on = (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href.replace(/\/$/, '')));
+  const many = all.length > 1;
+
+  const mark = (small?: boolean) => (
+    <div className={`markc${small ? ' small' : ''}`} aria-hidden>
+      <img src="/mark.svg" alt="" />
+    </div>
+  );
+
   return (
-    <Ctx.Provider value={{ store }}>
+    <Ctx.Provider value={{ store, symbol: store.currency_symbol || '$' }}>
       <div className="frame">
-        <nav className="rail" aria-label="Sections">
-          <div className="mark" aria-hidden>
-            <img src="/mark.svg" alt="" style={{ height: 26 }} />
-          </div>
-          {NAV.map((n) => (
-            <Link key={n.href} href={n.href} className={pathname === n.href ? 'selected' : ''}>
-              {n.label}
-            </Link>
-          ))}
-          <div className="spacer" />
-          <button
-            onClick={async () => {
-              await supabase.auth.signOut();
-              router.replace('/login/');
-            }}
-          >
-            Sign out
-          </button>
-        </nav>
-        <main className="sheet">
-          <div className="header">
-            <h1>{title}</h1>
-            {all.length > 1 && (
-              <select
-                aria-label="Store"
-                value={store.id}
-                onChange={(e) => {
-                  window.localStorage.setItem('shopmate.store', e.target.value);
-                  setStoreId(e.target.value);
-                }}
-              >
+        <aside className="rail" aria-label="ShopMate">
+          {mark()}
+          <div className="picker" ref={pickerRef}>
+            <button onClick={() => setPicker((p) => !p)} disabled={!many} aria-expanded={picker} aria-haspopup="listbox">
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span className="lbl" style={{ display: 'block' }}>Store</span>
+                <span className="name">{store.name}</span>
+              </span>
+              {many ? Icon.chevron : null}
+            </button>
+            {picker && (
+              <ul role="listbox" aria-label="Store">
                 {all.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
+                  <li key={s.id}>
+                    <button role="option" aria-selected={s.id === store.id} onClick={() => choose(s.id)}>
+                      {s.name}
+                      {s.id === store.id ? Icon.check : null}
+                    </button>
+                  </li>
                 ))}
-              </select>
+              </ul>
             )}
-            {all.length <= 1 && <span className="muted">{store.name}</span>}
           </div>
-          {children}
-        </main>
+          <nav className="nav" aria-label="Sections">
+            {NAV.map((n) => (
+              <Link key={n.href} href={n.href} className={on(n.href) ? 'on' : ''} aria-current={on(n.href) ? 'page' : undefined}>
+                {n.label}
+              </Link>
+            ))}
+          </nav>
+          <div className="who">
+            <div className="owner" title={email}>{who}</div>
+            <button onClick={signOut}>Sign out</button>
+          </div>
+        </aside>
+
+        <header className="topbar">
+          {mark(true)}
+          {!menu && (
+            <button className="store" onClick={() => setMenu(true)} aria-label={`Store: ${store.name}`}>
+              <span>{store.name}</span>
+              {many ? Icon.chevron : null}
+            </button>
+          )}
+          <button className="pillbtn" onClick={() => setMenu((m) => !m)} aria-expanded={menu}>
+            {menu ? Icon.close : Icon.menu}
+            {menu ? 'Close' : 'Menu'}
+          </button>
+        </header>
+
+        {menu ? (
+          <div className="menu">
+            <div className="eyebrow">Go to</div>
+            <nav className="nav" aria-label="Sections">
+              {NAV.map((n) => (
+                <Link key={n.href} href={n.href} className={on(n.href) ? 'on' : ''} onClick={() => setMenu(false)}>
+                  {n.label}
+                </Link>
+              ))}
+            </nav>
+            <div className="eyebrow" style={{ marginTop: 20 }}>Store</div>
+            <div className="stores">
+              {all.map((s) => (
+                <button key={s.id} className={s.id === store.id ? 'cur' : ''} onClick={() => choose(s.id)}>
+                  {s.name}
+                  {s.id === store.id ? Icon.check : null}
+                </button>
+              ))}
+            </div>
+            <div className="who">
+              <div className="owner">{who}</div>
+              <button onClick={signOut}>Sign out</button>
+            </div>
+          </div>
+        ) : (
+          <main className="sheet" key={store.id}>{children}</main>
+        )}
       </div>
     </Ctx.Provider>
   );
@@ -108,7 +196,7 @@ export function Shell({ title, children }: { title: string; children: React.Reac
 
 function Centered({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', color: '#fff', padding: 24, textAlign: 'center' }}>
+    <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', color: '#fff', padding: 24, textAlign: 'center', fontSize: 15 }}>
       {children}
     </div>
   );
