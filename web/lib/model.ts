@@ -219,7 +219,8 @@ export function axis(max: number, ticks: number): number[] {
   if (max <= 0) return [0, 1];
   const raw = max / ticks;
   const mag = 10 ** Math.floor(Math.log10(raw));
-  const step = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => s >= raw) ?? raw;
+  // Whole money units only: a $0/$0.50/$1 axis labelled in dollars would read $0/$1/$1.
+  const step = Math.max(1, [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => s >= raw) ?? raw);
   const top = Math.ceil(max / step) * step;
   const out: number[] = [];
   for (let v = 0; v <= top + step / 2; v += step) out.push(Math.round(v * 100) / 100);
@@ -427,7 +428,10 @@ export function ledgerRows(item: StockItem, tills: Till[], now: Date): LedgerRow
       }
       total += sum;
       const tillNames = [...codes].map((c) => name(c)).sort();
-      const who = tillNames.length ? `${tillNames.length > 1 ? 'Tills ' + listOf(tillNames.map((n) => n.replace(/^Till /, ''))) : tillNames[0]} · ` : '';
+      // "Tills 1 and 2" when every name is "Till …"; otherwise the names as they are.
+      const numbered = tillNames.length > 1 && tillNames.every((n) => n.startsWith('Till '));
+      const tillsText = numbered ? `Tills ${listOf(tillNames.map((n) => n.slice(5)))}` : listOf(tillNames);
+      const who = tillNames.length ? `${tillsText} · ` : '';
       const day = sameDay(at, now) ? `Today to ${hm(last)}` : dayWord(at, now);
       rows.push({ kind: 'Sold', meta: `${who}${day}`, change: sum < 0 ? `−${-sum}` : `+${sum}`, total });
       continue;
