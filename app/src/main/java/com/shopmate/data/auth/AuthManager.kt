@@ -22,6 +22,9 @@ interface AuthManager {
     suspend fun signUpEmail(email: String, password: String, fullName: String): AuthResult
     suspend fun signInEmail(email: String, password: String): AuthResult
 
+    /** Sends the sign-up confirmation email again, for an account not yet confirmed. */
+    suspend fun resendConfirmation(email: String): AuthResult
+
     // Phone OTP path (built, gated until provider keys exist)
     suspend fun requestOtp(phone: String): AuthResult
     suspend fun verifyOtp(phone: String, code: String): AuthResult

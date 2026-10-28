@@ -215,21 +215,17 @@ traced by hand**.
   square PNGs per density in `mipmap-*dpi/` with the art already placed — an `<inset>` around the
   logo was scaled non-uniformly by launchers and squashed it. Play Store art is
   `app/src/main/ic_launcher-playstore.png`.
-- **Splash, "Ink over"** (`design_handoff_owner_dashboard` › ShopMate Logo Motion). Android 12+
-  shows a system splash first: the white M (`ic_splash_mark`, from Logo Mark-35.svg) on Trade
-  Green, 94dp tall on the tablet. It is removed at once (`setOnExitAnimationListener { remove() }`)
-  because `BrandSplash`'s frame 0 is the same picture. Then, in 1.55s, the M is inked in Checkout
-  Neon along its own centreline (a mask, never drawn), moves to its slot in the **stacked** lockup,
-  "Shop" and "ate" settle 8dp, and the tagline arrives. It holds to 2 seconds in all (as WhatsApp
-  does), then crossfades (200ms) into the app. One clock per launch, driven by frames, so moving
-  between root states never replays it and "Remove animations" gets a 200ms crossfade instead.
-  Layers: `drawable-nodpi/splash_m_white|m_neon|shop|ate` (1200 × 823, split from the stacked PNG —
-  replace with vector exports when the brand owner sends them) and `ic_splash_tagline`. Store and
-  version at the tablet's foot. **No spinner, no progress bar.** The web dashboard's sign-in plays
-  the same timeline (`web/components/Lockup.tsx`).
+- **Splash:** Android 12+ always shows a system splash before any app code runs. Its icon is the
+  white M (`ic_splash_mark`, from the brand owner's ShopMate Logo Mark-35.svg), 40% of the icon's
+  height on a square canvas so it can't be stretched. `BrandSplash` follows on the same green and
+  fades in the full lockup with its tagline (400ms), holds for 2 seconds in all (as WhatsApp
+  does), then crossfades (200ms) into the app. Store and version at the tablet's foot. **No
+  spinner, no progress bar.** The web dashboard's sign-in has its own animation, "Ink over"
+  (`web/components/Lockup.tsx`); the app keeps this splash. `TradeGreenDeep` is no longer drawn anywhere; keep it only if a
+  splash needs it again.
 - **The tagline "uncompromising control" is serif logo art.** It ships inside the lockup vector
-  (`ic_splash_tagline`, placed under "ate" by the dashboard handoff — to be confirmed by the brand
-  owner; `ic_shopmate_lockup` keeps the horizontal Logo-25 version) and is never set as UI text (§ Typography bans serifs and downloadable fonts).
+  (`ic_shopmate_lockup`, converted from the brand owner's ShopMate Logo-25.svg) and is never set
+  as UI text (§ Typography bans serifs and downloadable fonts).
 - **Receipts:** the store is the headline, ShopMate signs off at the foot ("Kept by ShopMate").
   `ReceiptContent` resolves the words once; `SharedReceiptImage` renders the 1m card (shared as a
   PNG through the share sheet from the receipt sheet) and `PrintedReceiptSlip` the 2b 58mm slip,
@@ -901,6 +897,12 @@ Amended 2026-10-23 (replaces invite codes, which needed staff to confirm an emai
 
 - **Only the owner has an email account.** The owner signs in once to set up a till; the till
   stays signed in as the store. Managers and cashiers never create an account.
+- **The owner confirms their email.** Sign-up sends a link that lands on the web dashboard's
+  `/confirmed/` page ("Your email is confirmed — go back to the app"), or says the link expired.
+  The app names the address it went to and offers **Send the email again** (once a minute); signing
+  in unconfirmed offers the same instead of Supabase's error. **Emails reach real people only
+  through custom SMTP** in Supabase › Authentication › Emails: Supabase's own sender delivers to
+  the project's team members only, a few an hour.
 - **The owner adds staff** in Settings: name, role (`manager` or `cashier`), a 4-digit PIN, and
   for a cashier whether they can move stock. Staff belong to one store. Online only — the staff
   list lives on the server (`staff` table) and every till of that store pulls it on sync.

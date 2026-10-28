@@ -1,5 +1,6 @@
 package com.shopmate.data.auth
 
+import com.shopmate.BuildConfig
 import com.shopmate.data.remote.SessionStore
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.OtpType
@@ -46,12 +47,22 @@ class SupabaseAuthManager @Inject constructor(
 
     override suspend fun signUpEmail(email: String, password: String, fullName: String): AuthResult =
         runCatching {
-            auth.signUpWith(Email) {
+            auth.signUpWith(Email, redirectUrl = confirmedPage()) {
                 this.email = email
                 this.password = password
                 data = buildJsonObject { put("full_name", fullName) }
             }
         }.toAuthResult()
+
+    override suspend fun resendConfirmation(email: String): AuthResult =
+        runCatching { auth.resendEmail(OtpType.Email.SIGNUP, email) }.toAuthResult()
+
+    /**
+     * Where the confirmation link lands: the web dashboard's "You're confirmed" page, which tells
+     * the owner to come back to the app. Without a dashboard address, Supabase's Site URL.
+     */
+    private fun confirmedPage(): String? =
+        BuildConfig.WEB_DASHBOARD_URL.trimEnd('/').takeIf { it.isNotBlank() }?.let { "$it/confirmed/" }
 
     override suspend fun signInEmail(email: String, password: String): AuthResult =
         runCatching {

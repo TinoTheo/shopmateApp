@@ -1,5 +1,6 @@
 package com.shopmate.ui.screen.auth
 
+import android.os.SystemClock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shopmate.data.auth.AuthConfig
@@ -23,6 +24,10 @@ data class AuthUiState(
     val isSubmitting: Boolean = false,
     val error: String? = null,
     val info: String? = null,
+    /** The address a confirmation email went to, while the account waits to be confirmed. */
+    val awaitingConfirmation: String? = null,
+    /** "Send the email again" works once this uptime (ms) has passed: Supabase limits sends. */
+    val resendAllowedAt: Long = 0L,
     // Phone OTP sub-state
     val otpStep: OtpStep = OtpStep.ENTER_PHONE,
     val pendingPhone: String? = null,
@@ -37,7 +42,7 @@ class AuthViewModel @Inject constructor(
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
     fun toggleMode() = _uiState.update {
-        it.copy(isSignUp = !it.isSignUp, error = null, info = null)
+        it.copy(isSignUp = !it.isSignUp, error = null, info = null, awaitingConfirmation = null)
     }
 
     fun clearMessages() = _uiState.update { it.copy(error = null, info = null) }
@@ -51,7 +56,40 @@ class AuthViewModel @Inject constructor(
             _uiState.update { it.copy(error = emailError ?: pwError) }
             return
         }
-        submit(action = { authManager.signInEmail(email.trim(), password) })
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSubmitting = true, error = null, info = null) }
+            when (val result = authManager.signInEmail(email.trim(), password)) {
+                is AuthResult.Error -> _uiState.update {
+                    // Supabase refuses an unconfirmed account by name: offer the email again
+                    // instead of showing its words.
+                    if (result.message.contains("not confirmed", ignoreCase = true)) {
+                        it.copy(isSubmitting = false, error = NOT_CONFIRMED, awaitingConfirmation = email.trim())
+                    } else {
+                        it.copy(isSubmitting = false, error = friendly(result.message))
+                    }
+                }
+                else -> _uiState.update { it.copy(isSubmitting = false) }
+            }
+        }
+    }
+
+    /** Sends the confirmation email again, at most once a minute. */
+    fun resendConfirmation() {
+        val email = _uiState.value.awaitingConfirmation ?: return
+        if (SystemClock.uptimeMillis() < _uiState.value.resendAllowedAt) {
+            _uiState.update { it.copy(error = null, info = SENT_RECENTLY) }
+            return
+        }
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSubmitting = true, error = null, info = null) }
+            when (val result = authManager.resendConfirmation(email)) {
+                AuthResult.Success -> _uiState.update {
+                    it.copy(isSubmitting = false, info = SENT_AGAIN, resendAllowedAt = SystemClock.uptimeMillis() + RESEND_GAP_MS)
+                }
+                is AuthResult.Error -> _uiState.update { it.copy(isSubmitting = false, error = friendly(result.message)) }
+                is AuthResult.PendingOtp -> _uiState.update { it.copy(isSubmitting = false) }
+            }
+        }
     }
 
     fun signUp(email: String, password: String, fullName: String) {
@@ -66,7 +104,16 @@ class AuthViewModel @Inject constructor(
         submit(
             action = { authManager.signUpEmail(email.trim(), password, fullName.trim()) },
             // If email confirmation is on, there's no session yet — tell the user to confirm.
-            onSuccessNoSession = { _uiState.update { it.copy(info = CHECK_EMAIL, isSignUp = false) } },
+            onSuccessNoSession = {
+                _uiState.update {
+                    it.copy(
+                        info = CHECK_EMAIL,
+                        isSignUp = false,
+                        awaitingConfirmation = email.trim(),
+                        resendAllowedAt = SystemClock.uptimeMillis() + RESEND_GAP_MS,
+                    )
+                }
+            },
         )
     }
 
@@ -124,11 +171,15 @@ class AuthViewModel @Inject constructor(
                     }
                     _uiState.update { it.copy(isSubmitting = false) }
                 }
-                is AuthResult.Error -> _uiState.update { it.copy(isSubmitting = false, error = result.message) }
+                is AuthResult.Error -> _uiState.update { it.copy(isSubmitting = false, error = friendly(result.message)) }
                 is AuthResult.PendingOtp -> _uiState.update { it.copy(isSubmitting = false) }
             }
         }
     }
+
+    /** Supabase's send limit, in words; anything else passes through. */
+    private fun friendly(message: String): String =
+        if (message.contains("rate limit", ignoreCase = true)) EMAIL_RATE_LIMIT else message
 
     private fun validateEmail(email: String): String? = when {
         email.isBlank() -> EMAIL_REQUIRED
@@ -146,6 +197,11 @@ class AuthViewModel @Inject constructor(
         const val PHONE_REQUIRED = "phone_required"
         const val CODE_REQUIRED = "code_required"
         const val CHECK_EMAIL = "check_email"
+        const val SENT_AGAIN = "sent_again"
+        const val SENT_RECENTLY = "sent_recently"
+        const val NOT_CONFIRMED = "not_confirmed"
+        const val EMAIL_RATE_LIMIT = "email_rate_limit"
+        private const val RESEND_GAP_MS = 60_000L
         private val EMAIL_REGEX = Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")
     }
 }

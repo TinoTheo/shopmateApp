@@ -24,10 +24,9 @@ class MainActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Brand splash stage 1 (system): the white M on Trade Green, until the first frame. Stage 2
-        // is BrandSplash in ShopMateRoot, whose frame 0 is the same picture — so the system splash
-        // is removed at once, with no fade of its own, and the M inks over without a jump.
-        installSplashScreen().setOnExitAnimationListener { it.remove() }
+        // Brand splash stage 1 (system): Neon M on Trade Green, until the first frame. Stage 2 is
+        // BrandSplash in ShopMateRoot, shown only while the app is still opening.
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         // Edge-to-edge: the Trade Green app frame (sidebar + status-bar strip) sits behind

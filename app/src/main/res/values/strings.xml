@@ -251,7 +251,12 @@
     <string name="auth_error_email_invalid">Enter a valid email</string>
     <string name="auth_error_password_short">Password must be at least 6 characters</string>
     <string name="auth_error_name_required">Enter your name</string>
-    <string name="auth_check_email">Check your email to confirm your account, then sign in.</string>
+    <string name="auth_check_email_to">We sent a confirmation link to %1$s. Open it on any device, then sign in here. Not in your inbox? Check spam.</string>
+    <string name="auth_resend_email">Send the email again</string>
+    <string name="auth_sent_again">Sent again to %1$s. It can take a minute to arrive.</string>
+    <string name="auth_sent_recently">Sent less than a minute ago. Give it a moment, then check spam.</string>
+    <string name="auth_error_not_confirmed">%1$s isn\'t confirmed yet. Open the link in the email we sent, then sign in.</string>
+    <string name="auth_error_email_rate_limit">Too many emails sent just now. Wait a few minutes, then send it again.</string>
     <!-- Phone OTP (built, gated behind AuthConfig.ACTIVE_MODE) -->
     <string name="auth_phone">Phone number</string>
     <string name="auth_phone_hint">+263…</string>
