@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.shopmate.BuildConfig
 import com.shopmate.data.auth.AuthManager
 import com.shopmate.data.auth.StoreContext
+import com.shopmate.domain.repository.AppConfig
+import com.shopmate.domain.repository.AppConfigRepository
 import com.shopmate.domain.repository.SettingsRepository
 import com.shopmate.domain.repository.StoreChoice
 import com.shopmate.domain.repository.StoreRepository
@@ -48,7 +50,12 @@ class SettingsViewModel @Inject constructor(
     private val storeContext: StoreContext,
     private val storeRepository: StoreRepository,
     private val staffRepository: StaffRepository,
+    appConfig: AppConfigRepository,
 ) : ViewModel() {
+
+    /** What ShopMate has set remotely (§ Remote settings), for the About section. */
+    val remote: StateFlow<AppConfig?> = appConfig.config
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     /**
      * A manager at the till sees Settings but can't sign the till out or wipe it — those are the

@@ -24,6 +24,7 @@ import com.shopmate.domain.model.Sale
 import com.shopmate.domain.model.SyncEvent
 import com.shopmate.domain.repository.DeviceRepository
 import com.shopmate.domain.repository.DeviceRole
+import com.shopmate.domain.repository.AppConfigRepository
 import com.shopmate.domain.repository.LicenceRepository
 import com.shopmate.domain.repository.StaffRepository
 import com.shopmate.domain.repository.SaleRepository
@@ -60,6 +61,7 @@ class SyncWorker @AssistedInject constructor(
     private val licences: LicenceRepository,
     private val staffRepository: StaffRepository,
     private val deviceRepository: DeviceRepository,
+    private val appConfig: AppConfigRepository,
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
@@ -82,6 +84,7 @@ class SyncWorker @AssistedInject constructor(
             staffRepository.pull(storeId)
             syncSnapshot(storeId)
             licences.refresh() // so an offline till's grace countdown starts from fresh facts
+            appConfig.refresh()
             Result.success()
         } catch (e: SessionRejected) {
             authManager.markSessionRejected()

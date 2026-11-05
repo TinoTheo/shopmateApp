@@ -1,5 +1,7 @@
 package com.shopmate.ui
 
+import com.shopmate.domain.repository.AppConfigRepository
+import kotlinx.coroutines.launch
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shopmate.data.auth.AuthManager
@@ -33,7 +35,13 @@ class RootViewModel @Inject constructor(
     staffRepository: StaffRepository,
     deviceRepository: DeviceRepository,
     settings: SettingsRepository,
+    appConfig: AppConfigRepository,
 ) : ViewModel() {
+
+    init {
+        // Remote settings (§ Remote settings): once per launch, signed in or not.
+        viewModelScope.launch { appConfig.refresh() }
+    }
 
     /** Till or remote, asked once per store on each device (§ Devices). */
     val deviceRole: StateFlow<DeviceRole?> = deviceRepository.role

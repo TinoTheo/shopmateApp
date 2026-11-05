@@ -92,10 +92,16 @@ fun AuthScreen(viewModel: AuthViewModel = hiltViewModel()) {
                 }
 
                 state.info?.let { marker ->
-                    FeedbackText(localizedMessage(marker), color = StockGreen)
+                    FeedbackText(localizedMessage(marker, state.awaitingConfirmation), color = StockGreen)
                 }
                 state.error?.let { marker ->
-                    FeedbackText(localizedMessage(marker), color = ErrorRed)
+                    FeedbackText(localizedMessage(marker, state.awaitingConfirmation), color = ErrorRed)
+                }
+                if (state.awaitingConfirmation != null && state.mode == AuthMode.EMAIL_PASSWORD) {
+                    ShopMateTextButton(
+                        text = stringResource(R.string.auth_resend_email),
+                        onClick = viewModel::resendConfirmation,
+                    )
                 }
 
                 Spacer(Modifier.height(32.dp))
@@ -219,13 +225,17 @@ private fun FeedbackText(message: String, color: androidx.compose.ui.graphics.Co
 
 /** Maps ViewModel marker constants to localized strings; passes through raw provider messages. */
 @Composable
-private fun localizedMessage(marker: String): String = when (marker) {
+private fun localizedMessage(marker: String, email: String? = null): String = when (marker) {
     AuthViewModel.EMAIL_REQUIRED -> stringResource(R.string.auth_error_email_required)
     AuthViewModel.EMAIL_INVALID -> stringResource(R.string.auth_error_email_invalid)
     AuthViewModel.PASSWORD_SHORT -> stringResource(R.string.auth_error_password_short)
     AuthViewModel.NAME_REQUIRED -> stringResource(R.string.auth_error_name_required)
     AuthViewModel.PHONE_REQUIRED -> stringResource(R.string.auth_error_phone_required)
     AuthViewModel.CODE_REQUIRED -> stringResource(R.string.auth_error_code_required)
-    AuthViewModel.CHECK_EMAIL -> stringResource(R.string.auth_check_email)
+    AuthViewModel.CHECK_EMAIL -> stringResource(R.string.auth_check_email_to, email.orEmpty())
+    AuthViewModel.SENT_AGAIN -> stringResource(R.string.auth_sent_again, email.orEmpty())
+    AuthViewModel.SENT_RECENTLY -> stringResource(R.string.auth_sent_recently)
+    AuthViewModel.NOT_CONFIRMED -> stringResource(R.string.auth_error_not_confirmed, email.orEmpty())
+    AuthViewModel.EMAIL_RATE_LIMIT -> stringResource(R.string.auth_error_email_rate_limit)
     else -> marker
 }
