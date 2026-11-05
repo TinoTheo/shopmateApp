@@ -18,6 +18,13 @@ val localProps = Properties().apply {
 val supabaseUrl: String? = localProps.getProperty("SUPABASE_URL")?.takeIf { it.isNotBlank() }
 // The owner's web dashboard (§ Devices). Blank until it is hosted: remote devices then say so.
 val webDashboardUrl: String = localProps.getProperty("WEB_DASHBOARD_URL")?.trim().orEmpty()
+// Domains the app will accept a dashboard address on when ShopMate changes it remotely
+// (§ Remote settings): comma-separated, each also covering its subdomains. Only domains ShopMate
+// owns — adding one is a deliberate new APK. The built-in address's own domain always counts.
+val dashboardDomains: String = (
+    listOfNotNull(webDashboardUrl.substringAfter("://", "").substringBefore('/').takeIf { it.isNotBlank() }) +
+        localProps.getProperty("DASHBOARD_TRUSTED_DOMAINS").orEmpty().split(',').map { it.trim() }
+    ).filter { it.isNotBlank() }.distinct().joinToString(",")
 val supabaseAnonKey: String? = localProps.getProperty("SUPABASE_ANON_KEY")?.takeIf { it.isNotBlank() }
 
 // Release signing, also from local.properties. The keystore path is relative to the project root.
@@ -45,6 +52,7 @@ android {
         buildConfigField("String", "SUPABASE_URL", "\"${supabaseUrl ?: "https://placeholder.supabase.co"}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${supabaseAnonKey.orEmpty()}\"")
         buildConfigField("String", "WEB_DASHBOARD_URL", "\"$webDashboardUrl\"")
+        buildConfigField("String", "DASHBOARD_TRUSTED_DOMAINS", "\"$dashboardDomains\"")
     }
 
     signingConfigs {

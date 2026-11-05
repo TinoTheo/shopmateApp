@@ -23,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.shopmate.R
+import com.shopmate.domain.repository.AppConfig
 import com.shopmate.ui.components.ConstrainedContent
 import com.shopmate.ui.components.FormMaxWidth
 import com.shopmate.ui.theme.ErrorRed
@@ -36,6 +37,7 @@ fun SettingsScreen(
     val state by viewModel.uiState.collectAsState()
     val team by teamViewModel.uiState.collectAsState()
     val ownerAtTill by viewModel.ownerAtTill.collectAsState()
+    val remote by viewModel.remote.collectAsState()
 
     // A store just added appears in the store picker straight away.
     LaunchedEffect(team.notice) {
@@ -53,6 +55,7 @@ fun SettingsScreen(
         onRetryFailed = viewModel::retryFailedSyncs,
         onResetRequest = { showReset = true },
         ownerAtTill = ownerAtTill,
+        remote = remote,
         team = {
             TeamSection(
                 state = team,
@@ -125,6 +128,7 @@ private fun SettingsContent(
     onRetryFailed: () -> Unit,
     onResetRequest: () -> Unit,
     ownerAtTill: Boolean,
+    remote: AppConfig?,
     team: @Composable () -> Unit,
 ) {
     ConstrainedContent(maxWidth = FormMaxWidth) {
@@ -155,7 +159,7 @@ private fun SettingsContent(
                 canReset = ownerAtTill,
             )
             HorizontalDivider(color = ReceiptBeige, modifier = Modifier.padding(top = 20.dp))
-            AboutSection(appVersion = state.appVersion)
+            AboutSection(appVersion = state.appVersion, remote = remote)
             Spacer(Modifier.height(32.dp))
         }
     }

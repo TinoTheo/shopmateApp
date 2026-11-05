@@ -45,6 +45,8 @@
     <string name="settings_reset_done">All data cleared</string>
     <string name="settings_app_name">ShopMate for Android</string>
     <string name="settings_version">Version %1$s</string>
+    <string name="settings_update_available">A newer ShopMate is available. Ask ShopMate for the update. This till keeps selling either way.</string>
+    <string name="settings_need_help">Need help? %1$s</string>
     <string name="settings_made_in">Made in Zimbabwe 🇿🇼</string>
     <string name="settings_clear_token">Clear token</string>
     <string name="settings_clear_token_confirm">Remove the saved API token? Sync will pause until you enter a new one.</string>

@@ -858,6 +858,22 @@ Several tills can serve one store. They agree by sharing records, never by locki
 - Snapshots still upload as a backup; a fresh till loads from the live catalogue and ledger.
 - Reports remain this till's sales until the owner dashboard reads the store's.
 
+### Remote settings
+
+A few public values ShopMate changes without a new APK: the `app_config` table
+(`AppConfigRepository`), read at launch, on each sync and on a remote device's Refresh, and kept in
+DataStore for offline use. Keys: `dashboard_url`, `support_contact`, `min_version_code`, `notice`.
+
+- **Anyone can read it, nobody can write it through the API.** It has no write policies; values
+  change only in the Supabase dashboard. Readable signed out, because the sign-up link needs it.
+  Only harmless, public values go here — never keys, prices, licence limits or one shop's data.
+- **A remote dashboard address is accepted only on a trusted domain** (`DashboardAddress`): plain
+  `https`, on the built-in address's domain or one in `DASHBOARD_TRUSTED_DOMAINS`
+  (`local.properties`). Owners type their password on that page, so a typo or a tampered row must
+  not be able to send them elsewhere. List only domains ShopMate owns; adding one is a new APK.
+- **Nothing here can stop a shop.** Unreadable means the last value, then the built-in one. An old
+  version gets a notice in Settings › About, never a lock: it still sells.
+
 ### Release build
 
 - **R8 full mode** with resource shrinking. `app/proguard-rules.pro` holds only ShopMate's own

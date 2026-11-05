@@ -3,9 +3,9 @@ package com.shopmate.ui.screen.device
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.shopmate.BuildConfig
 import com.shopmate.data.auth.AuthManager
 import com.shopmate.data.auth.StoreContext
+import com.shopmate.domain.repository.AppConfigRepository
 import com.shopmate.domain.repository.DeviceRepository
 import com.shopmate.domain.repository.StaffRepository
 import com.shopmate.domain.repository.StoreToday
@@ -27,7 +27,8 @@ data class DeviceUiState(
     val refusal: TenancyRefusal? = null,
     val today: StoreToday? = null,
     val todayRefusal: TenancyRefusal? = null,
-    val webDashboardUrl: String = BuildConfig.WEB_DASHBOARD_URL,
+    /** Blank until there is a dashboard on a trusted domain (§ Remote settings). */
+    val webDashboardUrl: String = "",
 )
 
 /** The one-time till-or-remote question, the remote home, and a removed till (§ Devices). */
@@ -37,6 +38,7 @@ class DeviceViewModel @Inject constructor(
     private val authManager: AuthManager,
     private val storeContext: StoreContext,
     private val staffRepository: StaffRepository,
+    private val appConfig: AppConfigRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DeviceUiState())
@@ -44,6 +46,9 @@ class DeviceViewModel @Inject constructor(
 
     init {
         viewModelScope.launch { _state.update { it.copy(hasSold = deviceRepository.hasSold()) } }
+        viewModelScope.launch {
+            appConfig.config.collect { c -> _state.update { it.copy(webDashboardUrl = c.dashboardUrl.orEmpty()) } }
+        }
     }
 
     fun becomeTill(name: String) = act { deviceRepository.becomeTill(name) }
@@ -57,6 +62,7 @@ class DeviceViewModel @Inject constructor(
     fun refreshToday() {
         viewModelScope.launch {
             _state.update { it.copy(busy = true) }
+            appConfig.refresh() // a remote device doesn't sync, so it reads them here
             when (val result = deviceRepository.storeToday()) {
                 is TenancyResult.Done -> _state.update { it.copy(busy = false, today = result.value, todayRefusal = null) }
                 is TenancyResult.Refused -> _state.update { it.copy(busy = false, todayRefusal = result.reason) }

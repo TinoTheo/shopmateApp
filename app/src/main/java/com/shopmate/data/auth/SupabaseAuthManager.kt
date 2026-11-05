@@ -1,6 +1,6 @@
 package com.shopmate.data.auth
 
-import com.shopmate.BuildConfig
+import com.shopmate.domain.repository.AppConfigRepository
 import com.shopmate.data.remote.SessionStore
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.OtpType
@@ -24,6 +24,7 @@ import kotlin.time.Duration.Companion.seconds
 class SupabaseAuthManager @Inject constructor(
     private val auth: Auth,
     private val sessionStore: SessionStore,
+    private val appConfig: AppConfigRepository,
 ) : AuthManager {
 
     /** Session status once the stored session has been read; [SessionStatus.Initializing] says nothing yet. */
@@ -61,8 +62,8 @@ class SupabaseAuthManager @Inject constructor(
      * Where the confirmation link lands: the web dashboard's "You're confirmed" page, which tells
      * the owner to come back to the app. Without a dashboard address, Supabase's Site URL.
      */
-    private fun confirmedPage(): String? =
-        BuildConfig.WEB_DASHBOARD_URL.trimEnd('/').takeIf { it.isNotBlank() }?.let { "$it/confirmed/" }
+    private suspend fun confirmedPage(): String? =
+        appConfig.config.first().dashboardUrl?.let { "$it/confirmed/" }
 
     override suspend fun signInEmail(email: String, password: String): AuthResult =
         runCatching {
