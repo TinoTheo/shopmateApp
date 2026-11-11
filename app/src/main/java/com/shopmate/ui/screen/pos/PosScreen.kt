@@ -207,7 +207,7 @@ fun PosContent(
                     // No permanent number pad (no room); quantity edits use the stepper.
                     Column(Modifier.fillMaxSize()) {
                         LicenceBanner(licenceState)
-                        SaleSuccessBanner(receipt = state.lastSaleReceipt, total = state.lastSaleTotal)
+                        SaleSuccessBanner(receipt = state.lastSaleReceipt, total = state.lastSaleTotal, change = state.lastSaleChange)
                         CatalogPane(
                             state = state,
                             categoryColours = categoryColours,

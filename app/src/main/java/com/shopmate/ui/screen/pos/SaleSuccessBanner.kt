@@ -45,12 +45,16 @@ fun SaleSuccessBanner(
     receipt: String?,
     modifier: Modifier = Modifier,
     total: BigDecimal? = null,
+    /** Cash to hand back, shown first because it's what the cashier needs next. */
+    change: BigDecimal? = null,
 ) {
     // Keep the last receipt/total so the text stays stable while the exit animation plays.
     var lastReceipt by remember { mutableStateOf("") }
     var lastTotal by remember { mutableStateOf("") }
     if (receipt != null) lastReceipt = receipt
     if (total != null) lastTotal = CurrencyFormatter.format(total)
+    var lastChange by remember { mutableStateOf<String?>(null) }
+    if (receipt != null) lastChange = change?.let { CurrencyFormatter.format(it) }
 
     AnimatedVisibility(
         visible = receipt != null,
@@ -86,6 +90,14 @@ fun SaleSuccessBanner(
                         fontWeight = FontWeight.SemiBold,
                         color = Ink,
                     )
+                    lastChange?.let {
+                        Text(
+                            stringResource(R.string.pos_give_change, it),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = Ink,
+                        )
+                    }
                     Text(
                         stringResource(R.string.pos_receipt, lastReceipt),
                         style = MaterialTheme.typography.bodySmall,

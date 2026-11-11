@@ -38,8 +38,8 @@ fun ChargeButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     /**
-     * Overrides the default `Charge $X`. The tablet ticket passes `Next sale` in
-     * [TicketPhase.DONE] — the button stays put and says what it now does, per § Copy and voice.
+     * Overrides the default `Charge $X`, e.g. to say what's missing while it is disabled. The
+     * button stays put and says what it does, per § Copy and voice.
      */
     label: String? = null,
 ) {

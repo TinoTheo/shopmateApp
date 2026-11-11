@@ -134,7 +134,7 @@ private fun ProductArea(
 ) {
     Column(modifier.padding(top = 8.dp)) {
         LicenceBanner(licenceState)
-        SaleSuccessBanner(receipt = state.lastSaleReceipt, total = state.lastSaleTotal)
+        SaleSuccessBanner(receipt = state.lastSaleReceipt, total = state.lastSaleTotal, change = state.lastSaleChange)
 
         ProductSearchBar(
             query = state.searchQuery,
@@ -345,7 +345,6 @@ private fun TicketPanel(
                 enabled = state.canCharge,
                 onClick = onCharge,
                 label = when {
-                    state.phase == TicketPhase.DONE -> stringResource(R.string.pos_next_sale)
                     // Disabled for want of cash: say what's missing, as the phone till does.
                     state.phase == TicketPhase.TENDER && !state.canConfirmSale ->
                         stringResource(R.string.checkout_confirm_need_cash)
@@ -376,7 +375,7 @@ private fun TicketPhaseBand(
         verticalArrangement = Arrangement.Center,
     ) {
         when (state.phase) {
-            TicketPhase.SALE, TicketPhase.DONE -> QuantityHintRow(
+            TicketPhase.SALE -> QuantityHintRow(
                 pendingQuantity = state.pendingQuantity,
                 onApplyQuantity = onApplyQuantity,
             )
@@ -474,7 +473,7 @@ private fun TenderBlock(
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 TenderFigure(
                     label = stringResource(R.string.pos_cash_in),
-                    value = state.cashReceived?.let { CurrencyFormatter.format(it) } ?: "—",
+                    value = state.cashReceived?.let { CurrencyFormatter.format(it) } ?: CurrencyFormatter.format(java.math.BigDecimal.ZERO),
                     modifier = Modifier.weight(1f),
                 )
                 TenderFigure(

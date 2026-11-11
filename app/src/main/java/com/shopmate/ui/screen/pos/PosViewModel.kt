@@ -47,17 +47,19 @@ enum class NumberPadMode {
  * The tablet sale ticket is a three-phase state machine, and **the three zones do not reflow
  * between phases** (CLAUDE.md § Adaptive layouts). Only the ticket's middle band changes.
  *
- * | Phase    | Ticket shows                                  | Charge does              |
- * |----------|-----------------------------------------------|--------------------------|
- * | [SALE]   | lines, quantity hint, number pad              | goes to [TENDER]         |
- * | [TENDER] | lines, payment method, cash/change, pad       | commits the sale, [DONE] |
- * | [DONE]   | lines, success banner in the product area      | clears back to [SALE]    |
+ * | Phase    | Ticket shows                                  | Charge does                       |
+ * |----------|-----------------------------------------------|-----------------------------------|
+ * | [SALE]   | lines, quantity hint, number pad              | goes to [TENDER]                  |
+ * | [TENDER] | lines, payment method, cash/change, pad       | commits the sale, back to [SALE]  |
+ *
+ * A charged sale leaves the ticket empty and ready for the next customer at once; the success
+ * banner (with the change to hand back) is the only trace, and it fades on its own.
  *
  * The number pad has **one layout and two destinations** — the quantity buffer in [SALE], the
  * cash buffer in [TENDER]. It never moves, resizes, or relabels: the muscle-memory rule applied
  * within a screen rather than across device sizes.
  */
-enum class TicketPhase { SALE, TENDER, DONE }
+enum class TicketPhase { SALE, TENDER }
 
 data class PosUiState(
     val cartItems: List<CartItem> = emptyList(),
@@ -70,6 +72,8 @@ data class PosUiState(
     val isProcessingSale: Boolean = false,
     val lastSaleReceipt: String? = null,  // flash briefly after sale
     val lastSaleTotal: BigDecimal? = null,
+    /** Cash to hand back on the sale just charged; null when there is none. */
+    val lastSaleChange: BigDecimal? = null,
     val error: String? = null,
     val numberPadMode: NumberPadMode = NumberPadMode.IDLE,
     val numberPadBuffer: String = "",         // current typed value
@@ -108,8 +112,7 @@ data class PosUiState(
     val canCharge: Boolean
         get() = when (phase) {
             TicketPhase.SALE -> cartItems.isNotEmpty()
-            TicketPhase.TENDER -> cartItems.isNotEmpty() && canConfirmSale
-            TicketPhase.DONE -> true
+            TicketPhase.TENDER -> cartItems.isNotEmpty() && canConfirmSale && !isProcessingSale
         }
 }
 
@@ -218,6 +221,7 @@ class PosViewModel @Inject constructor(
             isProcessingSale = flags.processing,
             lastSaleReceipt = flags.lastSale?.receipt,
             lastSaleTotal = flags.lastSale?.total,
+            lastSaleChange = flags.lastSale?.change,
             error = flags.error,
             numberPadMode = pad.mode,
             numberPadBuffer = pad.buffer,
@@ -252,7 +256,7 @@ class PosViewModel @Inject constructor(
     )
 
     /** The just-completed sale, held briefly so the success banner can name the amount taken. */
-    data class LastSale(val receipt: String, val total: BigDecimal)
+    data class LastSale(val receipt: String, val total: BigDecimal, val change: BigDecimal? = null)
 
     /**
      * A code arrived from a [ScanSource][com.shopmate.scan.ScanSource].
@@ -413,8 +417,9 @@ class PosViewModel @Inject constructor(
     // The three zones never reflow between phases; only the ticket's middle band changes.
 
     /**
-     * The tablet Charge button, which means something different in each phase and says so —
-     * `Charge` in [TicketPhase.SALE] and [TicketPhase.TENDER], `Next sale` in [TicketPhase.DONE].
+     * The tablet Charge button: in [TicketPhase.SALE] it opens tendering, in [TicketPhase.TENDER]
+     * it takes the money. A charged sale returns the ticket to [TicketPhase.SALE], ready for the
+     * next customer, with no extra tap.
      *
      * It **never** applies a pending quantity: that is [applyPendingQuantity]'s job.
      */
@@ -430,15 +435,9 @@ class PosViewModel @Inject constructor(
             TicketPhase.TENDER -> {
                 val state = uiState.value
                 if (!state.canConfirmSale) return
-                _phase.value = TicketPhase.DONE
+                // Stays in TENDER until the sale is saved: if it fails, the cashier can try again
+                // without starting over. On success completeSale() empties the ticket.
                 completeSale(state.selectedPaymentMethod)
-            }
-            TicketPhase.DONE -> {
-                _cartItems.value = emptyList()
-                _padState.value = PadState()
-                _checkout.value = CheckoutState()
-                _lastSaleReceipt.value = null
-                _phase.value = TicketPhase.SALE
             }
         }
     }
@@ -586,6 +585,8 @@ class PosViewModel @Inject constructor(
         if (cart.isEmpty()) return
 
         _isProcessingSale.value = true
+        // Change is read now, before the ticket is cleared, so the banner can say what to hand back.
+        val change = uiState.value.changeDue.takeIf { paymentMethod == PaymentMethod.CASH && it.signum() > 0 }
         viewModelScope.launch {
             runCatching {
                 val categoryNames = categories.value.associate { it.id to it.name }
@@ -625,35 +626,38 @@ class PosViewModel @Inject constructor(
                     staffId = staffRepository.current.value?.id,
                 )
                 saleRepository.recordSale(sale)
-                LastSale(receiptNumber, sale.totalAmount) to skippedItem
+                LastSale(receiptNumber, sale.totalAmount, change) to skippedItem
             }.onSuccess { (lastSale, skippedItem) ->
                 _cartItems.value = emptyList()
                 _padState.value = PadState()
                 _isCheckoutSheetOpen.value = false
+                // Ready for the next customer straight away (tablet ticket back to SALE).
+                _checkout.value = CheckoutState()
+                _phase.value = TicketPhase.SALE
                 _lastSaleReceipt.value = lastSale
                 if (skippedItem) {
-                    _error.value = "Some items were skipped because the product no longer exists"
+                    _error.value = "Some items were left out because those products were deleted"
                 }
                 launch {
                     delay(SUCCESS_FLASH_MS)
                     _lastSaleReceipt.value = null
                 }
             }.onFailure { throwable ->
-                _error.value = throwable.message ?: "Could not complete the sale"
+                _error.value = throwable.message ?: "The sale didn't go through. Try again."
             }
             _isProcessingSale.value = false
         }
     }
 
     private fun oversellWarning(productName: String, recordedStock: Int): String =
-        "$productName: only $recordedStock recorded in stock — this sale will take it negative"
+        "$productName: only $recordedStock on record. This sale takes it below zero."
 
     companion object {
         private const val DEFAULT_CASHIER = "Cashier"
 
         /** Calm and specific: the code is kept, the sale is unaffected. */
         private const val UNKNOWN_CODE_MESSAGE =
-            "The sale continues. The code is saved to unknown codes -- name it when you have a minute."
+            "The sale carries on. The code is saved in unknown codes, so you can name it later."
         private const val SUCCESS_FLASH_MS = 3_000L
 
         /** Says what stopped and what still happens: sales already taken keep sending. */

@@ -11,8 +11,8 @@ Every decision in this file is final. Read it before touching any code.
 
 1. **`AppSidebar` has two width variants** — 64dp icons-only on COMPACT, 84dp icon+label
    on EXPANDED (§ Navigation). Still a green full-height sidebar, still no bottom bar.
-2. **Tablet POS sale ticket is a three-phase state machine** `SALE → TENDER → DONE`, zones
-   never reflowing (§ Adaptive layouts).
+2. **Tablet POS sale ticket is a phase state machine** `SALE → TENDER` (the `DONE` phase was
+   dropped 2026-11-11), zones never reflowing (§ Adaptive layouts).
 3. **`ChargeButton` fills `CheckoutNeon`.** The built composable filled `TradeGreen`; the
    colour table wins and the code is corrected (§ Colours).
 4. **`RunwayGauge`, `MarginGauge`, `InsightRow`, `LedgerRow` have full specs** (§ Component
@@ -268,6 +268,8 @@ Words are design material. They are specified here for the same reason spacing i
 - **Failure states say what happened and what to do**, in the interface's voice. They do
   not apologise and they are never vague.
 - **Offline copy is calm and specific.** "Held until you're back", not "Failed to sync".
+- **Plain, natural sentences.** Write as a helpful person at the counter would say it. No em
+  dashes or arrows in app text: use a full stop, a comma or "to" ("Cost went from $2 to $3").
 - **Sentence case everywhere.** No title case on buttons or headers.
 - **Be specific over clever.** "Runs out Thursday" beats "Low stock". "$6.20 short" beats
   "Discrepancy detected".
@@ -364,14 +366,18 @@ POS is the one screen with two distinct layouts:
   (owned by the app frame), product area (search, category chips, grid), and a **240dp sale
   ticket** with an **always-visible number pad**, charge button, and **cash-change calculation**.
 
-The tablet sale ticket is a **three-phase state machine** — `SALE → TENDER → DONE` — and the
-three zones **do not reflow between phases**. Only the ticket's middle band changes:
+The tablet sale ticket is a **two-phase state machine** — `SALE → TENDER` — and the three
+zones **do not reflow between phases**. Only the ticket's middle band changes:
 
 | Phase | Ticket shows | Charge does |
 |---|---|---|
 | `SALE` | lines, quantity hint, number pad | → `TENDER` |
-| `TENDER` | lines, payment method, cash/change, number pad | commits the sale → `DONE` |
-| `DONE` | lines, success banner in the product area | clears → `SALE` |
+| `TENDER` | lines, payment method, cash/change, number pad | commits the sale → back to `SALE` |
+
+**A charged sale is ready for the next customer at once** (amended 2026-11-11, replacing a
+`DONE` phase with a "Next sale" tap). The ticket empties; the success banner ("Charged $12.00",
+"Give $3.00 change" for cash, the receipt number) shows for 3 seconds and fades on its own. A sale
+that fails to save stays in `TENDER` so the cashier can try again. Phone and tablet behave alike.
 
 **The number pad has one layout and two destinations** — the quantity buffer in `SALE`, the
 cash buffer in `TENDER`. It never moves, resizes, or relabels. This is the muscle memory
