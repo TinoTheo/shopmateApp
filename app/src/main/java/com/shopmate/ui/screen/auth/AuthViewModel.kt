@@ -177,9 +177,15 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    /** Supabase's send limit, in words; anything else passes through. */
-    private fun friendly(message: String): String =
-        if (message.contains("rate limit", ignoreCase = true)) EMAIL_RATE_LIMIT else message
+    /**
+     * Supabase's words, turned into ours: its send limit, and a connection that isn't there
+     * (no internet, or the address can't be looked up), which it reports as a raw HTTP error.
+     */
+    private fun friendly(message: String): String = when {
+        message.contains("rate limit", ignoreCase = true) -> EMAIL_RATE_LIMIT
+        NO_CONNECTION_SIGNS.any { message.contains(it, ignoreCase = true) } -> NO_CONNECTION
+        else -> message
+    }
 
     private fun validateEmail(email: String): String? = when {
         email.isBlank() -> EMAIL_REQUIRED
@@ -201,6 +207,11 @@ class AuthViewModel @Inject constructor(
         const val SENT_RECENTLY = "sent_recently"
         const val NOT_CONFIRMED = "not_confirmed"
         const val EMAIL_RATE_LIMIT = "email_rate_limit"
+        const val NO_CONNECTION = "no_connection"
+        private val NO_CONNECTION_SIGNS = listOf(
+            "Unable to resolve host", "No address associated", "failed to connect", "timed out",
+            "timeout", "Network is unreachable", "UnknownHost", "ConnectException", "HTTP request to",
+        )
         private const val RESEND_GAP_MS = 60_000L
         private val EMAIL_REGEX = Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")
     }

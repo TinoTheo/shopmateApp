@@ -258,6 +258,7 @@
     <string name="auth_sent_again">Sent again to %1$s. It can take a minute to arrive.</string>
     <string name="auth_sent_recently">Sent less than a minute ago. Give it a moment, then check spam.</string>
     <string name="auth_error_not_confirmed">%1$s isn\'t confirmed yet. Open the link in the email we sent, then sign in.</string>
+    <string name="auth_error_no_connection">Can\'t reach ShopMate right now. Check this device is online, then try again.</string>
     <string name="auth_error_email_rate_limit">Too many emails sent just now. Wait a few minutes, then send it again.</string>
     <!-- Phone OTP (built, gated behind AuthConfig.ACTIVE_MODE) -->
     <string name="auth_phone">Phone number</string>

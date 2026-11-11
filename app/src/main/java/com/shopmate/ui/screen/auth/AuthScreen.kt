@@ -237,5 +237,6 @@ private fun localizedMessage(marker: String, email: String? = null): String = wh
     AuthViewModel.SENT_RECENTLY -> stringResource(R.string.auth_sent_recently)
     AuthViewModel.NOT_CONFIRMED -> stringResource(R.string.auth_error_not_confirmed, email.orEmpty())
     AuthViewModel.EMAIL_RATE_LIMIT -> stringResource(R.string.auth_error_email_rate_limit)
+    AuthViewModel.NO_CONNECTION -> stringResource(R.string.auth_error_no_connection)
     else -> marker
 }
