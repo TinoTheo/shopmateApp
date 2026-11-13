@@ -1003,6 +1003,19 @@ invite codes, licence states with the POS banner and the expired-plan block. Ser
 list and plan don't load and nothing is blocked. No payment integration: licences are set from
 the dashboard.
 
+**Next, in this order** (decided 2026-11-14: ShopMate is aimed at premium independent stores,
+which expect both at the counter):
+1. **Receipt printing.** Auto-print after each sale with a short "Don't print" window; the sale is
+   saved first and never waits on the printer. ESC/POS over Bluetooth (most 58mm printers and
+   Android POS handsets' built-in printers), USB and network (port 9100); 58mm and 80mm; a
+   per-till printer and a test print in Settings; Print and Share on every receipt in Sales
+   history. `EscPosRaster` and `PrintedReceiptSlip` already produce the bytes; the transports and
+   the settings are what's missing. Office printers can only print through Android's print
+   screen, never silently.
+2. **Barcode scanning.** The HID `ScanSource` exists; add camera scanning (CameraX + ML Kit) behind
+   the same interface, several barcodes per product, and naming codes from the unknown-barcode
+   inbox. An unknown code never blocks a sale (rule 11).
+
 **Not built yet**, in dependency order:
 - `MIGRATION_3_4` and everything downstream (§ Schema debt) — **blocks the three below**
 - Target margin setting, default 30% (§ Settings) — blocks `MarginGauge`
