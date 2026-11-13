@@ -1,0 +1,22 @@
+{
+  "name": "shopmate-site",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ShopMate's public website: what it is, for whom, and how to book a walkthrough.",
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "15.5.28",
+    "react": "19.1.10",
+    "react-dom": "19.1.10"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "5.9.3"
+  }
+}
